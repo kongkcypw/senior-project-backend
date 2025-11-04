@@ -8,6 +8,12 @@
 $ pnpm install
 ```
 
+## Docker (for localDB and nestjs app)
+
+```bash
+$ docker compose up -d
+```
+
 ## Compile and run the project
 
 ```bash
