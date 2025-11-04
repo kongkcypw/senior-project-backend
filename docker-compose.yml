@@ -14,6 +14,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data # Persist data
 
+  # TODO: Configure backend service to make it run the NestJS application and respond to requests
   backend:
     build: .
     container_name: nestjs_backend

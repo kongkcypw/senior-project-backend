@@ -6,6 +6,7 @@ import { CommonConfigModule } from './common/config/common-config.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from 'db/data-source';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { dataSourceOptions } from 'db/data-source';
     }),
     CommonConfigModule,
     WebhookModule, 
+    UsersModule
   ],
   controllers: [AppController],
   providers: [AppService],
