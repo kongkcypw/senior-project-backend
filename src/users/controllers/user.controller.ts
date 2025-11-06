@@ -1,12 +1,11 @@
 import { Controller, Get, Param } from "@nestjs/common";
-import { UsersService } from "../services/users.service";
-import { UsersEntity } from "../entities/users.entity";
+import { UserService } from "../services/users.service";
 import { UserInfoDto } from "../dto/user-info.dto";
 
 @Controller('users')
-export class UsersController {
+export class UserController {
     constructor(
-        private readonly usersService: UsersService
+        private readonly usersService: UserService
     ) {}
 
     // TODO: Change to proper route (This is just for testing)

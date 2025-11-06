@@ -2,15 +2,15 @@ import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm
 
 export class InitTable1762243195162 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // --- users table ---
+    // --- user table ---
     await queryRunner.createTable(
       new Table({
-        name: "users",
+        name: "user",
         columns: [
           { name: "id", type: "serial", isPrimary: true, isNullable: false },
           { name: "line_user_id", type: "varchar", isNullable: false },
-          { name: "display_name", type: "varchar", isNullable: false },
-          { name: "role", type: "varchar", isNullable: false },
+          { name: "display_name", type: "varchar", isNullable: true },
+          { name: "role", type: "varchar", isNullable: true },
           { name: "created_at", type: "timestamp", isNullable: false, default: "now()" },
           { name: "updated_at", type: "timestamp", isNullable: false, default: "now()" },
         ],
@@ -18,14 +18,14 @@ export class InitTable1762243195162 implements MigrationInterface {
       true
     );
 
-    // --- line_groups table ---
+    // --- line_group table ---
     await queryRunner.createTable(
       new Table({
-        name: "line_groups",
+        name: "line_group",
         columns: [
           { name: "id", type: "serial", isPrimary: true, isNullable: false },
           { name: "group_id", type: "varchar", isUnique: true, isNullable: false },
-          { name: "name", type: "varchar", isUnique: true, isNullable: false },
+          { name: "name", type: "varchar", isUnique: true, isNullable: true },
           { name: "created_at", type: "timestamp", isNullable: true, default: "now()" },
           { name: "updated_at", type: "timestamp", isNullable: false, default: "now()" },
         ],
@@ -39,8 +39,8 @@ export class InitTable1762243195162 implements MigrationInterface {
         name: "notification_schedule",
         columns: [
           { name: "id", type: "serial", isPrimary: true, isNullable: false },
-          { name: "type", type: "varchar", isNullable: false },
-          { name: "send_interval", type: "varchar", isNullable: false },
+          { name: "type", type: "varchar", isNullable: false }, // ex. calories, workout, summary
+          { name: "send_interval", type: "varchar", isNullable: false }, // ex. daily, weekly, monthly
           { name: "send_at", type: "timestamp", isNullable: false },
           { name: "is_active", type: "boolean", isNullable: false },
           { name: "created_at", type: "timestamp", isNullable: false, default: "now()" },
@@ -50,10 +50,10 @@ export class InitTable1762243195162 implements MigrationInterface {
       true
     );
 
-    // --- line_group_members table ---
+    // --- line_group_member table ---
     await queryRunner.createTable(
       new Table({
-        name: "line_group_members",
+        name: "line_group_member",
         columns: [
           { name: "id", type: "serial", isPrimary: true, isNullable: false },
           { name: "group_id", type: "varchar", isNullable: false },
@@ -67,17 +67,17 @@ export class InitTable1762243195162 implements MigrationInterface {
       true
     );
 
-    await queryRunner.createForeignKeys("line_group_members", [
+    await queryRunner.createForeignKeys("line_group_member", [
       new TableForeignKey({
         columnNames: ["user_id"],
         referencedColumnNames: ["id"],
-        referencedTableName: "users",
+        referencedTableName: "user",
         onDelete: "CASCADE",
       }),
       new TableForeignKey({
         columnNames: ["group_id"],
         referencedColumnNames: ["group_id"],
-        referencedTableName: "line_groups",
+        referencedTableName: "line_group",
         onDelete: "CASCADE",
       }),
     ]);
@@ -104,21 +104,21 @@ export class InitTable1762243195162 implements MigrationInterface {
       new TableForeignKey({
         columnNames: ["user_id"],
         referencedColumnNames: ["id"],
-        referencedTableName: "users",
+        referencedTableName: "user",
         onDelete: "CASCADE",
       }),
       new TableForeignKey({
         columnNames: ["group_id"],
         referencedColumnNames: ["group_id"],
-        referencedTableName: "line_groups",
+        referencedTableName: "line_group",
         onDelete: "CASCADE",
       }),
     ]);
 
-    // --- users_calories table ---
+    // --- user_calories table ---
     await queryRunner.createTable(
       new Table({
-        name: "users_calories",
+        name: "user_calories",
         columns: [
           { name: "id", type: "serial", isPrimary: true, isNullable: false },
           { name: "user_id", type: "integer", isNullable: false },
@@ -137,19 +137,19 @@ export class InitTable1762243195162 implements MigrationInterface {
     );
 
     await queryRunner.createForeignKey(
-      "users_calories",
+      "user_calories",
       new TableForeignKey({
         columnNames: ["user_id"],
         referencedColumnNames: ["id"],
-        referencedTableName: "users",
+        referencedTableName: "user",
         onDelete: "CASCADE",
       })
     );
 
-    // --- users_calories_plan table ---
+    // --- user_calories_plan table ---
     await queryRunner.createTable(
       new Table({
-        name: "users_calories_plan",
+        name: "user_calories_plan",
         columns: [
           { name: "id", type: "serial", isPrimary: true, isNullable: false },
           { name: "user_id", type: "integer", isNullable: false },
@@ -166,11 +166,11 @@ export class InitTable1762243195162 implements MigrationInterface {
       true
     );
 
-    await queryRunner.createForeignKeys("users_calories_plan", [
+    await queryRunner.createForeignKeys("user_calories_plan", [
       new TableForeignKey({
         columnNames: ["user_id"],
         referencedColumnNames: ["id"],
-        referencedTableName: "users",
+        referencedTableName: "user",
         onDelete: "CASCADE",
       }),
       new TableForeignKey({
@@ -183,12 +183,12 @@ export class InitTable1762243195162 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable("users_calories_plan", true);
-    await queryRunner.dropTable("users_calories", true);
+    await queryRunner.dropTable("user_calories_plan", true);
+    await queryRunner.dropTable("user_calories", true);
     await queryRunner.dropTable("line_group_chat_history", true);
-    await queryRunner.dropTable("line_group_members", true);
+    await queryRunner.dropTable("line_group_member", true);
     await queryRunner.dropTable("notification_schedule", true);
-    await queryRunner.dropTable("line_groups", true);
-    await queryRunner.dropTable("users", true);
+    await queryRunner.dropTable("line_group", true);
+    await queryRunner.dropTable("user", true);
   }
 }

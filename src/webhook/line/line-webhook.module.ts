@@ -5,6 +5,8 @@ import { LineMessagingService } from "./services/line-messaging.service";
 import { LineMessagingApiClientService } from "./services/line-messaging-api-client.service";
 import { MessageEventHandler } from "./handlers/message-event.handler";
 import { CaloriesHandler } from "./handlers/calories.handlers";
+import { JoinEventHandler } from "./handlers/join-event.handler";
+import { MemberJoinEventHandler } from "./handlers/member-join-event.handler";
 
 @Module({
     imports: [],
@@ -17,6 +19,8 @@ import { CaloriesHandler } from "./handlers/calories.handlers";
         // Handlers
         MessageEventHandler,
         CaloriesHandler,
+        JoinEventHandler,
+        MemberJoinEventHandler,
     ],
     controllers: [LineWebhookController],
 })

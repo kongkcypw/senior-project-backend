@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { UsersRepository } from "../repositories/users.repository";
+import { UserRepository } from "../repositories/user.repository";
 import { UserInfoDto } from "../dto/user-info.dto";
 
 @Injectable()
-export class UsersService {
+export class UserService {
     constructor(
-        private readonly usersRepository: UsersRepository
+        private readonly usersRepository: UserRepository
     ) {}
     
     async findByLineUserId(id: string | null): Promise<UserInfoDto> {
@@ -23,8 +23,8 @@ export class UsersService {
         return {
             id: user.id,
             lineUserId: user.lineUserId,
-            displayName: user.displayName,
-            role: user.role,
+            displayName: user.displayName || '',
+            role: user.role || '',
         };
 
     }
