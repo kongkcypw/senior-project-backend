@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from 'db/data-source';
 import { UserModule } from './users/user.module';
+import { LineGroupModule } from './line-group/line-group.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { UserModule } from './users/user.module';
     }),
     CommonConfigModule,
     WebhookModule, 
-    UserModule
+    UserModule,
+    LineGroupModule,
+    NotificationModule
   ],
   controllers: [AppController],
   providers: [AppService],

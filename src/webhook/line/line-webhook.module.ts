@@ -7,9 +7,14 @@ import { MessageEventHandler } from "./handlers/message-event.handler";
 import { CaloriesHandler } from "./handlers/calories.handlers";
 import { JoinEventHandler } from "./handlers/join-event.handler";
 import { MemberJoinEventHandler } from "./handlers/member-join-event.handler";
+import { LineGroupModule } from "src/line-group/line-group.module";
+import { UserModule } from "src/users/user.module";
 
 @Module({
-    imports: [],
+    imports: [
+        UserModule,
+        LineGroupModule,
+    ],
     providers: [
         // Services
         LineWebhookConfigService,

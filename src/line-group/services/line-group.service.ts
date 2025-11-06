@@ -1,0 +1,26 @@
+import { Injectable } from "@nestjs/common";
+import { LineGroupRepository } from "../repositories/line-group.repository";
+import { LineGroupMemberRepository } from "../repositories/line-group-member.entity";
+import { LineGroupChatHistoryRepository } from "../repositories/line-group-chat-history.repository";
+
+@Injectable()
+export class LineGroupService {
+    constructor(
+        private readonly lineGroupRepository: LineGroupRepository,
+        private readonly lineGroupMemberRepository: LineGroupMemberRepository,
+        private readonly lineGroupChatHistoryRepository: LineGroupChatHistoryRepository
+    ) {}
+
+    /**
+    *   Create a new line group record by group ID, return true if created, false if already exists.
+    *   @param groupId - The unique identifier for the line group
+    */
+    async createByGroupId(groupId: string): Promise<void> {
+        // We use upsert to avoid duplicate entries when multiple members join at the same time
+        const result = await this.lineGroupRepository.upsert(
+            { groupId, name: null }, // The data to insert/update
+            ['groupId'],             // The unique column to match on
+        );
+        console.log(result);
+    }
+}
