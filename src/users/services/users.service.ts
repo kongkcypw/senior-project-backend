@@ -34,7 +34,7 @@ export class UserService {
      * Create a new user by Line User ID, return true if created, false if already exists
      * @param userId - The Line User ID
      */
-    async createUserByLineUserId(userId: string): Promise<boolean> {
+    async insertUserIfNotExist(userId: string): Promise<boolean> {
         const existingUser = await this.usersRepository.findByLineUserId(userId);
         if(existingUser) {
             return false;

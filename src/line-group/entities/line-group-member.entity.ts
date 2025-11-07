@@ -7,11 +7,11 @@ export class LineGroupMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'group_id', type: 'varchar', nullable: false })
-  groupId: string;
+  @Column({ name: 'line_group_id', type: 'varchar', nullable: false })
+  lineGroupId: string;
 
-  @Column({ name: 'user_id', type: 'integer', nullable: false })
-  userId: number;
+  @Column({ name: 'line_user_id', type: 'varchar', nullable: false })
+  lineUserId: string;
 
   @Column({ name: 'join_group_at', type: 'timestamp', nullable: false })
   joinGroupAt: Date;
@@ -26,10 +26,10 @@ export class LineGroupMemberEntity {
   updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.lineGroupMembers, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'line_user_id', referencedColumnName: 'lineUserId' })
   user: UserEntity;
 
   @ManyToOne(() => LineGroupEntity, (group) => group.members, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'group_id', referencedColumnName: 'groupId' })
+  @JoinColumn({ name: 'line_group_id', referencedColumnName: 'lineGroupId' })
   group: LineGroupEntity;
 }

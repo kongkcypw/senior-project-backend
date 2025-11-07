@@ -6,8 +6,8 @@ export class UserCaloriesEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'user_id', type: 'integer', nullable: false })
-  userId: number;
+  @Column({ name: 'line_user_id', type: 'varchar', nullable: false })
+  lineUserId: string;
 
   @Column({ name: 'food_title', type: 'varchar', nullable: false })
   foodTitle: string;
@@ -37,6 +37,6 @@ export class UserCaloriesEntity {
   updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.userCalories, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'line_user_id', referencedColumnName: 'lineUserId' })
   user: UserEntity;
 }

@@ -7,11 +7,11 @@ export class LineGroupChatHistoryEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'group_id', type: 'varchar', nullable: false })
-  groupId: string;
+  @Column({ name: 'line_group_id', type: 'varchar', nullable: false })
+  lineGroupId: string;
 
-  @Column({ name: 'user_id', type: 'integer', nullable: false })
-  userId: number;
+  @Column({ name: 'line_user_id', type: 'varchar', nullable: false })
+  lineUserId: string;
 
   @Column({ name: 'message_id', type: 'integer', nullable: false })
   messageId: number;
@@ -29,10 +29,10 @@ export class LineGroupChatHistoryEntity {
   updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.lineGroupChatHistory, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'line_user_id', referencedColumnName: 'lineUserId' })
   user: UserEntity;
 
   @ManyToOne(() => LineGroupEntity, (group) => group.chatHistory, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'group_id', referencedColumnName: 'groupId' })
+  @JoinColumn({ name: 'line_group_id', referencedColumnName: 'lineGroupId' })
   group: LineGroupEntity;
 }

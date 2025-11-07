@@ -7,10 +7,10 @@ export class LineGroupEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'group_id', type: 'varchar', unique: true, nullable: false })
-  groupId: string;
+  @Column({ name: 'line_group_id', type: 'varchar', unique: true, nullable: false })
+  lineGroupId: string;
 
-  @Column({ name: 'name', type: 'varchar', unique: true, nullable: true })
+  @Column({ name: 'name', type: 'varchar', nullable: true })
   name: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })

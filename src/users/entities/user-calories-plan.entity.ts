@@ -7,8 +7,8 @@ export class UserCaloriesPlanEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'user_id', type: 'integer', nullable: false })
-  userId: number;
+  @Column({ name: 'line_user_id', type: 'varchar', nullable: false })
+  lineUserId: string;
 
   @Column({ name: 'total_calories', type: 'integer', nullable: false })
   totalCalories: number;
@@ -35,7 +35,7 @@ export class UserCaloriesPlanEntity {
   updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.userCaloriesPlans, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'line_user_id', referencedColumnName: 'lineUserId' })
   user: UserEntity;
 
   @ManyToOne(() => NotificationScheduleEntity, (schedule) => schedule.userCaloriesPlans, { onDelete: 'CASCADE' })

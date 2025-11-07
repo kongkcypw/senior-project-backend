@@ -9,7 +9,7 @@ export class LineGroupRepository extends Repository<LineGroupEntity> {
     }
 
     async findByGroupId(groupId: string): Promise<LineGroupEntity | null> {
-        return this.findOne({ where: { groupId } });
+        return this.findOne({ where: { lineGroupId: groupId } });
     }
     
 }

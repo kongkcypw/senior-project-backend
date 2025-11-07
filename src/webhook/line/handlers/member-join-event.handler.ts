@@ -7,6 +7,7 @@ import { welcomeMemberJoinGroupMessage } from "../messages/welcome-member-join-g
 import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum";
 import { LineGroupService } from "src/line-group/services/line-group.service";
 import { UserService } from "src/users/services/users.service";
+import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 
 @Injectable()
 export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
@@ -15,6 +16,7 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly userService: UserService,
         private readonly lineGroupService: LineGroupService,
+        private readonly lineGroupMemberService: LineGroupMemberService,
     ){}
 
     async handle(event: MemberJoinEvent): Promise<void> {
@@ -36,15 +38,16 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
         const members = event.joined.members;
 
         // Create group
-        await this.lineGroupService.createByGroupId(groupId);
+        await this.lineGroupService.insertGroupIfNotExist(groupId);
 
         // Create users for each member
         for(const member of members) {
             const lineUserId = member.userId;
-            await this.userService.createUserByLineUserId(lineUserId);
+            await Promise.all([
+                this.userService.insertUserIfNotExist(lineUserId),
+                this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId)
+            ]);
         }
-
-        // TODO: Create group members
 
         await this.sendWelcomeMessageToGroup(event);
     }
