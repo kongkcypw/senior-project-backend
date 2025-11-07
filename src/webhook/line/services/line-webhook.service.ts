@@ -1,15 +1,13 @@
 import { WebhookEvent, WebhookRequestBody } from "@line/bot-sdk";
 import { Injectable } from "@nestjs/common";
-import { LineWebhookConfigService } from "./line-webhook-config.service";
 import { MessageEventHandler } from "../handlers/message-event.handler";
 import { JoinEventHandler } from "../handlers/join-event.handler";
 import { MemberJoinEventHandler } from "../handlers/member-join-event.handler";
 import { WebhookEventType } from "../enums/webhook-event-type.enum";
 
 @Injectable()
-export class LineMessagingService {
+export class LineWebhookService {
     constructor(
-        private readonly lineWebhookConfigService: LineWebhookConfigService,
         private readonly messageEventHandler: MessageEventHandler,
         private readonly joinEventHandler: JoinEventHandler,
         private readonly memberJoinedEventHandler: MemberJoinEventHandler,

@@ -1,13 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { MessageHandler, MessageHandlerContext } from "../interfaces/message-handler.interface";
-import { LineWebhookConfigService } from "../services/line-webhook-config.service";
 import { messagingApi } from "@line/bot-sdk";
 
 @Injectable()
 export class CaloriesHandler implements MessageHandler {
-    constructor(
-        private readonly lineWebhookConfigService: LineWebhookConfigService,
-    ){}
+    constructor(){}
 
     async handle(
         context: MessageHandlerContext

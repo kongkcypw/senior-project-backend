@@ -9,6 +9,8 @@ import { dataSourceOptions } from 'db/data-source';
 import { UserModule } from './users/user.module';
 import { LineGroupModule } from './line-group/line-group.module';
 import { NotificationModule } from './notification/notification.module';
+import { HttpModule } from '@nestjs/axios';
+import { LineMessagingApiModule } from './external/line-messaging-api/line-messaging-api.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { NotificationModule } from './notification/notification.module';
       isGlobal: true,
     }),
     CommonConfigModule,
+    HttpModule,
+    LineMessagingApiModule,
     WebhookModule, 
     UserModule,
     LineGroupModule,

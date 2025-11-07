@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()
-export class LineWebhookConfigService extends BaseConfigService<string> {
+export class LineMessagingApiConfigService extends BaseConfigService<string> {
     constructor(private readonly configService: ConfigService) {
         super(configService);
     }

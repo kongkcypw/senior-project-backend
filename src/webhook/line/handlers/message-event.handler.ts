@@ -6,9 +6,9 @@ import {
   MessageHandlerContext,
 } from '../../line/interfaces/message-handler.interface';
 import { EventHandler } from '../interfaces/event-handler.interface';
-import { LineMessagingApiClientService } from '../services/line-messaging-api-client.service';
 import { LINE_ERROR_MESSAGES } from '../constants/error-messages.constant';
 import { CaloriesHandler } from './calories.handlers';
+import { LineMessagingApiClientService } from 'src/external/line-messaging-api/services/client.service';
 
 @Injectable()
 export class MessageEventHandler implements EventHandler<MessageEvent> {

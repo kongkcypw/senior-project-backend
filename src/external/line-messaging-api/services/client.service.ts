@@ -1,17 +1,17 @@
 import { HTTPFetchError, messagingApi } from '@line/bot-sdk';
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { LineMessagingApiConfigService } from './config.service';
 
-import { LineWebhookConfigService } from './line-webhook-config.service';
 
 @Injectable()
 export class LineMessagingApiClientService {
   private readonly client: messagingApi.MessagingApiClient;
 
   constructor(
-    private readonly lineWebhookConfigService: LineWebhookConfigService,
+    private readonly lineMessagingApiConfigService: LineMessagingApiConfigService,
   ) {
     this.client = new messagingApi.MessagingApiClient({
-      channelAccessToken: lineWebhookConfigService.channelAccessToken,
+      channelAccessToken: lineMessagingApiConfigService.channelAccessToken,
     });
   }
 

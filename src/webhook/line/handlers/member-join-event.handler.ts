@@ -1,19 +1,21 @@
 import { Injectable } from "@nestjs/common";
 import { EventHandler } from "../interfaces/event-handler.interface";
 import { JoinEvent, MemberJoinEvent, messagingApi } from "@line/bot-sdk";
-import { LineMessagingApiClientService } from "../services/line-messaging-api-client.service";
 import { welcomeToGroupMessage } from "../messages/welcome-to-group-message";
 import { welcomeMemberJoinGroupMessage } from "../messages/welcome-member-join-group-message";
 import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum";
 import { LineGroupService } from "src/line-group/services/line-group.service";
 import { UserService } from "src/users/services/users.service";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
+import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
+import { LineMessagingApiGroupChatService } from "src/external/line-messaging-api/services/group-chat.service";
 
 @Injectable()
 export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
 
     constructor(
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
+        private readonly lineMessagingApiGroupChatService: LineMessagingApiGroupChatService,
         private readonly userService: UserService,
         private readonly lineGroupService: LineGroupService,
         private readonly lineGroupMemberService: LineGroupMemberService,
@@ -36,6 +38,9 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
 
         const groupId = source.groupId;
         const members = event.joined.members;
+
+        // TODO: call LINE API to get group name
+        const { groupName } = await this.lineMessagingApiGroupChatService.getGroupChatSummary(groupId);
 
         // Create group
         await this.lineGroupService.insertGroupIfNotExist(groupId);

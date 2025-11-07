@@ -1,0 +1,1 @@
+export const LINE_MESSAGING_API_BASE_ENDPOINT_URL = 'https://api.line.me';

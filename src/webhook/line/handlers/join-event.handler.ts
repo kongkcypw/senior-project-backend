@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { EventHandler } from "../interfaces/event-handler.interface";
 import { JoinEvent, messagingApi } from "@line/bot-sdk";
-import { LineMessagingApiClientService } from "../services/line-messaging-api-client.service";
 import { welcomeToGroupMessage } from "../messages/welcome-to-group-message";
 import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum";
+import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 
 @Injectable()
 export class JoinEventHandler implements EventHandler<JoinEvent> {
