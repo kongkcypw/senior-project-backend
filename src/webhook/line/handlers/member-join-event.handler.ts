@@ -1,14 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { EventHandler } from "../interfaces/event-handler.interface";
 import { JoinEvent, MemberJoinEvent, messagingApi } from "@line/bot-sdk";
-import { welcomeToGroupMessage } from "../messages/welcome-to-group-message";
-import { welcomeMemberJoinGroupMessage } from "../messages/welcome-member-join-group-message";
+import { MemberJoinEventMessages } from "../messages/member-join-event.message";
 import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum";
 import { LineGroupService } from "src/line-group/services/line-group.service";
 import { UserService } from "src/users/services/users.service";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineMessagingApiGroupChatService } from "src/external/line-messaging-api/services/group-chat.service";
+import { UserRole } from "src/users/enums/user-role.enum";
 
 @Injectable()
 export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
@@ -50,7 +50,7 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
         for(const member of members) {
             const lineUserId = member.userId;
             await Promise.all([
-                this.userService.insertUserIfNotExist(lineUserId),
+                this.userService.insertUserIfNotExist(lineUserId, UserRole.TRAINEE),
                 this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId)
             ]);
         }
@@ -61,7 +61,7 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
     async sendWelcomeMessageToGroup(event: MemberJoinEvent): Promise<void> {
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            welcomeMemberJoinGroupMessage,
+            MemberJoinEventMessages,
         );
     }
 }

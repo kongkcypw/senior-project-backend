@@ -8,6 +8,7 @@ import { LineGroupModule } from "src/line-group/line-group.module";
 import { UserModule } from "src/users/user.module";
 import { LineMessagingApiModule } from "src/external/line-messaging-api/line-messaging-api.module";
 import { LineWebhookService } from "./services/line-webhook.service";
+import { PostBackEventHandler } from "./handlers/postback-event.handler";
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { LineWebhookService } from "./services/line-webhook.service";
         CaloriesHandler,
         JoinEventHandler,
         MemberJoinEventHandler,
+        PostBackEventHandler,
     ],
     controllers: [LineWebhookController],
 })

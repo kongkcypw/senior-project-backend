@@ -4,6 +4,7 @@ import { MessageEventHandler } from "../handlers/message-event.handler";
 import { JoinEventHandler } from "../handlers/join-event.handler";
 import { MemberJoinEventHandler } from "../handlers/member-join-event.handler";
 import { WebhookEventType } from "../enums/webhook-event-type.enum";
+import { PostBackEventHandler } from "../handlers/postback-event.handler";
 
 @Injectable()
 export class LineWebhookService {
@@ -11,6 +12,7 @@ export class LineWebhookService {
         private readonly messageEventHandler: MessageEventHandler,
         private readonly joinEventHandler: JoinEventHandler,
         private readonly memberJoinedEventHandler: MemberJoinEventHandler,
+        private readonly postbackEventHandler: PostBackEventHandler,
     ){}
 
     async handleWebhookEvent(body: WebhookRequestBody, lineSignature: string): Promise<void> {
@@ -32,6 +34,9 @@ export class LineWebhookService {
             switch (event.type) {
                 case WebhookEventType.MESSAGE:
                     await this.messageEventHandler.handle(event);
+                    break;
+                case WebhookEventType.POSTBACK:
+                    await this.postbackEventHandler.handle(event);
                     break;
                 case WebhookEventType.JOIN:
                     await this.joinEventHandler.handle(event);

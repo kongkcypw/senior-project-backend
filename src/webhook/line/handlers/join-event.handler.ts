@@ -1,12 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { EventHandler } from "../interfaces/event-handler.interface";
 import { JoinEvent, messagingApi } from "@line/bot-sdk";
-import { welcomeToGroupMessage } from "../messages/welcome-to-group-message";
+import { JoinEventMessages } from "../messages/join-event.message";
 import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineMessagingApiGroupChatService } from "src/external/line-messaging-api/services/group-chat.service";
 import { LineGroupService } from "src/line-group/services/line-group.service";
 import { ALLOW_MEMBER_COUNT_ON_INVITE_BOT } from "../constants/allow-member-count-on-invite-bot.constant";
+import { JoinEventInvalidMemberCountMessages } from "../messages/join-event-invalid-member-count.message";
+import { JoinEventFailToGetMemberCount } from "../messages/join-event-fail-to-get-member-count.message";
 
 @Injectable()
 export class JoinEventHandler implements EventHandler<JoinEvent> {
@@ -72,35 +74,23 @@ export class JoinEventHandler implements EventHandler<JoinEvent> {
     }
 
     async sendFailToGetMemberCountMessageToGroup(event: JoinEvent): Promise<void> {
-        const failToGetMemberCount: messagingApi.Message = {
-            type: 'text',
-            text: 'ขอโทษครับ เกิดข้อผิดพลาดในการตรวจสอบจำนวนสมาชิกในกลุ่ม กรุณาลองใหม่อีกครั้ง',
-        };
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            [failToGetMemberCount],
+            JoinEventFailToGetMemberCount,
         );
     }
 
     async sendInvalidMemberCountMessageToGroup(event: JoinEvent): Promise<void> {
-        const invalidMemberCount: messagingApi.Message = {
-            type: 'text',
-            text: 'ขอโทษครับ กลุ่มนี้ไม่สามารถใช้งานบอทได้ เนื่องจากมีสมาชิกเกินจำนวนที่กำหนดไว้',
-        };
-        const usageCondition: messagingApi.Message = {
-            type: 'text',
-            text: 'เงื่อนไขการใช้งานบอท: กลุ่มนี้ต้องสร้างขึ้นมาใหม่โดยมีเทรนเนอร์เพียงคนเดียว และเพิ่มลูกเทรนเข้ามาหลังจากเพิ่มบอทแล้วเท่านั้นครับ',
-        };
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            [invalidMemberCount, usageCondition],
+            JoinEventInvalidMemberCountMessages,
         );
     }
 
     async sendWelcomeMessageToGroup(event: JoinEvent): Promise<void> {
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            welcomeToGroupMessage,
+            JoinEventMessages,
         );
     }
 }

@@ -33,8 +33,9 @@ export class UserService {
     /**
      * Create a new user by Line User ID, return true if created, false if already exists
      * @param userId - The Line User ID
+     * @param role - The role of the user
      */
-    async insertUserIfNotExist(userId: string): Promise<boolean> {
+    async insertUserIfNotExist(userId: string, role: UserRole): Promise<boolean> {
         const existingUser = await this.usersRepository.findByLineUserId(userId);
         if(existingUser) {
             return false;
@@ -43,11 +44,19 @@ export class UserService {
         const newUser = this.usersRepository.create({ 
             lineUserId: userId, 
             displayName: null, 
-            role: UserRole.TRAINEE
+            role: role
         });
         const result = await this.usersRepository.save(newUser);
         console.log(result);
 
+        return true;
+    }
+
+    async isUserTrainer(lineUserId: string): Promise<boolean> {
+        const user = await this.usersRepository.findByLineUserIdAndRole(lineUserId, UserRole.TRAINER);
+        if (!user) {
+            return false;
+        }
         return true;
     }
 }
