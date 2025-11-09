@@ -12,13 +12,14 @@ export class LineGroupService {
     ) {}
 
     /**
-    *   Create a new line group record by group ID, return true if created, false if already exists.
-    *   @param groupId - The unique identifier for the line group
+    *  Create a new line group record by group ID
+    *  @param groupId: string - The unique identifier for the line group
+    *  @param groupName: string | null - The name of the line group
     */
-    async insertGroupIfNotExist(groupId: string): Promise<void> {
+    async insertGroupIfNotExist(groupId: string, groupName: string | null): Promise<void> {
         // We use upsert to avoid duplicate entries when multiple members join at the same time
         const result = await this.lineGroupRepository.upsert(
-            { lineGroupId: groupId, name: null }, // The data to insert/update
+            { lineGroupId: groupId, name: groupName }, // The data to insert/update
             ['lineGroupId'],             // The unique column to match on
         );
         console.log(result);

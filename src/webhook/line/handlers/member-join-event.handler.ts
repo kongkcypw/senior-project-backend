@@ -39,11 +39,12 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
         const groupId = source.groupId;
         const members = event.joined.members;
 
-        // TODO: call LINE API to get group name
-        const { groupName } = await this.lineMessagingApiGroupChatService.getGroupChatSummary(groupId);
+        // get group name from LINE Messaging API
+        const groupSummary = await this.lineMessagingApiGroupChatService.getGroupChatSummary(groupId);
+        const groupName = groupSummary ? groupSummary.groupName : null;
 
-        // Create group
-        await this.lineGroupService.insertGroupIfNotExist(groupId);
+        // Save group to database
+        await this.lineGroupService.insertGroupIfNotExist(groupId, groupName);
 
         // Create users for each member
         for(const member of members) {
