@@ -35,9 +35,9 @@ export class PostBackEventHandler implements EventHandler<PostbackEvent> {
             console.error('User ID is undefined in postback event source.');
             return;
         }
-        const isTrainer = await this.userService.isUserTrainer(lineUserId);
+        const trainerUser = await this.userService.findTrainerByLineUserId(lineUserId);
 
-        if (!isTrainer) {
+        if (!trainerUser) {
             await this.sendUnauthorizedTrainerMessage(event);
             return;
         }
@@ -52,13 +52,16 @@ export class PostBackEventHandler implements EventHandler<PostbackEvent> {
         // get group name from LINE Messaging API
         const groupSummary = await this.lineMessagingApiGroupChatService.getGroupChatSummary(groupId);
         const groupName = groupSummary ? groupSummary.groupName : null;
+        const groupPictureUrl = groupSummary ? (groupSummary.pictureUrl ? groupSummary.pictureUrl : null) : null;
 
-        // Save group to database
-        await Promise.all([
-            this.userService.insertUserIfNotExist(lineUserId, UserRole.TRAINER),
-            this.lineGroupService.insertGroupIfNotExist(groupId, groupName),
-            this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId)
-        ])
+        const displayName = trainerUser.displayName ? trainerUser.displayName : null;
+        const pictureUrl = trainerUser.pictureUrl ? trainerUser.pictureUrl : null;
+
+        // Save trainer user, group, and group member to database
+        // Can't use Promise.all here because we need to wait for user and group foriegn key constraint
+        await this.userService.insertUserIfNotExist(lineUserId, displayName, UserRole.TRAINER, pictureUrl);
+        await this.lineGroupService.insertGroupIfNotExist(groupId, groupName, groupPictureUrl);
+        await this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId);
 
         await this.sendAuthorizedTrainerMessage(event);
     }

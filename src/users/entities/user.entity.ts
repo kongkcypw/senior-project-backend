@@ -18,6 +18,9 @@ export class UserEntity {
   @Column({ name: 'role', type: 'varchar', nullable: true })
   role: string | null;
 
+  @Column({ name: 'picture_url', type: 'varchar', nullable: true })
+  pictureUrl: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 

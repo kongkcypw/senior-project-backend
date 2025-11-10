@@ -1,6 +1,7 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { UserService } from "../services/users.service";
 import { UserInfoDto } from "../dto/user-info.dto";
+import { CreateUserDto } from "../dto/create-user.dto";
 
 @Controller('users')
 export class UserController {
@@ -15,5 +16,13 @@ export class UserController {
     ): Promise<UserInfoDto> {
         console.log(id);
         return this.usersService.findByLineUserId(id);
+    }
+
+    @Post('create')
+    async createUser(
+        @Body() body: CreateUserDto
+    ): Promise<void> {
+        await this.usersService.insertUserIfNotExist(body.lineUserId, body.displayName ?? null, body.role, body.pictureUrl ?? null);;
+        return ;
     }
 }

@@ -58,9 +58,10 @@ export class JoinEventHandler implements EventHandler<JoinEvent> {
         // get group name from LINE Messaging API
         const groupSummary = await this.lineMessagingApiGroupChatService.getGroupChatSummary(groupId);
         const groupName = groupSummary ? groupSummary.groupName : null;
+        const groupPictureUrl = groupSummary ? (groupSummary.pictureUrl ? groupSummary.pictureUrl : null) : null;
 
         // Save group to database
-        await this.lineGroupService.insertGroupIfNotExist(groupId, groupName);
+        await this.lineGroupService.insertGroupIfNotExist(groupId, groupName, groupPictureUrl);
 
         // Send welcome message to group
         await this.sendWelcomeMessageToGroup(event);

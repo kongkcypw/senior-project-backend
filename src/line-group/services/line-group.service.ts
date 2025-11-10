@@ -15,13 +15,27 @@ export class LineGroupService {
     *  Create a new line group record by group ID
     *  @param groupId: string - The unique identifier for the line group
     *  @param groupName: string | null - The name of the line group
+    *  @param groupPictureUrl: string | null - The picture URL of the line group
     */
-    async insertGroupIfNotExist(groupId: string, groupName: string | null): Promise<void> {
+    async insertGroupIfNotExist(groupId: string, groupName: string | null, groupPictureUrl: string | null): Promise<void> {
         // We use upsert to avoid duplicate entries when multiple members join at the same time
         const result = await this.lineGroupRepository.upsert(
-            { lineGroupId: groupId, name: groupName }, // The data to insert/update
-            ['lineGroupId'],             // The unique column to match on
+            { lineGroupId: groupId, 
+              name: groupName, 
+              pictureUrl: groupPictureUrl,
+              joinGroupAt: new Date(),
+              leaveGroupAt: null
+            },                                  // The data to insert/update
+            ['lineGroupId'],                    // The unique column to match on
         );
         console.log(result);
+    }
+
+    async markGroupAsLeft(groupId: string): Promise<void> {
+        const group = await this.lineGroupRepository.findOne({ where: { lineGroupId: groupId } });
+        if (group) {
+            group.leaveGroupAt = new Date();
+            await this.lineGroupRepository.save(group);
+        }
     }
 }

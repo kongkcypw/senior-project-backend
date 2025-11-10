@@ -9,6 +9,8 @@ import { UserModule } from "src/users/user.module";
 import { LineMessagingApiModule } from "src/external/line-messaging-api/line-messaging-api.module";
 import { LineWebhookService } from "./services/line-webhook.service";
 import { PostBackEventHandler } from "./handlers/postback-event.handler";
+import { MemberLeaveEventHandler } from "./handlers/member-leave-event.handler";
+import { LeaveEventHandler } from "./handlers/leave-event.handler";
 
 @Module({
     imports: [
@@ -24,7 +26,9 @@ import { PostBackEventHandler } from "./handlers/postback-event.handler";
         MessageEventHandler,
         CaloriesHandler,
         JoinEventHandler,
+        LeaveEventHandler,
         MemberJoinEventHandler,
+        MemberLeaveEventHandler,
         PostBackEventHandler,
     ],
     controllers: [LineWebhookController],

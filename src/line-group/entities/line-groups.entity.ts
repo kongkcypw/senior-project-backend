@@ -13,6 +13,15 @@ export class LineGroupEntity {
   @Column({ name: 'name', type: 'varchar', nullable: true })
   name: string | null;
 
+  @Column({ name: 'picture_url', type: 'varchar', nullable: true })
+  pictureUrl: string | null;
+
+  @Column({ name: 'join_group_at', type: 'timestamp', nullable: false })
+  joinGroupAt: Date;
+
+  @Column({ name: 'leave_group_at', type: 'timestamp', nullable: true })
+  leaveGroupAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 

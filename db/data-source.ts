@@ -17,7 +17,7 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
     entities: ['dist/**/*.entity{.ts,.js}'],
     migrations: ['dist/db/migrations/*{.ts,.js}'],
     migrationsTableName: 'migrations',
-    synchronize: configService.getOrThrow<string>('ENV') !== 'production',
+    synchronize: false,
     logging: configService.getOrThrow<boolean>('DB_LOG'),
     seeds: ['dist/db/seeds/*{.ts,.js}']
 }

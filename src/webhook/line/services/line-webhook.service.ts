@@ -5,13 +5,17 @@ import { JoinEventHandler } from "../handlers/join-event.handler";
 import { MemberJoinEventHandler } from "../handlers/member-join-event.handler";
 import { WebhookEventType } from "../enums/webhook-event-type.enum";
 import { PostBackEventHandler } from "../handlers/postback-event.handler";
+import { MemberLeaveEventHandler } from "../handlers/member-leave-event.handler";
+import { LeaveEventHandler } from "../handlers/leave-event.handler";
 
 @Injectable()
 export class LineWebhookService {
     constructor(
         private readonly messageEventHandler: MessageEventHandler,
         private readonly joinEventHandler: JoinEventHandler,
+        private readonly leaveEventHandler: LeaveEventHandler,
         private readonly memberJoinedEventHandler: MemberJoinEventHandler,
+        private readonly memberLeaveEventHandler: MemberLeaveEventHandler,
         private readonly postbackEventHandler: PostBackEventHandler,
     ){}
 
@@ -41,8 +45,14 @@ export class LineWebhookService {
                 case WebhookEventType.JOIN:
                     await this.joinEventHandler.handle(event);
                     break;
+                case WebhookEventType.LEAVE:
+                    await this.leaveEventHandler.handle(event);
+                    break;
                 case WebhookEventType.MEMBER_JOINED:
                     await this.memberJoinedEventHandler.handle(event);
+                    break;
+                case WebhookEventType.MEMBER_LEAVED:
+                    await this.memberLeaveEventHandler.handle(event);
                     break;
                 default: {
                     console.log('Unhandled event type:', event.type);

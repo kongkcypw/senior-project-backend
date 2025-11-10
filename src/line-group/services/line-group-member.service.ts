@@ -9,8 +9,16 @@ export class LineGroupMemberService {
 
     async insertGroupMemberIfNotExist(groupId: string, lineUserId: string) {
         const existingMember = await this.lineGroupMemberRepository.findByGroupIdAndLineUserId(groupId, lineUserId);
-        if (existingMember) {
-            // Member already exists, do nothing
+
+        // Member already exists, do nothing
+        if (existingMember && existingMember.leaveGroupAt === null) {
+            return;
+        }
+
+        // Member existed but had left before, update leaveGroupAt to null
+        if (existingMember && existingMember.leaveGroupAt !== null) {
+            existingMember.leaveGroupAt = null;
+            await this.lineGroupMemberRepository.save(existingMember);
             return;
         }
 
@@ -18,8 +26,17 @@ export class LineGroupMemberService {
             lineGroupId: groupId,
             lineUserId: lineUserId,
             joinGroupAt: new Date(),
+            leaveGroupAt: null,
         });
 
         await this.lineGroupMemberRepository.save(newMember);
+    }
+
+    async markMemberAsLeft(groupId: string, lineUserId: string): Promise<void> {
+        const member = await this.lineGroupMemberRepository.findByGroupIdAndLineUserId(groupId, lineUserId);
+        if (member) {
+            member.leaveGroupAt = new Date();
+            await this.lineGroupMemberRepository.save(member);
+        }
     }
 }
