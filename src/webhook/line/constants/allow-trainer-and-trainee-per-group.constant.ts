@@ -1,0 +1,2 @@
+export const ALLOW_TRAINER_PER_GROUP = 1;
+export const ALLOW_TRAINEE_PER_GROUP = 1;

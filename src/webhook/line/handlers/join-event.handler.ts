@@ -9,6 +9,7 @@ import { LineGroupService } from "src/line-group/services/line-group.service";
 import { ALLOW_MEMBER_COUNT_ON_INVITE_BOT } from "../constants/allow-member-count-on-invite-bot.constant";
 import { JoinEventInvalidMemberCountMessages } from "../messages/join-event-invalid-member-count.message";
 import { JoinEventFailToGetMemberCount } from "../messages/join-event-fail-to-get-member-count.message";
+import { JoinEventFailToInsertMessages } from "../messages/join-event-fail-to-insert.message";
 
 @Injectable()
 export class JoinEventHandler implements EventHandler<JoinEvent> {
@@ -60,11 +61,13 @@ export class JoinEventHandler implements EventHandler<JoinEvent> {
         const groupName = groupSummary ? groupSummary.groupName : null;
         const groupPictureUrl = groupSummary ? (groupSummary.pictureUrl ? groupSummary.pictureUrl : null) : null;
 
-        // Save group to database
-        await this.lineGroupService.insertGroupIfNotExist(groupId, groupName, groupPictureUrl);
-
-        // Send welcome message to group
-        await this.sendWelcomeMessageToGroup(event);
+        try{
+            // Save group to database
+            await this.lineGroupService.insertGroupIfNotExist(groupId, groupName, groupPictureUrl);
+            await this.sendWelcomeMessageToGroup(event);
+        } catch (error) {
+            await this.sendFailToInsertGroupMessage(event);
+        }
     }
 
     async isValidGroup(memberCount: number): Promise<boolean> {
@@ -92,6 +95,13 @@ export class JoinEventHandler implements EventHandler<JoinEvent> {
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
             JoinEventMessages,
+        );
+    }
+
+    async sendFailToInsertGroupMessage(event: JoinEvent): Promise<void> {
+        await this.lineMessagingApiClientService.sendReplyMessages(
+            event.replyToken,
+            JoinEventFailToInsertMessages,
         );
     }
 }

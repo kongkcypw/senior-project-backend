@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { EventHandler } from "../interfaces/event-handler.interface";
-import { JoinEvent, MemberJoinEvent, messagingApi } from "@line/bot-sdk";
+import type { MemberJoinEvent, messagingApi } from "@line/bot-sdk";
 import { MemberJoinEventMessages } from "../messages/member-join-event.message";
 import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum";
 import { LineGroupService } from "src/line-group/services/line-group.service";
@@ -10,6 +10,11 @@ import { LineMessagingApiClientService } from "src/external/line-messaging-api/s
 import { LineMessagingApiGroupChatService } from "src/external/line-messaging-api/services/group-chat.service";
 import { UserRole } from "src/users/enums/user-role.enum";
 import { MemberJoinEventFailToGetProfileMessages } from "../messages/member-join-event-fail-to-get-profile.message";
+import { Transactional } from "typeorm-transactional";
+import { MemberJoinEventFailToInsertMessages } from "../messages/member-join-event-fail-to-insert.message";
+import { ALLOW_MEMBER_COUNT_ON_INVITE_TRAINEE } from "../constants/allow-member-count-on-invite-trainee.constant";
+import { ALLOW_MEMBER_COUNT_ON_INVITE_BOT } from "../constants/allow-member-count-on-invite-bot.constant";
+import { MemberJoinEventMemberCountExceedMessages } from "../messages/member-join-event-member-count-exceed.message";
 
 @Injectable()
 export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
@@ -39,15 +44,23 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
 
         const groupId = source.groupId;
         const members = event.joined.members;
+
+        const memberCountFromApi = await this.lineMessagingApiGroupChatService.getGroupChatMemberCount(groupId);
+        let memberCount: number;
+
+        if (!memberCountFromApi) {
+            // With our flow, trainer already in group before inviting bot
+            memberCount = ALLOW_MEMBER_COUNT_ON_INVITE_BOT + members.length; 
+        } else {
+            memberCount = memberCountFromApi;
+        }
+
+        if (memberCount > ALLOW_MEMBER_COUNT_ON_INVITE_TRAINEE) {
+            await this.sendMemberCountExceedMessage(event);
+            return;
+        }
+
         let membersName: string[] = [];
-
-        // get group name from LINE Messaging API
-        const groupSummary = await this.lineMessagingApiGroupChatService.getGroupChatSummary(groupId);
-        const groupName = groupSummary ? groupSummary.groupName : null;
-        const groupPictureUrl = groupSummary ? (groupSummary.pictureUrl ? groupSummary.pictureUrl : null) : null;
-
-        // Save group to database
-        await this.lineGroupService.insertGroupIfNotExist(groupId, groupName, groupPictureUrl);
 
         // Create users for each member
         for(const member of members) {
@@ -67,13 +80,31 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
             membersName.push(displayName ? displayName : '');
 
             // Save trainee user and group member to database
-            // Can't use Promise.all here because we need to wait for user foriegn key constraint
-            await this.userService.insertUserIfNotExist(lineUserId, displayName, UserRole.TRAINEE, pictureUrl);
-            await this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId);
+            await this.insertUserAndGroupMember(event, lineUserId, displayName, pictureUrl, groupId);
             
         }
 
         await this.sendWelcomeMessageToGroup(event, membersName);
+    }
+
+    // Save user and group member in a single transaction
+    // If either operation fails, the entire transaction is rolled back
+    @Transactional()
+    async insertUserAndGroupMember(event: MemberJoinEvent, lineUserId: string, displayName: string | null, pictureUrl: string | null, groupId: string): Promise<void> {
+        try {
+            await this.userService.insertUserIfNotExist(lineUserId, displayName, UserRole.TRAINEE, pictureUrl);
+            await this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId);
+        } catch (error) {
+            await this.sendFailtoInsertGroupMemberMessage(event)
+            throw error; // Rethrow to trigger transaction rollback
+        }
+    }
+
+    async sendMemberCountExceedMessage(event: MemberJoinEvent): Promise<void> {
+        await this.lineMessagingApiClientService.sendReplyMessages(
+            event.replyToken,
+            MemberJoinEventMemberCountExceedMessages,
+        );
     }
 
     async sendFailToGetProfileMessage(event: MemberJoinEvent): Promise<void> {
@@ -89,4 +120,12 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
             MemberJoinEventMessages(membersName),
         );
     }
+
+    async sendFailtoInsertGroupMemberMessage(event: MemberJoinEvent): Promise<void> {
+        await this.lineMessagingApiClientService.sendReplyMessages(
+            event.replyToken,
+            MemberJoinEventFailToInsertMessages,
+        );
+    }
+        
 }

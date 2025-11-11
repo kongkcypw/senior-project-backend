@@ -11,6 +11,8 @@ import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum"
 import { LineMessagingApiGroupChatService } from "src/external/line-messaging-api/services/group-chat.service";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 import { UserRole } from "src/users/enums/user-role.enum";
+import { Transactional } from "typeorm-transactional";
+import { PostbackEventAuthenTrainerFailToInsertMessages } from "../messages/postback-event-authen-trainer-fail-to-insert.message";
 
 @Injectable()
 export class PostBackEventHandler implements EventHandler<PostbackEvent> {
@@ -49,21 +51,13 @@ export class PostBackEventHandler implements EventHandler<PostbackEvent> {
 
         const groupId = event.source.groupId;
 
-        // get group name from LINE Messaging API
-        const groupSummary = await this.lineMessagingApiGroupChatService.getGroupChatSummary(groupId);
-        const groupName = groupSummary ? groupSummary.groupName : null;
-        const groupPictureUrl = groupSummary ? (groupSummary.pictureUrl ? groupSummary.pictureUrl : null) : null;
-
-        const displayName = trainerUser.displayName ? trainerUser.displayName : null;
-        const pictureUrl = trainerUser.pictureUrl ? trainerUser.pictureUrl : null;
-
-        // Save trainer user, group, and group member to database
-        // Can't use Promise.all here because we need to wait for user and group foriegn key constraint
-        await this.userService.insertUserIfNotExist(lineUserId, displayName, UserRole.TRAINER, pictureUrl);
-        await this.lineGroupService.insertGroupIfNotExist(groupId, groupName, groupPictureUrl);
-        await this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId);
-
-        await this.sendAuthorizedTrainerMessage(event);
+        try {
+            // Save trainer user to group member to database
+            await this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId);
+            await this.sendAuthorizedTrainerMessage(event);
+        } catch (error) {
+            await this.sendFailToInsertGroupMemberMessage(event);
+        }
     }
 
     async sendUnauthorizedTrainerMessage(event: PostbackEvent): Promise<void> {
@@ -77,6 +71,13 @@ export class PostBackEventHandler implements EventHandler<PostbackEvent> {
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
             PostbackEventAuthenTrainerTrueMessages
+        );
+    }
+
+    async sendFailToInsertGroupMemberMessage(event: PostbackEvent): Promise<void> {
+        await this.lineMessagingApiClientService.sendReplyMessages(
+            event.replyToken,
+            PostbackEventAuthenTrainerFailToInsertMessages
         );
     }
 }

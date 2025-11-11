@@ -1,0 +1,1 @@
+export const ALLOW_MEMBER_COUNT_ON_INVITE_TRAINEE = 2;
