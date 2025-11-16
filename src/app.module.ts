@@ -11,6 +11,7 @@ import { LineGroupModule } from './line-group/line-group.module';
 import { NotificationModule } from './notification/notification.module';
 import { HttpModule } from '@nestjs/axios';
 import { LineMessagingApiModule } from './external/line-messaging-api/line-messaging-api.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { LineMessagingApiModule } from './external/line-messaging-api/line-messa
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     CommonConfigModule,
     HttpModule,
     LineMessagingApiModule,

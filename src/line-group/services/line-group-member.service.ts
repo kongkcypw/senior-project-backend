@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { IsNull } from "typeorm";
 import { LineGroupMemberRepository } from "../repositories/line-group-member.entity";
 
 @Injectable()
@@ -39,4 +40,10 @@ export class LineGroupMemberService {
             await this.lineGroupMemberRepository.save(member);
         }
     }
-}
+    async findGroupIdByMemberLineUserId(lineUserId: string): Promise<string | null> {
+        const groupMember = await this.lineGroupMemberRepository.findOne({
+            where: { lineUserId: lineUserId, leaveGroupAt: IsNull() },
+        });
+        return groupMember?.lineGroupId || null;
+    }
+}   

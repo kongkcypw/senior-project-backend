@@ -12,11 +12,8 @@ export class NotificationScheduleEntity {
   @Column({ name: 'send_interval', type: 'varchar', nullable: false })
   sendInterval: string;
 
-  @Column({ name: 'send_at', type: 'timestamp', nullable: false })
-  sendAt: Date;
-
-  @Column({ name: 'is_active', type: 'boolean', nullable: false })
-  isActive: boolean;
+  @Column({ name: 'send_at', type: 'time', nullable: false })
+  sendAt: string; // Only time of day (HH:mm:ss)
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

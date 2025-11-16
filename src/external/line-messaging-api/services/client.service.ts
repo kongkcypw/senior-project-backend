@@ -32,6 +32,21 @@ export class LineMessagingApiClientService {
     }
   }
 
+  async sendPushMessages(
+    to: string,
+    messages: messagingApi.Message[],
+  ): Promise<void> {
+    try {
+      await this.client.pushMessage({ to, messages });
+    } catch (error) {
+      if (this.isHttpClientError(error)) {
+        console.log(`Failed to send push message due to client error: ${error.message}`)
+        return;
+      }
+      throw error;
+    }
+  }
+
   async linkRichMenuIdToUser(
     lineUserId: string,
     richMenuId: string,

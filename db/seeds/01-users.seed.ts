@@ -15,8 +15,19 @@ export class MockUsers {
         updatedAt: new Date(),
     };
 
+    static readonly TRAINEE_USER_002: UserEntity = {
+        id: 2,
+        lineUserId: 'U2201192bbe85b768b35cf892b8325443',
+        displayName: 'Witcha',
+        role: UserRole.TRAINEE,
+        pictureUrl: 'https://sprofile.line-scdn.net/0hUUVEVAPOCnp7PBv_K-10RAtsCRBYTVNoV1kXHUhpV0lHDxklBF1GGU5rAU1DXx1-A1oRT0s7XE5ZZQVbFCMYYzVvIUsfcxJXD18ifRY8UkkZdUotFhIWdxB0Iw0_Dx1yI0YkYTZVE0kgRS0kDVokbDNbIjEjSxpwKWtmLH4OZPkUPn0vVltMHEY_V03P',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
     static readonly Users = [
         this.TRAINER_USER_001,
+        this.TRAINEE_USER_002,
     ]
 }
 
