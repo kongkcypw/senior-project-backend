@@ -10,6 +10,6 @@ import { TriggerHandler } from "./handlers/trigger.handler";
     imports: [DialogflowModule, LineMessagingApiModule],
     controllers: [DialogflowWebhookController],
     providers: [DialogflowWebhookService, DialogflowWebhookHandler, TriggerHandler],
-    exports: [DialogflowWebhookHandler],
+    exports: [DialogflowWebhookService, DialogflowWebhookHandler],
 })
 export class DialogflowWebhookModule {}

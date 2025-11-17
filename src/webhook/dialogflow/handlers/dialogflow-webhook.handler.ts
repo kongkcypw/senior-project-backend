@@ -1,58 +1,22 @@
-import { MessageEvent } from "@line/bot-sdk";
 import { Injectable } from "@nestjs/common";
-import { DialogflowClientService } from "src/external/dialogflow-client/services/client.service";
-import { DialogflowConfigService } from "src/external/dialogflow-client/services/config.service";
-import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
-import { WebhookEventType } from "src/webhook/line/enums/webhook-event-type.enum";
+import { DialogflowIntentName } from "../enums/dialogflow-intent-name";
+import { TriggerHandler } from "./trigger.handler";
+import { Response } from "express";
 
 @Injectable()
 export class DialogflowWebhookHandler {
     constructor(
-        private readonly dialogflowClientService: DialogflowClientService,
-        private readonly dialogflowConfigService: DialogflowConfigService,
-        private readonly lineMessagingApiClientService: LineMessagingApiClientService,
+        private readonly triggerHandler: TriggerHandler,
     ){}
 
-    async getFullfilmentTextAndReplyMessage(event: MessageEvent): Promise<void> {
+    async handleIntent(res: Response, intentName: string | null): Promise<any> {
 
-        if (event.message.type !== 'text') {
-            return;
+        console.log('Intent detected:', intentName);
+
+        if (intentName === DialogflowIntentName.TRIGGER) {
+            return this.triggerHandler.handle(res);
         }
 
-        try {
-            const dialogflowClient = this.dialogflowClientService.createSessionsClient();
-            const sessionPath = dialogflowClient.projectAgentSessionPath(
-                this.dialogflowConfigService.projectId,
-                event.source.userId || 'default-session',
-            )
-
-            const request = {
-                session: sessionPath,
-                queryInput: {
-                    text: {
-                        text: event.message.text,
-                        languageCode: 'th',
-                    },
-                },
-            };
-
-            const responses = await dialogflowClient.detectIntent(request);
-            const result = responses[0].queryResult;
-
-            console.log(`Dialogflow response for user ${event.source.userId}:`);
-            console.log(` Response: ${result?.fulfillmentText}`);
-
-            if(result?.fulfillmentText){
-                await this.lineMessagingApiClientService.sendReplyMessages(
-                    event.replyToken,
-                    [{
-                        type: 'text',
-                        text: result.fulfillmentText,
-                    }],
-                );
-            }
-        } catch (error) {
-            console.error('Error handling Dialogflow text event:', error);
-        }
+        return;
     }
 }

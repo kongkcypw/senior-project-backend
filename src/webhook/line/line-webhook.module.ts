@@ -11,7 +11,6 @@ import { LineWebhookService } from "./services/line-webhook.service";
 import { PostBackEventHandler } from "./handlers/postback-event.handler";
 import { MemberLeaveEventHandler } from "./handlers/member-leave-event.handler";
 import { LeaveEventHandler } from "./handlers/leave-event.handler";
-import { DialogflowModule } from "src/external/dialogflow-client/dialogflow.module";
 import { DialogflowWebhookModule } from "../dialogflow/dialogflow-webhook.module";
 
 @Module({

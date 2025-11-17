@@ -2,12 +2,12 @@ import { Controller, Post, Body, Req, Res } from '@nestjs/common';
 import { DialogflowIntentName } from '../enums/dialogflow-intent-name';
 import { TriggerHandler } from '../handlers/trigger.handler';
 import { DialogflowWebhookService } from '../services/dialogflow-webhook.service';
+import { DialogflowWebhookHandler } from '../handlers/dialogflow-webhook.handler';
 
 @Controller('webhook')
 export class DialogflowWebhookController {
     constructor(
-        private readonly dialogflowWebhookService: DialogflowWebhookService,
-        private readonly triggerHandler: TriggerHandler,
+        private readonly dialogflowWebhookHandler: DialogflowWebhookHandler,
     ) {}
 
     // Handle Dialogflow fulfillment webhook
@@ -20,7 +20,7 @@ export class DialogflowWebhookController {
         console.log('Dialogflow fulfillment webhook -> User message:', queryText);
 
         const intent = body.queryResult?.intent?.displayName;
-        await this.dialogflowWebhookService.handleIntent(res, intent);
+        await this.dialogflowWebhookHandler.handleIntent(res, intent);
 
         res.status(200).send();
     }

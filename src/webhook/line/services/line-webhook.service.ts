@@ -7,7 +7,7 @@ import { WebhookEventType } from "../enums/webhook-event-type.enum";
 import { PostBackEventHandler } from "../handlers/postback-event.handler";
 import { MemberLeaveEventHandler } from "../handlers/member-leave-event.handler";
 import { LeaveEventHandler } from "../handlers/leave-event.handler";
-import { DialogflowWebhookHandler } from "src/webhook/dialogflow/handlers/dialogflow-webhook.handler";
+import { DialogflowWebhookService } from "src/webhook/dialogflow/services/dialogflow-webhook.service";
 
 @Injectable()
 export class LineWebhookService {
@@ -18,7 +18,7 @@ export class LineWebhookService {
         private readonly memberJoinedEventHandler: MemberJoinEventHandler,
         private readonly memberLeaveEventHandler: MemberLeaveEventHandler,
         private readonly postbackEventHandler: PostBackEventHandler,
-        private readonly dialogflowWebhookHandler: DialogflowWebhookHandler,
+        private readonly dialogflowWebhookService: DialogflowWebhookService,
     ){}
 
     async handleWebhookEvent(body: WebhookRequestBody, lineSignature: string): Promise<void> {
@@ -40,7 +40,7 @@ export class LineWebhookService {
             switch (event.type) {
                 case WebhookEventType.MESSAGE:
                     // await this.messageEventHandler.handle(event);
-                    await this.dialogflowWebhookHandler.getFullfilmentTextAndReplyMessage(event);
+                    await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event);
                     break;
                 case WebhookEventType.POSTBACK:
                     await this.postbackEventHandler.handle(event);
