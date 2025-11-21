@@ -19,8 +19,4 @@ export class DialogflowConfigService extends BaseConfigService<string> {
     get privateKey(): string {
         return this.getAsString('GOOGLE_CLOUD_PRIVATE_KEY').replace(/\\n/g, '\n');
     }
-
-    get agentId(): string {
-        return this.getAsString('DIALOGFLOW_AGENT_ID');
-    }
 }

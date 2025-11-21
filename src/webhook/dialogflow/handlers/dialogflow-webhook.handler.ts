@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { DialogflowIntentName } from "../enums/dialogflow-intent-name";
 import { TriggerHandler } from "./trigger.handler";
-import { Response } from "express";
+import { MessageEvent } from "@line/bot-sdk";
 
 @Injectable()
 export class DialogflowWebhookHandler {
@@ -9,12 +9,12 @@ export class DialogflowWebhookHandler {
         private readonly triggerHandler: TriggerHandler,
     ){}
 
-    async handleIntent(res: Response, intentName: string | null): Promise<any> {
+    async handleIntent(intentName: string, event: MessageEvent): Promise<any> {
 
         console.log('Intent detected:', intentName);
 
         if (intentName === DialogflowIntentName.TRIGGER) {
-            return this.triggerHandler.handle(res);
+            return this.triggerHandler.handle(event);
         }
 
         return;

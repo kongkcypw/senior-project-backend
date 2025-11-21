@@ -1,9 +1,10 @@
-import { Response } from "express";
+import { MessageEvent } from "@line/bot-sdk";
 
 export interface IntentHandlerInterface {
     /**
      * Handles a Dialogflow intent.
-     * @returns A promise that resolves when the intent is handled
+     * @param event The LINE message event associated with the intent
+     * @returns A promise that resolves when the intent has been handled
      */
-    handle: (res: Response) => Promise<Response>;
+    handle: (event: MessageEvent) => Promise<void>;
 }
