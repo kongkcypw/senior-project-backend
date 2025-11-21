@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DialogflowClientService } from 'src/external/dialogflow-client/services/client.service';
 import { DialogflowConfigService } from 'src/external/dialogflow-client/services/config.service';
-import { LineMessagingApiClientService } from 'src/external/line-messaging-api/services/client.service';
 import { MessageEvent } from '@line/bot-sdk';
 import { DialogflowWebhookHandler } from '../handlers/dialogflow-webhook.handler';
 
@@ -11,7 +10,6 @@ export class DialogflowWebhookService {
     constructor(
         private readonly dialogflowClientService: DialogflowClientService,
         private readonly dialogflowConfigService: DialogflowConfigService,
-        private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly dialogflowWebhookHandler: DialogflowWebhookHandler,
     ) {}
 
@@ -59,6 +57,4 @@ export class DialogflowWebhookService {
             console.error('Error handling Dialogflow text event:', error);
         }
     }
-
-    async 
 }
