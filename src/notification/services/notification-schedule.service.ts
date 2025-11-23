@@ -30,7 +30,7 @@ export class NotificationScheduleService {
     const schedules = await this.notificationScheduleRepository.findCaloriesIntakeReminderByTime(time);
 
     for (const schedule of schedules) {
-      for (const userPlan of schedule.userCaloriesPlans) {
+      for (const userPlan of schedule.nutritionPlan) {
         const lineUserId = userPlan.lineUserId;
         const messages = CaloriesIntakeReminderMessages(
           userPlan.totalCalories,

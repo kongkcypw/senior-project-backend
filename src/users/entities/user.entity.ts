@@ -1,8 +1,8 @@
 import { LineGroupChatHistoryEntity } from 'src/line-group/entities/line-group-chat-history.entity';
 import { LineGroupMemberEntity } from 'src/line-group/entities/line-group-member.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { UserCaloriesEntity } from './user-calories.entity';
-import { UserCaloriesPlanEntity } from './user-calories-plan.entity';
+import { MealHistoryEntity } from '../../nutrition/entities/meal-history.entity';
+import { NutritionPlanEntity } from '../../nutrition/entities/nutrition-plan.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -33,9 +33,9 @@ export class UserEntity {
   @OneToMany(() => LineGroupChatHistoryEntity, (chat) => chat.user)
   lineGroupChatHistory?: LineGroupChatHistoryEntity[];
 
-  @OneToMany(() => UserCaloriesEntity, (calories) => calories.user)
-  userCalories?: UserCaloriesEntity[];
+  @OneToMany(() => MealHistoryEntity, (meal) => meal.user)
+  mealHistory?: MealHistoryEntity[];
 
-  @OneToMany(() => UserCaloriesPlanEntity, (plan) => plan.user)
-  userCaloriesPlans?: UserCaloriesPlanEntity[];
+  @OneToMany(() => NutritionPlanEntity, (plan) => plan.user)
+  nutritionPlan?: NutritionPlanEntity[];
 }

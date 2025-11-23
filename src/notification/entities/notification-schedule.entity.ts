@@ -1,4 +1,4 @@
-import { UserCaloriesPlanEntity } from 'src/users/entities/user-calories-plan.entity';
+import { NutritionPlanEntity } from 'src/nutrition/entities/nutrition-plan.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 
 @Entity('notification_schedule')
@@ -21,6 +21,6 @@ export class NotificationScheduleEntity {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
-  @OneToMany(() => UserCaloriesPlanEntity, (plan) => plan.notificationSchedule)
-  userCaloriesPlans: UserCaloriesPlanEntity[];
+  @OneToMany(() => NutritionPlanEntity, (plan) => plan.notificationSchedule)
+  nutritionPlan: NutritionPlanEntity[];
 }

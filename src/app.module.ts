@@ -12,6 +12,7 @@ import { NotificationModule } from './notification/notification.module';
 import { HttpModule } from '@nestjs/axios';
 import { LineMessagingApiModule } from './external/line-messaging-api/line-messaging-api.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { NutritionModule } from './nutrition/nutrition.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     WebhookModule, 
     UserModule,
     LineGroupModule,
-    NotificationModule
+    NotificationModule,
+    NutritionModule
   ],
   controllers: [AppController],
   providers: [AppService],

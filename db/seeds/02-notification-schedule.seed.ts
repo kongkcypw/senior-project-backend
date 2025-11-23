@@ -12,7 +12,7 @@ export class MockNotificationSchedule {
         sendAt: '16:20:00',
         createdAt: new Date(),
         updatedAt: new Date(),
-        userCaloriesPlans: [],
+        nutritionPlan: [],
     };
     static readonly NotificationSchedules = [
         this.NOTIFICATION_SCHEDULE_001,

@@ -4,7 +4,7 @@ import { PostbackEvent } from "@line/bot-sdk";
 import { PostbackData } from "../enums/postback-data.enum";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineGroupService } from "src/line-group/services/line-group.service";
-import { UserService } from "src/users/services/users.service";
+import { UserService } from "src/users/services/user.service";
 import { PostbackEventAuthenTrainerFalseMessages } from "../messages/postback-event-authen-trainer-false.message";
 import { PostbackEventAuthenTrainerTrueMessages } from "../messages/postback-event-authen-trainer-true.message";
 import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum";

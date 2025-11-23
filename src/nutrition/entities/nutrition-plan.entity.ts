@@ -1,16 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../../users/entities/user.entity';
+import { NotificationScheduleEntity } from 'src/notification/entities/notification-schedule.entity';
 
-@Entity('user_calories')
-export class UserCaloriesEntity {
+@Entity('nutrition_plan')
+export class NutritionPlanEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ name: 'line_user_id', type: 'varchar', nullable: false })
   lineUserId: string;
-
-  @Column({ name: 'food_title', type: 'varchar', nullable: false })
-  foodTitle: string;
 
   @Column({ name: 'total_calories', type: 'integer', nullable: false })
   totalCalories: number;
@@ -24,11 +22,11 @@ export class UserCaloriesEntity {
   @Column({ name: 'fat', type: 'integer', nullable: false })
   fat: number;
 
-  @Column({ name: 'ingredients', type: 'jsonb', nullable: false })
-  ingredients: any;
+  @Column({ name: 'need_notificiation', type: 'boolean', nullable: false })
+  needNotification: boolean;
 
-  @Column({ name: 'confirm_at', type: 'timestamp', nullable: true })
-  confirmAt: Date | null;
+  @Column({ name: 'notification_schedule_id', type: 'integer', nullable: false })
+  notificationScheduleId: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
@@ -36,7 +34,11 @@ export class UserCaloriesEntity {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.userCalories, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, (user) => user.nutritionPlan, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'line_user_id', referencedColumnName: 'lineUserId' })
   user: UserEntity;
+
+  @ManyToOne(() => NotificationScheduleEntity, (schedule) => schedule.nutritionPlan, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'notification_schedule_id' })
+  notificationSchedule: NotificationScheduleEntity;
 }

@@ -4,7 +4,7 @@ import type { MemberJoinEvent, messagingApi } from "@line/bot-sdk";
 import { MemberJoinEventMessages } from "../messages/member-join-event.message";
 import { WebhookEventSourceType } from "../enums/webhook-event-source-type.enum";
 import { LineGroupService } from "src/line-group/services/line-group.service";
-import { UserService } from "src/users/services/users.service";
+import { UserService } from "src/users/services/user.service";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineMessagingApiGroupChatService } from "src/external/line-messaging-api/services/group-chat.service";
