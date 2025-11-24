@@ -12,8 +12,8 @@ export class NotificationScheduleRepository extends Repository<NotificationSched
 
     async findCaloriesIntakeReminderByTime(time: string): Promise<NotificationScheduleEntity[]> {
         return this.createQueryBuilder("ns")
-            .leftJoinAndSelect("ns.userCaloriesPlans", "userPlans", 
-                "userPlans.needNotification = true",
+            .leftJoinAndSelect("ns.nutritionPlan", "nutritionPlan", 
+                "nutritionPlan.needNotification = true",
             )
             .where("ns.type = :type", { type: NotificationScheduleType.CALORIES_INTAKE_REMINDER })
             .andWhere("ns.sendInterval = :DAILY", { DAILY: NotificationScheduleSendInterval.DAILY })

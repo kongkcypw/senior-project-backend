@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import { ConfigService } from '@nestjs/config';
 import { addTransactionalDataSource, initializeTransactionalContext } from 'typeorm-transactional';
 import dataSource from 'db/data-source';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 config();
 
@@ -24,6 +25,15 @@ async function bootstrap() {
   addTransactionalDataSource(dataSource);
 
   const app = await NestFactory.create(AppModule);
+
+  const config = new DocumentBuilder()
+    .setTitle('Senior Project API') 
+    .setDescription('API documentation for Senior Project') 
+    .setVersion('1.0') 
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('document', app, document);
+
   await app.listen( configService.getOrThrow<number>('PORT') || 9000, '0.0.0.0');
 }
 bootstrap();

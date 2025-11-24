@@ -5,6 +5,8 @@ import { Seeder } from "typeorm-extension";
 
 export class MockUsers {
 
+    // Note: We can provide actual lineUserId (it will be different with different LINE OA provider)
+
     static readonly TRAINER_USER_001: UserEntity = {
         id: 1,
         lineUserId: 'U9254489272e28fd617b3d43a22c01d71',
