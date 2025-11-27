@@ -17,7 +17,7 @@ export class NotificationScheduleService {
   ){}
 
   // TODO: Minimize cron job frequency if possible
-  @Cron(CronExpression.EVERY_10_MINUTES, { 
+  @Cron(CronExpression.EVERY_30_MINUTES, { 
   name: NotificationScheduleCronJobName.CALORIES_INTAKE_REMINDER, 
   timeZone: 'Asia/Bangkok' 
   })
