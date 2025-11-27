@@ -1,50 +1,48 @@
-# 1. Build Stage
+# Stage 1: Builder
+# This stage installs all dependencies (including dev) and compiles the code.
 FROM node:22-alpine AS builder
 
 WORKDIR /usr/src/app
 
-# Install app dependencies
+# 1. Install Dependencies
+# Copy only package files to leverage Docker layer caching
 COPY package*.json ./
 RUN npm install
 
-# Copy ALL necessary config files *before* the build
-COPY tsconfig*.json nest-cli.json .env.example ./
-
-# Copy all source files
+# 2. Copy Source and Config
+# Copy tsconfig.json and other necessary files (like nest-cli.json)
 COPY . .
 
-# Run the build command
-# The output (dist directory) will be generated here
+# 3. Build the Application
+# This creates the 'dist' directory
 RUN npm run build
 
-
-# 2. Production Stage
+# ---
+# Stage 2: Production (Final Image)
+# This stage is minimal, only containing runtime dependencies and compiled code.
 FROM node:22-alpine AS production
 
-# Set the working directory for the app in the final image
 WORKDIR /usr/src/app
 
-# Only copy the essential files from the build stage:
-# 1. package*.json to re-run 'npm install --omit=dev'
-# 2. node_modules (production only)
-# 3. The built application code (dist)
+# 1. Copy only Production Dependencies & Config
 COPY package*.json ./
 
-# Install only production dependencies
-# The `dist` folder should be copied before this if you need it for some post-install step,
-# but usually, you install dependencies first.
+# Ensure tsconfig-paths is in 'dependencies' for this to work
 RUN npm install --only=production
 
-# COPY tsconfig.json into the final image for tsconfig-paths/register
-COPY --from=builder /usr/src/app/tsconfig.json ./
+# 2. Copy compiled code and necessary config for runtime
+# We must copy tsconfig.json so tsconfig-paths/register can resolve paths.
 COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/tsconfig.json ./
+# Copy environment file placeholder if needed
+COPY --from=builder /usr/src/app/.env.example ./
 
-# Set port environment variables
+
+# 3. Runtime Configuration
 ENV PORT=9000
-
-# Expose the port the app runs on
 EXPOSE 9000
 
-# The command to run the application
-# This is where the error occurs, ensure the path is correct: dist/main
+# 4. Start Command
+# Use the working node binary, register tsconfig-paths, and run the compiled main file.
+# The previous errors confirm this command is correct IF dist/main exists.
 CMD [ "node", "-r", "tsconfig-paths/register", "dist/main" ]
