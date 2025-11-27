@@ -1,0 +1,4 @@
+services:
+  - type: web
+    name: senior-project-backend
+    prebuildCommand: npm run typeorm:migration:run:prod
