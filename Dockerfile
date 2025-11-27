@@ -2,6 +2,7 @@
 # This stage installs all dependencies (including dev) and compiles the code.
 FROM node:22-alpine AS builder
 
+COPY . /usr/src/app
 WORKDIR /usr/src/app
 
 # 1. Install Dependencies
@@ -22,6 +23,7 @@ RUN npm run build
 # This stage is minimal, only containing runtime dependencies and compiled code.
 FROM node:22-alpine AS production
 
+COPY . /usr/src/app
 WORKDIR /usr/src/app
 
 # 1. Copy only Production Dependencies & Config
