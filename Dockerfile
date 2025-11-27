@@ -11,6 +11,8 @@ RUN npm install
 # Bundle app source
 COPY . .
 
+RUN npm run build
+
 # Set port environment variables
 ENV PORT=9000
 
