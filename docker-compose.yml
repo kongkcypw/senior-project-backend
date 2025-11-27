@@ -24,6 +24,10 @@ services:
       - .env
     depends_on:
       - db
+    # Explicitly define the command to ensure tsconfig-paths is used
+    # If the package.json start script is updated, this may not be strictly necessary,
+    # but it guarantees the correct command is run.
+    command: node -r tsconfig-paths/register dist/main
 
 volumes:
   pgdata:
