@@ -7,6 +7,9 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
 
+# Copy ALL necessary config files *before* the build
+COPY tsconfig*.json nest-cli.json .env.example ./
+
 # Copy all source files
 COPY . .
 
@@ -32,9 +35,9 @@ COPY package*.json ./
 # but usually, you install dependencies first.
 RUN npm install --only=production
 
-# Copy the built application from the builder stage
+# COPY tsconfig.json into the final image for tsconfig-paths/register
+COPY --from=builder /usr/src/app/tsconfig.json ./
 COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/.env.example ./
 
 # Set port environment variables
 ENV PORT=9000
