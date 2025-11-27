@@ -7,7 +7,9 @@ config();
 
 const configService = new ConfigService();
 
-export const dataSourceOptions: DataSourceOptions & SeederOptions = {
+const isProduction = configService.get('NODE_ENV') === 'production';
+
+export const baseOptions: DataSourceOptions & SeederOptions = {
     type: 'postgres',
     host: configService.getOrThrow<string>('POSTGRES_HOST'),
     port: configService.getOrThrow<number>('POSTGRES_PORT'),
@@ -21,6 +23,21 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
     logging: configService.getOrThrow<boolean>('DB_LOG'),
     seeds: ['dist/db/seeds/*{.ts,.js}']
 }
+
+const productionSslConfig = isProduction 
+    ? {
+        ssl: {
+            // Aiven requires the CA certificate for verification
+            ca: configService.getOrThrow<string>('AIVEN_CA_CERT'),
+            rejectUnauthorized: true, // Crucial for security
+        }
+    } 
+    : {}; // No SSL config in development
+
+export const dataSourceOptions: DataSourceOptions & SeederOptions = {
+    ...baseOptions,
+    ...productionSslConfig,
+};
 
 const dataSource = new DataSource(dataSourceOptions);
 export default dataSource;
