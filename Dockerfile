@@ -24,4 +24,4 @@ ENV NODE_ENV=production
 ENV PORT=9000
 EXPOSE 9000
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
