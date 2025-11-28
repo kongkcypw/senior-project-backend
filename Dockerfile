@@ -22,6 +22,12 @@ RUN npm install --only=production
 
 COPY --from=builder /usr/src/app/dist ./dist
 
+COPY docker-entrypoint.sh .
+
+#Make the script executable AND convert line endings for Unix
+RUN chmod +x docker-entrypoint.sh \
+    && sed -i 's/\r$//' docker-entrypoint.sh
+
 ENV NODE_ENV=production
 ENV PORT=9000
 EXPOSE 9000
