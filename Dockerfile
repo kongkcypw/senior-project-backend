@@ -13,6 +13,8 @@ RUN npm run build
 # Stage 2: Production
 FROM node:22-alpine AS production
 
+RUN apk --no-cache add postgresql-client
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
