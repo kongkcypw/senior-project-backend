@@ -13,6 +13,7 @@ import { HttpModule } from '@nestjs/axios';
 import { LineMessagingApiModule } from './external/line-messaging-api/line-messaging-api.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NutritionModule } from './nutrition/nutrition.module';
+import { CloudflareModule } from './external/cloudflare/cloudflare.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { NutritionModule } from './nutrition/nutrition.module';
     ScheduleModule.forRoot(),
     CommonConfigModule,
     HttpModule,
+    CloudflareModule,
     LineMessagingApiModule,
     WebhookModule, 
     UserModule,

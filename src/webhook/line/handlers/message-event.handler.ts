@@ -1,151 +1,75 @@
-import { MessageEvent, messagingApi } from '@line/bot-sdk';
+import { MessageEvent } from '@line/bot-sdk';
 import { Injectable } from '@nestjs/common';
-import {
-  MessageHandler,
-  MessageHandlerConfig,
-  MessageHandlerContext,
-} from '../../line/interfaces/message-handler.interface';
+import { WebhookEventMessageType } from '../enums/webhook-event-message-type.enum';
+import { DialogflowWebhookService } from 'src/webhook/dialogflow/services/dialogflow-webhook.service';
 import { EventHandler } from '../interfaces/event-handler.interface';
-import { LINE_ERROR_MESSAGES } from '../constants/error-messages.constant';
-import { CaloriesHandler } from './calories.handlers';
-import { LineMessagingApiClientService } from 'src/external/line-messaging-api/services/client.service';
+import { LineMessagingApiMessageContentService } from 'src/external/line-messaging-api/services/message-content.service';
+import { CloudFlareR2Service } from 'src/external/cloudflare/services/cloudflare-r2.service';
+import { WebhookEventSourceType } from '../enums/webhook-event-source-type.enum';
+import { R2UploadPathEnum } from 'src/external/cloudflare/enums/r2-upload-path.enum';
 
 @Injectable()
 export class MessageEventHandler implements EventHandler<MessageEvent> {
-  private readonly handlerMap = new Map<string, MessageHandlerConfig>();
 
   constructor(
-    private readonly lineMessagingApiClientService: LineMessagingApiClientService,
-    private readonly caloriesHandler: CaloriesHandler,
+    private readonly dialogflowWebhookService: DialogflowWebhookService,
+    private readonly lineMessagingApiMessageContentService: LineMessagingApiMessageContentService,
+    private readonly cloudFlareR2Service: CloudFlareR2Service
   ) {
-    this.initializeHandlers();
   }
 
   async handle(event: MessageEvent): Promise<void> {
     console.log('Handling Message Event:', event);
-    const messages = await this.createReplyMessages(event);
-    console.log('Reply Messages:', messages);
-    if (messages.length > 0) {
-      await this.lineMessagingApiClientService.sendReplyMessages(
-        event.replyToken,
-        messages,
-      );
+    console.log('Message Event Type:', event.message.type);
+
+    if (event.message.type === WebhookEventMessageType.TEXT) {
+      await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event);
     }
+
+    if (event.message.type === WebhookEventMessageType.IMAGE) {
+      await this.handleImageMessage(event);
+    }
+
   }
 
-  initializeHandlers(): void {
-    // Define the message handler configurations
-    const handlerConfigs: MessageHandlerConfig[] = [
-      {
-        actions: ['แคลอรี่ในวันนี้'],
-        handler: this.caloriesHandler,
-        requireAuthentication: false,
-      },
-    ];
+  async handleImageMessage(event: MessageEvent): Promise<void> {
 
-    this.registerHandlers(handlerConfigs);
-  }
-
-  /** Mark as public for unit testing only. */
-  registerHandlers(handlerConfigs: MessageHandlerConfig[]): void {
-    for (const handlerConfig of handlerConfigs) {
-      for (const action of handlerConfig.actions) {
-        const normalizedAction = this.normalizeAction(action);
-
-        if (this.handlerMap.has(normalizedAction)) {
-          throw new Error(
-            `Handler for action "${normalizedAction}" is already registered`,
-          );
-        }
-
-        this.handlerMap.set(normalizedAction, handlerConfig);
-      }
-    }
-  }
-
-  /** Mark as public for unit testing only. */
-  async createReplyMessages(
-    event: MessageEvent,
-  ): Promise<messagingApi.Message[]> {
-    if (event.message.type !== 'text') {
-      return [];
+    if (event.source.type !== WebhookEventSourceType.GROUP) {
+      return;
     }
 
-    const handlerConfig = this.findHandlerConfig(event.message.text);
+    const groupId = event.source.groupId;
+    if (!groupId) {
+      console.error('Group ID is missing in the event source.');
+      return;
+    }
+    const messageId = event.message.id;
 
-    if (!handlerConfig) {
-      return [];
+    const userId = event.source.userId;
+    if (!userId) {
+      console.error('User ID is missing in the event source.');
+      return;
     }
 
-    // Execute authentication check if required
-    // const isAuthenticated = await this.validateAuthentication(
-    //   handlerConfig,
-    //   event.source.userId,
-    // );
-
-    // if (!isAuthenticated) {
-    //   return this.createAuthenticationErrorMessage();
-    // }
-
-    return await this.executeHandler(handlerConfig.handler, {
-      lineUserId: event.source.userId,
-    });
-  }
-
-  /** Mark as public for unit testing only. */
-  async validateAuthentication(
-    handlerConfig: MessageHandlerConfig,
-    lineUid?: string,
-  ): Promise<boolean> {
-    if (!handlerConfig.requireAuthentication) {
-      return true;
-    }
-
-    if (!lineUid) {
-      return false;
-    }
-
-    // TODO: Implement actual customer lookup logic
-    // const customer = await this.customersService.findActiveCustomerByLineUid(
-    //   lineUid,
-    // );
-
-    // return !!customer;
-    return true;
-  }
-
-  /** Mark as public for unit testing only. */
-  async executeHandler(
-    handler: MessageHandler,
-    context: MessageHandlerContext,
-  ): Promise<messagingApi.Message[]> {
     try {
-      return await handler.handle(context);
+      // Get the content and MIME type from LINE API
+      const { buffer, contentType } = await this.lineMessagingApiMessageContentService.getMessageContent(messageId);
+
+      console.log(`Retrieved image content for message ID ${messageId}. MIME type: ${contentType}`);
+
+      // Define the key (filename/path)
+      const fileExtension = contentType.split('/')[1] || 'jpeg';
+      const fileKey = `${R2UploadPathEnum.LINE_UPLOADS_FROM_GROUP}/${groupId}/${userId}/${messageId}.${fileExtension}`;
+
+      // Upload the buffer to R2
+      const publicUrl = await this.cloudFlareR2Service.uploadBuffer(fileKey, buffer, contentType);
+
+      console.log(`Image successfully uploaded to R2. URL: ${publicUrl}`);
+
+      // TODO: Save the publicUrl to database
+
     } catch (error) {
-        console.error('Error executing message handler:', error);
-
-      return this.createInternalServerErrorMessage();
+      console.error(`Failed to process/upload image content for message ID ${messageId}:`, error.message);
     }
-  }
-
-  /** Mark as public for unit testing only. */
-  normalizeAction(action: string): string {
-    return action.toLowerCase();
-  }
-
-  /** Mark as public for unit testing only. */
-  findHandlerConfig(action: string): MessageHandlerConfig | undefined {
-    const normalizeAction = this.normalizeAction(action);
-
-    return this.handlerMap.get(normalizeAction);
-  }
-
-  private createInternalServerErrorMessage(): messagingApi.Message[] {
-    return [
-      {
-        type: 'text',
-        text: LINE_ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-      },
-    ];
   }
 }
