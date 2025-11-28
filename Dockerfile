@@ -24,4 +24,6 @@ ENV NODE_ENV=production
 ENV PORT=9000
 EXPOSE 9000
 
-CMD ["node", "dist/src/main"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
+
+CMD ["npm", "run", "start:prod"]
