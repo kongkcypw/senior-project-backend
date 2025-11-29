@@ -13,20 +13,6 @@ export class MealHistoryService {
         private readonly nutritionPlanRepository: NutritionPlanRepository,
     ) {}
 
-    async findMealDetailByMealId(id: number): Promise<MealDetailDto> {
-        const meal = await this.mealHistoryRepository.findOne({ where: { id } });
-        
-        if (!meal) {
-            throw new NotFoundException(`Meal with id ${id} not found`);
-        }
-
-        const plan = await this.nutritionPlanRepository.findOne({
-            where: { lineUserId: meal.lineUserId },
-        });
-
-        return this.mapToMealDetailDto(meal, plan);
-    }
-
     private mapToMealDetailDto(meal: MealHistoryEntity, plan: NutritionPlanEntity | null): MealDetailDto {
         const dto: MealDetailDto = {
             id: meal.id,
@@ -55,5 +41,24 @@ export class MealHistoryService {
         }
 
         return dto;
+    }
+
+    async findMealDetailByMealId(id: number): Promise<MealDetailDto> {
+        const meal = await this.mealHistoryRepository.findOne({ where: { id } });
+        
+        if (!meal) {
+            throw new NotFoundException(`Meal with id ${id} not found`);
+        }
+
+        const plan = await this.nutritionPlanRepository.findOne({
+            where: { lineUserId: meal.lineUserId },
+        });
+
+        return this.mapToMealDetailDto(meal, plan);
+    }
+
+    async insertMealHistory(mealData: Partial<MealHistoryEntity>): Promise<MealHistoryEntity> {
+        const meal = this.mealHistoryRepository.create(mealData);
+        return this.mealHistoryRepository.save(meal);
     }
 }

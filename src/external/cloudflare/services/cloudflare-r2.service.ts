@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { CloudFlareConfigService } from './config.service';
+import { R2BaseDirectoryEnum } from '../enums/r2-base-directory.enum';
 
 @Injectable()
 export class CloudFlareR2Service {
@@ -28,26 +29,45 @@ export class CloudFlareR2Service {
    * @param contentType The file's MIME type (e.g., 'image/jpeg').
    * @returns A promise that resolves to the public URL of the uploaded file.
    */
-  async uploadBuffer(key: string, buffer: Buffer, contentType: string): Promise<string> {
-    const command = new PutObjectCommand({
-      Bucket: this.cloudFlareConfigService.bucketName,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-      ContentLength: buffer.length,
-    });
+  async uploadBuffer(key: string, buffer: Buffer, contentType: string): Promise<string | null> {
+    try {
+      const environment = this.cloudFlareConfigService.nodeEnv;
+      let baseDirectory: string;
+      switch (environment) {
+        case 'production':
+          baseDirectory = R2BaseDirectoryEnum.PRODUCTION;
+          break;
+        case 'development':
+          baseDirectory = R2BaseDirectoryEnum.DEVELOPMENT;
+          break;
+        default:
+          baseDirectory = R2BaseDirectoryEnum.LOCAL;
+      }
+      key = `${baseDirectory}/${key}`;
 
-    await this.s3Client.send(command);
+      const command = new PutObjectCommand({
+        Bucket: this.cloudFlareConfigService.bucketName,
+        Key: key,
+        Body: buffer,
+        ContentType: contentType,
+        ContentLength: buffer.length,
+      });
 
-    // CRITICAL UPDATE: Use the custom domain for the public URL
-    // and 'key' already contains the path (e.g., 'line-uploads/U.../589...jpeg')
-    const baseUrl = this.cloudFlareConfigService.customDomain.endsWith('/')
-      ? this.cloudFlareConfigService.customDomain.slice(0, -1)
-      : this.cloudFlareConfigService.customDomain;
+      await this.s3Client.send(command);
 
-    // Ensure the key doesn't start with a slash if the base URL doesn't end with one (safe concatenation)
-    const cleanedKey = key.startsWith('/') ? key.substring(1) : key;
+      // CRITICAL UPDATE: Use the custom domain for the public URL
+      // and 'key' already contains the path (e.g., 'line-uploads/U.../589...jpeg')
+      const baseUrl = this.cloudFlareConfigService.customDomain.endsWith('/')
+        ? this.cloudFlareConfigService.customDomain.slice(0, -1)
+        : this.cloudFlareConfigService.customDomain;
 
-    return `${baseUrl}/${cleanedKey}`;
+      // Ensure the key doesn't start with a slash if the base URL doesn't end with one (safe concatenation)
+      const cleanedKey = key.startsWith('/') ? key.substring(1) : key;
+
+      return `${baseUrl}/${cleanedKey}`;
+    } catch (error) {
+      console.error('Error uploading to Cloudflare R2:', error);
+      return null;
+    }
   }
 }

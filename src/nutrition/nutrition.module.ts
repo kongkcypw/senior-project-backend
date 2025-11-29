@@ -8,7 +8,7 @@ import { NutritionPlanRepository } from "./repositories/nutrition-plan.repositor
     imports: [],
     providers: [MealHistoryRepository, MealHistoryService, NutritionPlanRepository],
     controllers: [MealHistoryController],
-    exports: []
+    exports: [MealHistoryService],
 })
 
 export class NutritionModule {}

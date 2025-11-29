@@ -8,6 +8,10 @@ export class CloudFlareConfigService extends BaseConfigService<string> {
         super(configService);
     }
 
+    get nodeEnv(): string {
+        return this.getAsString('NODE_ENV');
+    }
+
     get accountId(): string {
         return this.getAsString('CLOUDFLARE_R2_ACCOUNT_ID');
     }

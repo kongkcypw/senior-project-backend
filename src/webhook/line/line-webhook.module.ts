@@ -12,6 +12,8 @@ import { MemberLeaveEventHandler } from "./handlers/member-leave-event.handler";
 import { LeaveEventHandler } from "./handlers/leave-event.handler";
 import { DialogflowWebhookModule } from "../dialogflow/dialogflow-webhook.module";
 import { CloudflareModule } from "src/external/cloudflare/cloudflare.module";
+import { GeminiModule } from "src/external/gemini/gemini.module";
+import { NutritionModule } from "src/nutrition/nutrition.module";
 
 @Module({
     imports: [
@@ -20,6 +22,8 @@ import { CloudflareModule } from "src/external/cloudflare/cloudflare.module";
         LineMessagingApiModule,
         DialogflowWebhookModule,
         CloudflareModule,
+        GeminiModule,
+        NutritionModule,
     ],
     providers: [
         // Services

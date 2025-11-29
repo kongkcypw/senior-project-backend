@@ -7,14 +7,22 @@ import { LineMessagingApiMessageContentService } from 'src/external/line-messagi
 import { CloudFlareR2Service } from 'src/external/cloudflare/services/cloudflare-r2.service';
 import { WebhookEventSourceType } from '../enums/webhook-event-source-type.enum';
 import { R2UploadPathEnum } from 'src/external/cloudflare/enums/r2-upload-path.enum';
+import { GeminiService } from 'src/external/gemini/services/gemini.service';
+import { MealHistoryService } from 'src/nutrition/services/meal-history.service';
+import { LineMessagingApiClientService } from 'src/external/line-messaging-api/services/client.service';
+import { MealDetailMessage } from '../messages/meal-detail.message';
+import { GeminiAnalyzeFoodImageResponse } from 'src/external/gemini/types/gemini-analyze-food-image-response.type';
 
 @Injectable()
 export class MessageEventHandler implements EventHandler<MessageEvent> {
 
   constructor(
     private readonly dialogflowWebhookService: DialogflowWebhookService,
+    private readonly lineMessagingApiClientService: LineMessagingApiClientService,
     private readonly lineMessagingApiMessageContentService: LineMessagingApiMessageContentService,
-    private readonly cloudFlareR2Service: CloudFlareR2Service
+    private readonly cloudFlareR2Service: CloudFlareR2Service,
+    private readonly geminiService: GeminiService,
+    private readonly mealHistoryService: MealHistoryService,
   ) {
   }
 
@@ -39,37 +47,108 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     }
 
     const groupId = event.source.groupId;
-    if (!groupId) {
-      console.error('Group ID is missing in the event source.');
-      return;
-    }
-    const messageId = event.message.id;
-
     const userId = event.source.userId;
-    if (!userId) {
-      console.error('User ID is missing in the event source.');
+    const messageId = event.message.id;
+    if (!groupId || !userId) {
       return;
     }
 
-    try {
-      // Get the content and MIME type from LINE API
-      const { buffer, contentType } = await this.lineMessagingApiMessageContentService.getMessageContent(messageId);
-
-      console.log(`Retrieved image content for message ID ${messageId}. MIME type: ${contentType}`);
-
-      // Define the key (filename/path)
-      const fileExtension = contentType.split('/')[1] || 'jpeg';
-      const fileKey = `${R2UploadPathEnum.LINE_UPLOADS_FROM_GROUP}/${groupId}/${userId}/${messageId}.${fileExtension}`;
-
-      // Upload the buffer to R2
-      const publicUrl = await this.cloudFlareR2Service.uploadBuffer(fileKey, buffer, contentType);
-
-      console.log(`Image successfully uploaded to R2. URL: ${publicUrl}`);
-
-      // TODO: Save the publicUrl to database
-
-    } catch (error) {
-      console.error(`Failed to process/upload image content for message ID ${messageId}:`, error.message);
+    // Get the content and MIME type from LINE API
+    const messageContentResponse = await this.lineMessagingApiMessageContentService.getMessageContent(messageId);
+    if (!messageContentResponse) {
+      await this.sendErrorGetMessageContent(event);
+      return;
     }
+    const { buffer, contentType } = messageContentResponse;
+
+    // Define the key (filename/path) and upload to Cloudflare R2
+    const fileExtension = contentType.split('/')[1] || 'jpeg';
+    const fileKey = `${R2UploadPathEnum.LINE_UPLOADS_FROM_GROUP}/${groupId}/${userId}/${messageId}.${fileExtension}`;
+    const publicUrl = await this.cloudFlareR2Service.uploadBuffer(fileKey, buffer, contentType);
+    if (!publicUrl) {
+      await this.sendErrorUploadToR2(event);
+      return;
+    }
+
+    // Analyze the image using Gemini
+    const analysisResult = await this.geminiService.analyzeFoodImage(buffer, contentType);
+    if (!analysisResult) {
+      await this.sendErrorAnalyzeImage(event);
+      return;
+    }
+    if (analysisResult.data.is_food === false) {
+      await this.sendNotFoodImageMessage(event);
+      return;
+    }
+
+    await this.mealHistoryService.insertMealHistory({
+      lineUserId: userId,
+      imageUrl: publicUrl,
+      foodTitle: analysisResult.data.foodTitle,
+      ingredients: analysisResult.data.ingredients,
+      calories: analysisResult.data.nutritionFacts.calories,
+      protein: analysisResult.data.nutritionFacts.protein,
+      carbohydrate: analysisResult.data.nutritionFacts.carbohydrates,
+      fat: analysisResult.data.nutritionFacts.fat,
+    });
+
+    // TODO: Save to line group chat history
+
+    this.sendMealDetailMessage(event, analysisResult.data);
+  }
+
+  async sendErrorGetMessageContent(event: MessageEvent): Promise<void> {
+    await this.lineMessagingApiClientService.sendReplyMessages(
+      event.replyToken,
+      [
+        {
+          type: 'text',
+          text: 'ขออภัยครับ ไม่สามารถดึงข้อมูลรูปภาพได้ กรุณาลองส่งรูปภาพอีกครั้งครับ',
+        }
+      ]
+    );
+  }
+
+  async sendErrorUploadToR2(event: MessageEvent): Promise<void> {
+    await this.lineMessagingApiClientService.sendReplyMessages(
+      event.replyToken,
+      [
+        {
+          type: 'text',
+          text: 'ขออภัยครับ เกิดปัญหาในการอัปโหลดรูปภาพ กรุณาลองส่งรูปภาพอีกครั้งครับ',
+        }
+      ]
+    );
+  }
+
+  async sendErrorAnalyzeImage(event: MessageEvent): Promise<void> {
+    await this.lineMessagingApiClientService.sendReplyMessages(
+      event.replyToken,
+      [
+        {
+          type: 'text',
+          text: 'ขออภัยครับ ไม่สามารถวิเคราะห์รูปภาพได้ กรุณาลองส่งรูปภาพอีกครั้งครับ',
+        }
+      ]
+    );
+  }
+
+  async sendNotFoodImageMessage(event: MessageEvent): Promise<void> {
+    await this.lineMessagingApiClientService.sendReplyMessages(
+      event.replyToken,
+      [
+        {
+          type: 'text',
+          text: 'ขออภัยครับ รูปภาพที่ส่งมาไม่ใช่อาหาร กรุณาส่งรูปภาพอาหารเพื่อวิเคราะห์ครับ',
+        }
+      ]
+    );
+  }
+
+  async sendMealDetailMessage(event: MessageEvent, detail: GeminiAnalyzeFoodImageResponse): Promise<void> {
+    await this.lineMessagingApiClientService.sendReplyMessages(
+      event.replyToken,
+      MealDetailMessage(detail)
+    );
   }
 }

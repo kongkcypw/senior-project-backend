@@ -25,7 +25,7 @@ export class LineMessagingApiMessageContentService {
      * @param messageId The ID of the message to retrieve content for.
      * @returns A Promise that resolves to a Buffer containing the file data.
      */
-    async getMessageContent(messageId: string): Promise<GetMessageContentResponse> {
+    async getMessageContent(messageId: string): Promise<GetMessageContentResponse | null> {
         const url = `${LINE_MESSAGING_API_DATA_ENDPOINT_URL}/v2/bot/message/${messageId}/content`;
 
         try {
@@ -48,7 +48,8 @@ export class LineMessagingApiMessageContentService {
             };
 
         } catch (error) {
-            throw new Error('Failed to retrieve message content from LINE.');
+            console.error('Error fetching message content from LINE API:', error);
+            return null;
         }
     }
 }
