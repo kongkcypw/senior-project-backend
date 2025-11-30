@@ -12,4 +12,8 @@ export class LineLiffConfigService extends BaseConfigService<string> {
     get liffId(): string {
         return this.getAsString('LIFF_ID');
     }
+
+    get liffNumericId(): string {
+        return this.getAsString('LIFF_NUMERIC_ID');
+    }
 }
