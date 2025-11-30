@@ -10,12 +10,12 @@ import { LineLiffConfigService } from 'src/external/line-liff/services/config.se
 
 @Injectable()
 export class LiffJwtStrategy extends PassportStrategy(Strategy, 'liff-jwt') {
-  private readonly LIFF_ID: string;
 
   constructor(
+    private readonly userService: UserService,
     private readonly lineliffConfigService: LineLiffConfigService,
-    private readonly userService: UserService
 ) {
+    const liffIdFromConfig = lineliffConfigService.liffId;
     super({
       // Extract the token from the Authorization header (Bearer token)
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), 
@@ -32,9 +32,8 @@ export class LiffJwtStrategy extends PassportStrategy(Strategy, 'liff-jwt') {
       issuer: 'https://access.line.me',
       
       // Validate the audience (must match your LIFF ID)
-      audience: process.env.LIFF_ID, 
+      audience: liffIdFromConfig,
     });
-    this.LIFF_ID = this.lineliffConfigService.liffId
   }
 
   async validate(payload: any): Promise<UserInfoDto> {
