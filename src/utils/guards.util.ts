@@ -11,6 +11,8 @@ export function getProtectedGuards(liffAuthStrategyName: string) {
     if (isLocal) {
         // LOCAL: Use DevAuthGuard followed directly by RolesGuard 
         guards.push(DevAuthGuard);
+        guards.push(RolesGuard);
+        return guards;
     } else {
         // PRODUCTION: Use real LIFF Auth 
         guards.push(AuthGuard(liffAuthStrategyName));
