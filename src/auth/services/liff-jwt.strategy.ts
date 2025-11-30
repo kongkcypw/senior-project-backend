@@ -1,21 +1,19 @@
-// src/auth/liff-jwt.strategy.ts (Simplified Example)
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
 import { UserService } from 'src/users/services/user.service';
-import { UserEntity } from 'src/users/entities/user.entity';
 import { UserInfoDto } from 'src/users/dto/user-info.dto';
-import { LineLiffConfigService } from 'src/external/line-liff/services/config.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class LiffJwtStrategy extends PassportStrategy(Strategy, 'liff-jwt') {
 
   constructor(
     private readonly userService: UserService,
-    private readonly lineliffConfigService: LineLiffConfigService,
+    private readonly configService: ConfigService,
 ) {
-    const liffIdFromConfig = lineliffConfigService.liffId;
+    const liffId = configService.get<string>('LIFF_ID');
     super({
       // Extract the token from the Authorization header (Bearer token)
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), 
@@ -32,7 +30,7 @@ export class LiffJwtStrategy extends PassportStrategy(Strategy, 'liff-jwt') {
       issuer: 'https://access.line.me',
       
       // Validate the audience (must match your LIFF ID)
-      audience: liffIdFromConfig,
+      audience: liffId,
     });
   }
 
