@@ -14,6 +14,10 @@ export class LiffJwtStrategy extends PassportStrategy(Strategy, 'liff-jwt') {
     private readonly lineliffConfigService: LineLiffConfigService,
 ) {
     const liffNumericId = lineliffConfigService.liffNumericId;
+
+    // TEMPORARY LOG: This will show in your Render logs on startup
+    console.log('--- LIFF Strategy Initialized. Audience configured as:', liffNumericId, '---');
+
     super({
       // Extract the token from the Authorization header (Bearer token)
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), 
