@@ -8,13 +8,12 @@ export class UserRelationshipsRepository extends Repository<UserRelationshipEnti
         super(UserRelationshipEntity, dataSource.createEntityManager());
     }
 
-    async findActiveRelationshipsByTraineeAndTrainer(traineeLineUserId: string, trainerLineUserId: string): Promise<UserRelationshipEntity | null> {
-        return this.findOne({ 
+    async findActiveRelationshipsByTraineeAndTrainer(trainerLineUserId: string, traineeLineUserId: string): Promise<UserRelationshipEntity | null> {
+        return this.findOne({
             where: {
-                traineeLineUserId, 
                 trainerLineUserId,
+                traineeLineUserId,
                 isActive: true,
-                unassignedAt: IsNull()
             }
         });
     }

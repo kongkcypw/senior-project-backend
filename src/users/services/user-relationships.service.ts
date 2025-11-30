@@ -11,7 +11,12 @@ export class UserRelationshipsService {
 
     async isAssignedTrainerForTrainee(trainerLineUserId: string, traineeLineUserId: string): Promise<boolean> {
         const relationship = await this.userRelationshipsRepository.findActiveRelationshipsByTraineeAndTrainer(trainerLineUserId, traineeLineUserId);
-        return relationship !== null;
+        
+        if (!relationship) {
+            return false;
+        }
+
+        return true;
     }
 
     async insertTrainerRelationshipIfNotExist(groupId: string, traineeLineUserId: string): Promise<void> {
