@@ -1,0 +1,1 @@
+export const LINE_LIFF_BASE_URL = 'https://liff.line.me';

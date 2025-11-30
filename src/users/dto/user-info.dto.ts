@@ -15,9 +15,13 @@ export class UserInfoDto {
 
   @IsString()
   @Expose()
-  displayName: string;
+  displayName: string | null;
 
   @IsString()
   @Expose()
-  role: string;
+  pictureUrl?: string | null;
+
+  @IsString()
+  @Expose()
+  role: string | null;
 }

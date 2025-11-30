@@ -25,8 +25,9 @@ export class UserService {
         return {
             id: user.id,
             lineUserId: user.lineUserId,
-            displayName: user.displayName || '',
-            role: user.role || '',
+            displayName: user.displayName,
+            pictureUrl: user.pictureUrl,
+            role: user.role,
         };
 
     }
@@ -56,5 +57,23 @@ export class UserService {
 
     async findTrainerByLineUserId(lineUserId: string): Promise<UserEntity | null> {
         return await this.usersRepository.findByLineUserIdAndRole(lineUserId, UserRole.TRAINER);
+    }
+
+    async updateDisplayName(lineUserId: string, displayName: string): Promise<void> {
+        const user = await this.usersRepository.findByLineUserId(lineUserId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        user.displayName = displayName;
+        await this.usersRepository.save(user);
+    }
+
+    async updatePictureUrl(lineUserId: string, pictureUrl: string): Promise<void> {
+        const user = await this.usersRepository.findByLineUserId(lineUserId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        user.pictureUrl = pictureUrl;
+        await this.usersRepository.save(user);
     }
 }

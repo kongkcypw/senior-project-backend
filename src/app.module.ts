@@ -14,6 +14,8 @@ import { LineMessagingApiModule } from './external/line-messaging-api/line-messa
 import { ScheduleModule } from '@nestjs/schedule';
 import { NutritionModule } from './nutrition/nutrition.module';
 import { CloudflareModule } from './external/cloudflare/cloudflare.module';
+import { AuthModule } from './auth/auth.module';
+import { LineLiffModule } from './external/line-liff/line-liff.module';
 
 @Module({
   imports: [
@@ -27,7 +29,9 @@ import { CloudflareModule } from './external/cloudflare/cloudflare.module';
     CloudflareModule,
     LineMessagingApiModule,
     WebhookModule, 
+    LineLiffModule,
     UserModule,
+    AuthModule,
     LineGroupModule,
     NotificationModule,
     NutritionModule
