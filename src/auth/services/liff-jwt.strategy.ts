@@ -14,6 +14,7 @@ export class LiffJwtStrategy extends PassportStrategy(Strategy, 'liff-jwt') {
     private readonly configService: ConfigService,
 ) {
     const liffId = configService.get<string>('LIFF_ID');
+    console.log('LIFF_ID from config:', liffId);
     super({
       // Extract the token from the Authorization header (Bearer token)
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), 
@@ -35,6 +36,7 @@ export class LiffJwtStrategy extends PassportStrategy(Strategy, 'liff-jwt') {
   }
 
   async validate(payload: any): Promise<UserInfoDto> {
+    console.log('Validating LIFF JWT with payload:', payload);
     const lineUserId = payload.sub;
     const displayName = payload.name;
     const pictureUrl = payload.picture;
