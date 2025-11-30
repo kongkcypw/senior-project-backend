@@ -23,7 +23,7 @@ export class DialogflowWebhookHandler {
         }
 
         if (intentName === DialogflowIntentName.TEST_PROFILE) {
-            const profileUrl = this.lineLiffNavigatePathService.getNavigateProfilePath();
+            const profileUrl = this.lineLiffNavigatePathService.navigateProfilePage;
             await this.lineMessagingApiClientService.sendReplyMessages(
                 event.replyToken,
                 TestProfileMessages(profileUrl)

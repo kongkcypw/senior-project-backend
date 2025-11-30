@@ -5,6 +5,7 @@ import { UserModule } from 'src/users/user.module';
 import { LiffJwtStrategy } from './services/liff-jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { LineLiffModule } from 'src/external/line-liff/line-liff.module';
+import { DevAuthGuard } from './guards/dev-auth.guard';
 @Module({
   imports: [
     LineLiffModule,
@@ -13,7 +14,8 @@ import { LineLiffModule } from 'src/external/line-liff/line-liff.module';
   ],
   providers: [
     LiffJwtStrategy, 
-    RolesGuard,      
+    RolesGuard,
+    DevAuthGuard,      
   ],
   exports: [
     LiffJwtStrategy,

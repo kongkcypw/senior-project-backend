@@ -14,12 +14,14 @@ import { DialogflowWebhookModule } from "../dialogflow/dialogflow-webhook.module
 import { CloudflareModule } from "src/external/cloudflare/cloudflare.module";
 import { GeminiModule } from "src/external/gemini/gemini.module";
 import { NutritionModule } from "src/nutrition/nutrition.module";
+import { LineLiffModule } from "src/external/line-liff/line-liff.module";
 
 @Module({
     imports: [
         UserModule,
         LineGroupModule,
         LineMessagingApiModule,
+        LineLiffModule,
         DialogflowWebhookModule,
         CloudflareModule,
         GeminiModule,

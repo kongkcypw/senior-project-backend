@@ -15,6 +15,7 @@ import { MemberJoinEventFailToInsertMessages } from "../messages/member-join-eve
 import { ALLOW_MEMBER_COUNT_ON_INVITE_TRAINEE } from "../constants/allow-member-count-on-invite-trainee.constant";
 import { ALLOW_MEMBER_COUNT_ON_INVITE_BOT } from "../constants/allow-member-count-on-invite-bot.constant";
 import { MemberJoinEventMemberCountExceedMessages } from "../messages/member-join-event-member-count-exceed.message";
+import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 
 @Injectable()
 export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
@@ -22,6 +23,7 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
     constructor(
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly lineMessagingApiGroupChatService: LineMessagingApiGroupChatService,
+        private readonly lineLiffNavigationPathService: LineLiffNavigatePathService,
         private readonly userService: UserService,
         private readonly lineGroupService: LineGroupService,
         private readonly lineGroupMemberService: LineGroupMemberService,
@@ -84,7 +86,8 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
             
         }
 
-        await this.sendWelcomeMessageToGroup(event, membersName);
+        const navigateUrl = this.lineLiffNavigationPathService.bodyInformationPage;
+        await this.sendWelcomeMessageToGroup(event, membersName, navigateUrl);
     }
 
     // Save user and group member in a single transaction
@@ -114,10 +117,10 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
         );
     }
 
-    async sendWelcomeMessageToGroup(event: MemberJoinEvent, membersName: string[]): Promise<void> {
+    async sendWelcomeMessageToGroup(event: MemberJoinEvent, membersName: string[], navigateUrl: string): Promise<void> {
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            MemberJoinEventMessages(membersName),
+            MemberJoinEventMessages(membersName, navigateUrl),
         );
     }
 

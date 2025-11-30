@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { UserRepository } from "./repositories/user.repository";
 import { UserService } from "./services/user.service";
 import { UserController } from "./controllers/user.controller";
+import { UserBodyInformationController } from "./controllers/user-body-information.controller";
 
 @Module({
     imports: [],
@@ -10,7 +11,8 @@ import { UserController } from "./controllers/user.controller";
         UserService
     ],
     controllers: [
-        UserController
+        UserController,
+        UserBodyInformationController
     ],
     exports: [UserService]
 })

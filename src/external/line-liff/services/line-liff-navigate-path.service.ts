@@ -15,7 +15,11 @@ export class LineLiffNavigatePathService {
         this.liffId = this.lineLiffConfigService.liffId;
     }
 
-    getNavigateProfilePath(): string {
+    get navigateProfilePage(): string {
         return `${this.basePath}/${this.liffId}/${WebPath.PROFILE}`;
+    }
+
+    get bodyInformationPage(): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.BODY_INFORMATION}`;
     }
 }
