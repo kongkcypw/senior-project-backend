@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { LineGroupRepository } from "../repositories/line-group.repository";
-import { LineGroupMemberRepository } from "../repositories/line-group-member.entity";
 import { LineGroupChatHistoryRepository } from "../repositories/line-group-chat-history.repository";
+import { LineGroupMemberRepository } from "../repositories/line-group-member.repository";
 
 @Injectable()
 export class LineGroupService {

@@ -3,6 +3,8 @@ import { LineGroupMemberEntity } from 'src/line-group/entities/line-group-member
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { MealHistoryEntity } from '../../nutrition/entities/meal-history.entity';
 import { NutritionPlanEntity } from '../../nutrition/entities/nutrition-plan.entity';
+import { UserPhysiqueHistoryEntity } from './user-physique-history.entity';
+import { UserRelationshipEntity } from './user-relationships.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -38,4 +40,15 @@ export class UserEntity {
 
   @OneToMany(() => NutritionPlanEntity, (plan) => plan.user)
   nutritionPlan?: NutritionPlanEntity[];
+
+  @OneToMany(() => UserPhysiqueHistoryEntity, (physique) => physique.user)
+  physiqueHistory?: UserPhysiqueHistoryEntity[];
+
+  // Relationships where this user is the TRAINEE
+  @OneToMany(() => UserRelationshipEntity, (relationship) => relationship.trainee)
+  traineeRelationships?: UserRelationshipEntity[];
+
+  // Relationships where this user is the TRAINER
+  @OneToMany(() => UserRelationshipEntity, (relationship) => relationship.trainer)
+  trainerRelationships?: UserRelationshipEntity[];
 }

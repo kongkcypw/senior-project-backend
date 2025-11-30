@@ -3,11 +3,13 @@ import { UserRepository } from "../repositories/user.repository";
 import { UserInfoDto } from "../dto/user-info.dto";
 import { UserRole } from "../enums/user-role.enum";
 import { UserEntity } from "../entities/user.entity";
+import { UserRelationshipsRepository } from "../repositories/user-relationships.repository";
 
 @Injectable()
 export class UserService {
     constructor(
-        private readonly usersRepository: UserRepository
+        private readonly usersRepository: UserRepository,
+        private readonly userRelationshipsRepository: UserRelationshipsRepository
     ) {}
     
     async findByLineUserId(id: string | null): Promise<UserInfoDto> {

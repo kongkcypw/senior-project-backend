@@ -2,19 +2,32 @@ import { Module } from "@nestjs/common";
 import { UserRepository } from "./repositories/user.repository";
 import { UserService } from "./services/user.service";
 import { UserController } from "./controllers/user.controller";
-import { UserBodyInformationController } from "./controllers/user-body-information.controller";
+import { UserPhysiqueHistoryController } from "./controllers/user-physique-history.controller";
+import { UserRelationshipsRepository } from "./repositories/user-relationships.repository";
+import { UserRelationshipsService } from "./services/user-relationships.service";
+import { UserRelationshipsController } from "./controllers/user-relationships.controller";
+import { UserPhysiqueHistoryRepository } from "./repositories/user-physique-history.repository";
+import { UserPhysiqueHistoryService } from "./services/user-physique-history.service";
+import { LineGroupModule } from "src/line-group/line-group.module";
 
 @Module({
-    imports: [],
+    imports: [
+        LineGroupModule,
+    ],
     providers: [
         UserRepository,
-        UserService
+        UserService,
+        UserRelationshipsRepository,
+        UserRelationshipsService,
+        UserPhysiqueHistoryRepository,
+        UserPhysiqueHistoryService,
     ],
     controllers: [
         UserController,
-        UserBodyInformationController
+        UserRelationshipsController,
+        UserPhysiqueHistoryController,
     ],
-    exports: [UserService]
+    exports: [UserService, UserRelationshipsService]
 })
 
 export class UserModule {}

@@ -16,6 +16,7 @@ import { ALLOW_MEMBER_COUNT_ON_INVITE_TRAINEE } from "../constants/allow-member-
 import { ALLOW_MEMBER_COUNT_ON_INVITE_BOT } from "../constants/allow-member-count-on-invite-bot.constant";
 import { MemberJoinEventMemberCountExceedMessages } from "../messages/member-join-event-member-count-exceed.message";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
+import { UserRelationshipsService } from "src/users/services/user-relationships.service";
 
 @Injectable()
 export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
@@ -27,6 +28,7 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
         private readonly userService: UserService,
         private readonly lineGroupService: LineGroupService,
         private readonly lineGroupMemberService: LineGroupMemberService,
+        private readonly userRelationshipsService: UserRelationshipsService,
     ){}
 
     async handle(event: MemberJoinEvent): Promise<void> {
@@ -86,7 +88,7 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
             
         }
 
-        const navigateUrl = this.lineLiffNavigationPathService.bodyInformationPage;
+        const navigateUrl = this.lineLiffNavigationPathService.getBodyInformationPage(members[0].userId);
         await this.sendWelcomeMessageToGroup(event, membersName, navigateUrl);
     }
 
@@ -96,6 +98,7 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
     async insertUserAndGroupMember(event: MemberJoinEvent, lineUserId: string, displayName: string | null, pictureUrl: string | null, groupId: string): Promise<void> {
         try {
             await this.userService.insertUserIfNotExist(lineUserId, displayName, UserRole.TRAINEE, pictureUrl);
+            await this.userRelationshipsService.insertTrainerRelationshipIfNotExist(groupId, lineUserId);
             await this.lineGroupMemberService.insertGroupMemberIfNotExist(groupId, lineUserId);
         } catch (error) {
             await this.sendFailtoInsertGroupMemberMessage(event)

@@ -19,7 +19,7 @@ export class LineLiffNavigatePathService {
         return `${this.basePath}/${this.liffId}/${WebPath.PROFILE}`;
     }
 
-    get bodyInformationPage(): string {
-        return `${this.basePath}/${this.liffId}/${WebPath.BODY_INFORMATION}`;
+    getBodyInformationPage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.BODY_INFORMATION}/${userId}`;
     }
 }

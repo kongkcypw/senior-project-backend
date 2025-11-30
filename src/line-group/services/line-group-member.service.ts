@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { IsNull } from "typeorm";
-import { LineGroupMemberRepository } from "../repositories/line-group-member.entity";
+import { LineGroupMemberRepository } from "../repositories/line-group-member.repository";
+import { UserEntity } from "src/users/entities/user.entity";
 
 @Injectable()
 export class LineGroupMemberService {
     constructor(
         private readonly lineGroupMemberRepository: LineGroupMemberRepository,
-    ) {}
+    ) { }
 
     async insertGroupMemberIfNotExist(groupId: string, lineUserId: string) {
         const existingMember = await this.lineGroupMemberRepository.findByGroupIdAndLineUserId(groupId, lineUserId);
@@ -45,5 +46,15 @@ export class LineGroupMemberService {
             where: { lineUserId: lineUserId, leaveGroupAt: IsNull() },
         });
         return groupMember?.lineGroupId || null;
+    }
+
+    async findTrainerInGroup(groupId: string): Promise<UserEntity | null> {
+        const trainerMember = await this.lineGroupMemberRepository.findTrainerInGroup(groupId);
+
+        if (!trainerMember) {
+            return null;
+        }
+
+        return trainerMember.user;
     }
 }   

@@ -6,6 +6,7 @@ import { LiffJwtStrategy } from './services/liff-jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { LineLiffModule } from 'src/external/line-liff/line-liff.module';
 import { DevAuthGuard } from './guards/dev-auth.guard';
+import { AssignedTrainerGuard } from './guards/assigned-trainer.guard';
 @Module({
   imports: [
     LineLiffModule,
@@ -15,12 +16,14 @@ import { DevAuthGuard } from './guards/dev-auth.guard';
   providers: [
     LiffJwtStrategy, 
     RolesGuard,
-    DevAuthGuard,      
+    DevAuthGuard,
+    AssignedTrainerGuard,      
   ],
   exports: [
     LiffJwtStrategy,
     PassportModule,
-    RolesGuard
+    RolesGuard,
+    AssignedTrainerGuard,
   ]
 })
 export class AuthModule {}

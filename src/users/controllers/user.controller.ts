@@ -1,16 +1,20 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { UserService } from "../services/user.service";
 import { UserInfoDto } from "../dto/user-info.dto";
 import { CreateUserDto } from "../dto/create-user.dto";
+import { getProtectedGuards } from "src/utils/guards.util";
+import { Roles } from "src/auth/decorators/roles.decorator";
+import { UserRole } from "../enums/user-role.enum";
 
-@Controller('users')
+@Controller('user')
+@UseGuards(...getProtectedGuards('liff-jwt'))
 export class UserController {
     constructor(
         private readonly usersService: UserService
     ) {}
 
-    // TODO: Change to proper route (This is just for testing)
     @Get('info/:lineUserId')
+    @Roles(UserRole.TRAINER, UserRole.TRAINEE)
     async getUserByLineUserId(
         @Param('lineUserId') id: string
     ): Promise<UserInfoDto> {
