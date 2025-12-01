@@ -9,6 +9,6 @@ export class UserPhysiqueHistoryRepository extends Repository<UserPhysiqueHistor
     }
 
     async findByLineUserId(lineUserId: string): Promise<UserPhysiqueHistoryEntity[]> {
-        return this.find({ where: { lineUserId } });
+        return this.find({ where: { lineUserId }, order: { createdAt: "DESC" } });
     }
 }
