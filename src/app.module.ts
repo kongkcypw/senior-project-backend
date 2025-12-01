@@ -8,7 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from 'db/data-source';
 import { UserModule } from './users/user.module';
 import { LineGroupModule } from './line-group/line-group.module';
-import { NotificationModule } from './notification/notification.module';
 import { HttpModule } from '@nestjs/axios';
 import { LineMessagingApiModule } from './external/line-messaging-api/line-messaging-api.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -33,7 +32,6 @@ import { LineLiffModule } from './external/line-liff/line-liff.module';
     UserModule,
     AuthModule,
     LineGroupModule,
-    NotificationModule,
     NutritionModule
   ],
   controllers: [AppController],

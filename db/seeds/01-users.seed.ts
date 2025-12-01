@@ -27,9 +27,20 @@ export class MockUsers {
         updatedAt: new Date(),
     };
 
+    static readonly TRAINEE_USER_003: UserEntity = {
+        id: 2,
+        lineUserId: 'Ue2589f779cb7eb3107afcb35b9921bc2',
+        displayName: 'Latif Danai',
+        role: UserRole.TRAINEE,
+        pictureUrl: 'https://sprofile.line-scdn.net/0hxxN63ENiJ1djTze5Gd1ZKBMfJD1APn5FRis9NlcfcTJXKDUIT3puYgJLfWdXLzIGGi1hNVZOeTNvXFAxfRnbY2R_emZfdmAJTCpvuA',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
     static readonly Users = [
         this.TRAINER_USER_001,
         this.TRAINEE_USER_002,
+        this.TRAINEE_USER_003,
     ]
 }
 

@@ -23,6 +23,7 @@ import { AssignedTrainerGuard } from './guards/assigned-trainer.guard';
     LiffJwtStrategy,
     PassportModule,
     RolesGuard,
+    DevAuthGuard,
     AssignedTrainerGuard,
   ]
 })

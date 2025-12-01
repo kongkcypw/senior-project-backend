@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity';
-import { NotificationScheduleEntity } from 'src/notification/entities/notification-schedule.entity';
+import { NutritionNotificationTimeEntity } from './nutrition-notification-time.entity';
 
 @Entity('nutrition_plan')
 export class NutritionPlanEntity {
@@ -25,9 +25,6 @@ export class NutritionPlanEntity {
   @Column({ name: 'need_notificiation', type: 'boolean', nullable: false })
   needNotification: boolean;
 
-  @Column({ name: 'notification_schedule_id', type: 'integer', nullable: false })
-  notificationScheduleId: number;
-
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
@@ -38,7 +35,6 @@ export class NutritionPlanEntity {
   @JoinColumn({ name: 'line_user_id', referencedColumnName: 'lineUserId' })
   user: UserEntity;
 
-  @ManyToOne(() => NotificationScheduleEntity, (schedule) => schedule.nutritionPlan, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'notification_schedule_id' })
-  notificationSchedule: NotificationScheduleEntity;
+  @OneToMany(() => NutritionNotificationTimeEntity, (time) => time.nutritionPlan)
+  notificationTimes: NutritionNotificationTimeEntity[];
 }
