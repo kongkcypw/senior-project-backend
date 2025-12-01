@@ -36,7 +36,8 @@ export class NutritionPlanDto {
         dto.notificationTimes = entity.notificationTimes.map((notification: any) => ({
             id: notification.id,
             nutritionPlanId: notification.nutritionPlanId,
-            sendAt: notification.sendAt,
+            // Use substring to convert "HH:mm:ss" to "HH:mm"
+            sendAt: notification.sendAt.substring(0, 5)
         }));
         return dto;
     }
@@ -51,5 +52,16 @@ export class NutritionPlanDto {
         dto.needNotification = false;
         dto.notificationTimes = [];
         return dto;
+    }
+
+    static toEntityWithoutNotificationTimes(dto: NutritionPlanDto): NutritionPlanEntity {
+        const entity = new NutritionPlanEntity();
+        entity.lineUserId = dto.line_user_id;
+        entity.totalCalories = dto.totalCalories;
+        entity.protein = dto.protein;
+        entity.carbohydrate = dto.carbohydrate;
+        entity.fat = dto.fat;
+        entity.needNotification = dto.needNotification;
+        return entity;
     }
 }

@@ -3,8 +3,8 @@ import { NutritionPlanEntity } from "../entities/nutrition-plan.entity";
 import { DataSource, Repository } from "typeorm";
 
 @Injectable()
-export class NutritionPlanRepository extends Repository<NutritionPlanEntity>  {
-    constructor(private datasource: DataSource){
+export class NutritionPlanRepository extends Repository<NutritionPlanEntity> {
+    constructor(private datasource: DataSource) {
         super(NutritionPlanEntity, datasource.createEntityManager());
     }
 
@@ -13,5 +13,21 @@ export class NutritionPlanRepository extends Repository<NutritionPlanEntity>  {
             .where("nutritionPlan.lineUserId = :lineUserId", { lineUserId })
             .leftJoinAndSelect("nutritionPlan.notificationTimes", "notificationTime")
             .getOne();
+    }
+
+    /**
+     * Finds a plan by lineUserId and updates it, or inserts it if not found.
+     * Returns the fully saved/updated entity.
+     */
+    async upsertNutritionPlan(nutritionPlan: NutritionPlanEntity): Promise<NutritionPlanEntity> {
+        const existingPlan = await this.findOne({
+            where: { lineUserId: nutritionPlan.lineUserId }
+        });
+        if (existingPlan) {
+            const mergedPlan = this.merge(existingPlan, nutritionPlan);
+            return await this.save(mergedPlan);
+        } else {
+            return await this.save(nutritionPlan);
+        }
     }
 }

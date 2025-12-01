@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { UserRole } from "src/users/enums/user-role.enum";
 import { getProtectedGuards } from "src/utils/guards.util";
@@ -18,5 +18,14 @@ export class NutritionPlanController {
         @Param('lineUserId') lineUserId: string
     ) : Promise<NutritionPlanDto | null> {
         return this.nutritionPlanService.getNutritionPlanByLineUserId(lineUserId);
+    }
+
+    @Post(':lineUserId')
+    @Roles(UserRole.TRAINER, UserRole.TRAINEE)
+    async createOrUpdateNutritionPlan(
+        @Param('lineUserId') lineUserId: string,
+        @Body() nutritionPlanDto: NutritionPlanDto
+    ): Promise<void> {
+        return this.nutritionPlanService.createOrUpdateNutritionPlan(nutritionPlanDto);
     }
 }
