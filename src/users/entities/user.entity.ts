@@ -5,6 +5,8 @@ import { MealHistoryEntity } from '../../nutrition/entities/meal-history.entity'
 import { NutritionPlanEntity } from '../../nutrition/entities/nutrition-plan.entity';
 import { UserPhysiqueHistoryEntity } from './user-physique-history.entity';
 import { UserRelationshipEntity } from './user-relationships.entity';
+import { WorkoutProgramPlanEntity } from 'src/workout/entities/workout-program-plan.entity';
+import { WorkoutHistoryEntity } from 'src/workout/entities/workout-history.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -51,4 +53,13 @@ export class UserEntity {
   // Relationships where this user is the TRAINER
   @OneToMany(() => UserRelationshipEntity, (relationship) => relationship.trainer)
   trainerRelationships?: UserRelationshipEntity[];
+
+  @OneToMany(() => WorkoutProgramPlanEntity, (plan) => plan.trainee)
+  traineeProgramPlans?: WorkoutProgramPlanEntity[];
+
+  @OneToMany(() => WorkoutProgramPlanEntity, (plan) => plan.trainer)
+  trainerProgramPlans?: WorkoutProgramPlanEntity[];
+
+  @OneToMany(() => WorkoutHistoryEntity, (history) => history.user)
+  workoutHistories?: WorkoutHistoryEntity[];
 }

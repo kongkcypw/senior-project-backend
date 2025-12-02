@@ -15,6 +15,7 @@ import { NutritionModule } from './nutrition/nutrition.module';
 import { CloudflareModule } from './external/cloudflare/cloudflare.module';
 import { AuthModule } from './auth/auth.module';
 import { LineLiffModule } from './external/line-liff/line-liff.module';
+import { WorkoutModule } from './workout/workout.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { LineLiffModule } from './external/line-liff/line-liff.module';
     UserModule,
     AuthModule,
     LineGroupModule,
-    NutritionModule
+    NutritionModule,
+    WorkoutModule,
   ],
   controllers: [AppController],
   providers: [AppService],
