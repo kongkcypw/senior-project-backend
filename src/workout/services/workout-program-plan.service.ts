@@ -37,13 +37,31 @@ export class WorkoutProgramPlanService {
 
     async getProgramPlanByPlanId(programPlanId: number): Promise<WorkoutProgramPlanDto | null> {
         const plan = await this.workoutProgramPlanRepository.findFullProgramByProgramPlanId(programPlanId);
-
         if (!plan) {
             return null;
         }
-
         const sortedPlan = await this.sortDayDefinitions(plan);
-
         return WorkoutProgramPlanDto.fromEntityToDto(sortedPlan);
+    }
+
+    async getProgramPlanByLineUserIdTrainee(lineUserId: string): Promise<WorkoutProgramPlanDto[]> {
+        const plans = await this.workoutProgramPlanRepository.findFullProgramByLineUserIdTrainee(lineUserId);
+        const sortedPlansPromises = plans.map(async (plan) => {
+            return this.sortDayDefinitions(plan);
+        });
+        const sortedPlans = await Promise.all(sortedPlansPromises);
+        return sortedPlans.map(plan => WorkoutProgramPlanDto.fromEntityToDto(plan));
+    }
+
+    async createProgramPlan(name: string, lineUserIdTrainee: string, lineUserIdTrainer: string): Promise<WorkoutProgramPlanDto> {
+        const newPlan = this.workoutProgramPlanRepository.create({
+            name,
+            lineUserIdTrainee,
+            lineUserIdTrainer,
+            dayDefinitions: [],
+            scheduleItems: [],
+        });
+        const savedPlan = await this.workoutProgramPlanRepository.save(newPlan);
+        return WorkoutProgramPlanDto.fromEntityToDto(savedPlan);
     }
 }

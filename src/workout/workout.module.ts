@@ -9,12 +9,15 @@ import { WorkoutScheduleItemRepository } from "./repositories/workout-schedule-i
 import { WorkoutHistoryService } from "./services/workout-history.service";
 import { WorkoutProgramPlanService } from "./services/workout-program-plan.service";
 import { UserModule } from "src/users/user.module";
+import { WorkoutDayDefinitionService } from "./services/workout-day-definition.service";
+import { WorkoutDayDefinitionController } from "./controllers/workout-day-definition.controller";
 
 @Module({
     imports: [UserModule],
     controllers: [
         WorkoutHistoryController,
         WorkoutProgramPlanController,
+        WorkoutDayDefinitionController,
     ],
     providers: [
         WorkoutDayDefinitionRepository,
@@ -24,6 +27,7 @@ import { UserModule } from "src/users/user.module";
         WorkoutScheduleItemRepository,
         WorkoutHistoryService,
         WorkoutProgramPlanService,
+        WorkoutDayDefinitionService,
     ],
     exports: [],
 })

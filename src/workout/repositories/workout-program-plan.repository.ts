@@ -9,11 +9,11 @@ export class WorkoutProgramPlanRepository extends Repository<WorkoutProgramPlanE
     }
 
     /**
- * Retrieves the complete workout program plan, including all associated day definitions,
- * exercises, and scheduling items.
- * @param programPlanId The ID of the program plan to retrieve.
- * @returns The full WorkoutProgramPlanEntity with eagerly loaded relations.
- */
+     * Retrieves the complete workout program plan, including all associated day definitions,
+     * exercises, and scheduling items.
+     * @param programPlanId The ID of the program plan to retrieve.
+     * @returns The full WorkoutProgramPlanEntity with eagerly loaded relations.
+     */
     async findFullProgramByProgramPlanId(programPlanId: number): Promise<WorkoutProgramPlanEntity | null> {
         return this.createQueryBuilder('plan')
             .leftJoinAndSelect('plan.dayDefinitions', 'dayDef')
@@ -22,5 +22,21 @@ export class WorkoutProgramPlanRepository extends Repository<WorkoutProgramPlanE
             .where('plan.id = :id', { id: programPlanId })
             .orderBy('exerciseDetail.orderInDay', 'ASC')
             .getOne();
+    }
+
+    /**
+     * Retrieves the complete workout program plan, including all associated day definitions,
+     * exercises, and scheduling items.
+     * @param programPlanId The ID of the program plan to retrieve.
+     * @returns The full WorkoutProgramPlanEntity with eagerly loaded relations.
+     */
+    async findFullProgramByLineUserIdTrainee(lineUserId: string): Promise<WorkoutProgramPlanEntity[]> {
+        return this.createQueryBuilder('plan')
+            .leftJoinAndSelect('plan.dayDefinitions', 'dayDef')
+            .leftJoinAndSelect('dayDef.exerciseDetails', 'exerciseDetail')
+            .leftJoinAndSelect('plan.scheduleItems', 'scheduleItem')
+            .where('plan.lineUserIdTrainee = :lineUserIdTrainee', { lineUserIdTrainee: lineUserId })
+            .orderBy('exerciseDetail.orderInDay', 'ASC')
+            .getMany();
     }
 }
