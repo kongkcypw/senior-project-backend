@@ -8,9 +8,10 @@ import { WorkoutProgramPlanRepository } from "./repositories/workout-program-pla
 import { WorkoutScheduleItemRepository } from "./repositories/workout-schedule-item.repository";
 import { WorkoutHistoryService } from "./services/workout-history.service";
 import { WorkoutProgramPlanService } from "./services/workout-program-plan.service";
+import { UserModule } from "src/users/user.module";
 
 @Module({
-    imports: [],
+    imports: [UserModule],
     controllers: [
         WorkoutHistoryController,
         WorkoutProgramPlanController,

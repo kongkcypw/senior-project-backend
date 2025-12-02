@@ -6,4 +6,8 @@ export class WorkoutProgramPlanService {
     constructor(
         private readonly workoutProgramPlanRepository: WorkoutProgramPlanRepository,
     ) {}
+
+    async getProgramPlanByPlanId(programPlanId: number) {
+        return this.workoutProgramPlanRepository.findFullProgramByProgramPlanId(programPlanId);
+    }
 }
