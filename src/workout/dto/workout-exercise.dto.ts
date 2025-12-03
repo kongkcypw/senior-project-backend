@@ -1,32 +1,27 @@
 import { Exclude, Expose } from 'class-transformer';
+import { WorkoutExerciseSetDto } from './workout-exercise-set.dto';
 
 export class WorkoutExerciseDto {
   @Expose()
   id: number;
 
   @Expose()
-  name: string; // Renamed from exerciseName
-
-  @Expose()
-  rep: number; // Renamed from reps (and type changed to number)
-
-  @Expose()
-  set: number; // Renamed from sets
-
-  @Expose()
-  weightKg: number | null; // Renamed from prescribedWeightKg
-
-  @Expose()
-  restTimeSecond: number | null; // Renamed from restTimeSeconds
+  name: string;
 
   @Expose()
   imageUrl: string | null;
 
   @Expose()
-  orderInRoutine: number; // Renamed from orderInDay
+  orderInRoutine: number;
+
+  @Expose()
+  restTimeSecond: number | null;
+
+  @Expose()
+  sets: WorkoutExerciseSetDto[];
 
   @Exclude()
-  routineId: number; // Renamed FK (private)
+  routineId: number;
 
   @Exclude()
   createdAt: Date;

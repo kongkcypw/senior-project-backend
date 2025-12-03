@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from "@nestjs/common";
 import { getProtectedGuards } from "src/utils/guards.util";
 import { WorkoutExerciseTemplateService } from "../services/workout-exercise-template.service";
-import { WorkoutExerciseTemplateEntity } from "../entities/workout-exercise-template.entity";
+import { WorkoutExerciseTemplateDto } from "../dto/workout-exercise-template.dto";
 
 @Controller('workout-exercise-template')
 @UseGuards(...getProtectedGuards('liff-jwt'))
@@ -11,7 +11,7 @@ export class WorkoutExerciseTemplateController {
     ) { }
 
     @Get('')
-    async getAll(): Promise<WorkoutExerciseTemplateEntity[]> {
+    async getAll(): Promise<WorkoutExerciseTemplateDto[]> {
         return this.workoutExerciseTemplateService.getAll();
     }
 }

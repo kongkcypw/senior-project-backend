@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { WorkoutRoutineEntity } from './workout-routine.entity'; // Renamed import
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { WorkoutRoutineEntity } from './workout-routine.entity';
+import { WorkoutExerciseSetEntity } from './workout-exercise-set.entity';
 
 @Entity('workout_exercise')
 export class WorkoutExerciseEntity {
@@ -12,14 +13,7 @@ export class WorkoutExerciseEntity {
   @Column({ name: 'name', type: 'varchar', nullable: false })
   name: string;
 
-  @Column({ name: 'rep', type: 'integer', nullable: false })
-  rep: number;
-
-  @Column({ name: 'set', type: 'integer', nullable: false })
-  set: number;
-
-  @Column({ name: 'weight_kg', type: 'real', nullable: true })
-  weightKg: number | null;
+  // --- REMOVED fixed prescription columns (rep, set, weightKg) ---
 
   @Column({ name: 'rest_time_second', type: 'integer', nullable: true })
   restTimeSecond: number | null;
@@ -39,4 +33,8 @@ export class WorkoutExerciseEntity {
   @ManyToOne(() => WorkoutRoutineEntity, (routine) => routine.exercises, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'routine_id' })
   workoutRoutine: WorkoutRoutineEntity;
+
+  // NEW RELATIONSHIP: Linking to the individual set prescriptions
+  @OneToMany(() => WorkoutExerciseSetEntity, (setDetail) => setDetail.workoutExercise)
+  setDetails?: WorkoutExerciseSetEntity[];
 }

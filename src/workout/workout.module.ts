@@ -16,6 +16,7 @@ import { WorkoutExerciseTemplateRepository } from "./repositories/workout-exerci
 import { WorkoutRoutineTemplateRepository } from "./repositories/workout-routine-template.repository";
 import { WorkoutRoutineTemplateService } from "./services/workout-routine-template.service";
 import { WorkoutRoutineTemplateController } from "./controllers/workout-routine-template.controller";
+import { WorkoutExerciseSetRepository } from "./repositories/workout-exercise-set.repository";
 
 @Module({
     imports: [UserModule],
@@ -38,6 +39,7 @@ import { WorkoutRoutineTemplateController } from "./controllers/workout-routine-
         WorkoutRoutineTemplateRepository,
         WorkoutExerciseTemplateService,
         WorkoutRoutineTemplateService,
+        WorkoutExerciseSetRepository,
     ],
     exports: [],
 })
