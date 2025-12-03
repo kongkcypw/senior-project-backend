@@ -8,20 +8,15 @@ export class InsertWorkoutExerciseTemplate1764783513524 implements MigrationInte
 
         // Data derived directly from your MockWorkoutExerciseTemplates seed file
         const templateData = [
-            // routine_template_id: 1 (Push)
-            { id: 1, routine_template_id: 1, name: 'Barbell Bench Press', rest_time_second: 120, image_url: 'https://www.shutterstock.com/shutterstock/videos/1017371524/thumb/1.jpg?ip=x480', order_in_routine: 1 },
-            { id: 2, routine_template_id: 1, name: 'Incline Dumbbell Press', rest_time_second: 90, image_url: 'https://static.strengthlevel.com/images/exercises/incline-dumbbell-bench-press/incline-dumbbell-bench-press-800.jpg', order_in_routine: 2 },
-            { id: 3, routine_template_id: 1, name: 'Dumbbell Lateral Raise', rest_time_second: 60, image_url: 'https://cdn.shopify.com/s/files/1/0754/7279/8002/files/Blog-dumbbells_3.webp?v=1739252606', order_in_routine: 3 },
-
-            // routine_template_id: 2 (Pull)
-            { id: 4, routine_template_id: 2, name: 'Lat Pulldowns', rest_time_second: 120, image_url: 'https://s3assets.skimble.com/assets/2900765/image_iphone.jpg', order_in_routine: 1 },
-            { id: 5, routine_template_id: 2, name: 'T-Bar/Barbell Row', rest_time_second: 90, image_url: 'http://example.com/images/t_bar_row.jpg', order_in_routine: 2 },
-            { id: 6, routine_template_id: 2, name: 'Face Pulls', rest_time_second: 60, image_url: 'https://s3assets.skimble.com/assets/2591179/image_full.jpg', order_in_routine: 3 },
-
-            // routine_template_id: 3 (Legs)
-            { id: 7, routine_template_id: 3, name: 'Barbell Back Squat', rest_time_second: 180, image_url: 'https://cdn.shopify.com/s/files/1/1497/9682/files/2_cfb27f9d-2dea-40d7-9229-5899794c8f31.jpg?v=1653566234', order_in_routine: 1 },
-            { id: 8, routine_template_id: 3, name: 'Romanian Deadlift (RDL)', rest_time_second: 90, image_url: 'https://cdn.shopify.com/s/files/1/1497/9682/files/2_cfb27f9d-2dea-40d7-9229-5899794c8f31.jpg?v=1653566234', order_in_routine: 2 },
-            // Standalone Exercises (Library)
+            { id: 1, routine_template_id: null, name: 'Barbell Bench Press', rest_time_second: 120, image_url: 'https://www.shutterstock.com/shutterstock/videos/1017371524/thumb/1.jpg?ip=x480', order_in_routine: 1 },
+            { id: 2, routine_template_id: null, name: 'Incline Dumbbell Press', rest_time_second: 90, image_url: 'https://static.strengthlevel.com/images/exercises/incline-dumbbell-bench-press/incline-dumbbell-bench-press-800.jpg', order_in_routine: 2 },
+            { id: 3, routine_template_id: null, name: 'Dumbbell Lateral Raise', rest_time_second: 60, image_url: 'https://cdn.shopify.com/s/files/1/0754/7279/8002/files/Blog-dumbbells_3.webp?v=1739252606', order_in_routine: 3 },
+            { id: 4, routine_template_id: null, name: 'Lat Pulldowns', rest_time_second: 120, image_url: 'https://s3assets.skimble.com/assets/2900765/image_iphone.jpg', order_in_routine: 1 },
+            { id: 5, routine_template_id: null, name: 'T-Bar/Barbell Row', rest_time_second: 90, image_url: 'http://example.com/images/t_bar_row.jpg', order_in_routine: 2 },
+            { id: 6, routine_template_id: null, name: 'Face Pulls', rest_time_second: 60, image_url: 'https://s3assets.skimble.com/assets/2591179/image_full.jpg', order_in_routine: 3 },
+            { id: 7, routine_template_id: null, name: 'Barbell Back Squat', rest_time_second: 180, image_url: 'https://cdn.shopify.com/s/files/1/1497/9682/files/2_cfb27f9d-2dea-40d7-9229-5899794c8f31.jpg?v=1653566234', order_in_routine: 1 },
+            { id: 7, routine_template_id: null, name: 'Barbell Back Squat', rest_time_second: 180, image_url: 'https://cdn.shopify.com/s/files/1/1497/9682/files/2_cfb27f9d-2dea-40d7-9229-5899794c8f31.jpg?v=1653566234', order_in_routine: 1 },
+            { id: 8, routine_template_id: null, name: 'Romanian Deadlift (RDL)', rest_time_second: 90, image_url: 'https://cdn.shopify.com/s/files/1/1497/9682/files/2_cfb27f9d-2dea-40d7-9229-5899794c8f31.jpg?v=1653566234', order_in_routine: 2 },
             { id: 9, routine_template_id: null, name: 'Hack Squat', rest_time_second: 90, image_url: 'https://s3assets.skimble.com/assets/2759493/image_full.jpg', order_in_routine: null },
             { id: 10, routine_template_id: null, name: 'Seated Leg Curl', rest_time_second: 60, image_url: 'https://static.strengthlevel.com/images/illustrations/seated-leg-curl-1000x1000.jpg', order_in_routine: null },
             { id: 11, routine_template_id: null, name: 'Cable Crunch (Abs)', rest_time_second: 60, image_url: 'https://www.hevyapp.com/wp-content/uploads/01751201-Cable-Kneeling-Crunch_Waist.jpg', order_in_routine: null },
