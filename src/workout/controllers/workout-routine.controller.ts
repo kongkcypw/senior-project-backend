@@ -1,6 +1,7 @@
-import { Controller, Delete, Param, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Param, Post, UseGuards } from "@nestjs/common";
 import { getProtectedGuards } from "src/utils/guards.util";
 import { WorkoutRoutineService } from "../services/workout-routine.service";
+import { WorkoutRoutineEntity } from "../entities/workout-routine.entity";
 
 
 @Controller('workout-routine')
@@ -15,5 +16,12 @@ export class WorkoutRoutineController {
         @Param('id') id: number,
     ): Promise<void> {
         return this.workoutRoutineService.deleteById(id);
+    }
+
+    @Post('')
+    async create(
+        @Body() workoutRoutine: WorkoutRoutineEntity
+    ): Promise<WorkoutRoutineEntity> {
+        return this.workoutRoutineService.createRoutineWithoutExercises(workoutRoutine.programId, workoutRoutine.name);
     }
 }

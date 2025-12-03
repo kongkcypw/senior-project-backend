@@ -10,6 +10,12 @@ import { WorkoutProgramService } from "./services/workout-program.service";
 import { UserModule } from "src/users/user.module";
 import { WorkoutRoutineController } from "./controllers/workout-routine.controller";
 import { WorkoutRoutineService } from "./services/workout-routine.service";
+import { WorkoutExerciseTemplateController } from "./controllers/workout-exercise-template.controller";
+import { WorkoutExerciseTemplateService } from "./services/workout-exercise-template.service";
+import { WorkoutExerciseTemplateRepository } from "./repositories/workout-exercise-template.repository";
+import { WorkoutRoutineTemplateRepository } from "./repositories/workout-routine-template.repository";
+import { WorkoutRoutineTemplateService } from "./services/workout-routine-template.service";
+import { WorkoutRoutineTemplateController } from "./controllers/workout-routine-template.controller";
 
 @Module({
     imports: [UserModule],
@@ -17,6 +23,8 @@ import { WorkoutRoutineService } from "./services/workout-routine.service";
         WorkoutHistoryController,
         WorkoutProgramController,
         WorkoutRoutineController,
+        WorkoutExerciseTemplateController,
+        WorkoutRoutineTemplateController,
     ],
     providers: [
         WorkoutRoutineRepository,
@@ -26,6 +34,10 @@ import { WorkoutRoutineService } from "./services/workout-routine.service";
         WorkoutHistoryService,
         WorkoutProgramService,
         WorkoutRoutineService,
+        WorkoutExerciseTemplateRepository,
+        WorkoutRoutineTemplateRepository,
+        WorkoutExerciseTemplateService,
+        WorkoutRoutineTemplateService,
     ],
     exports: [],
 })
