@@ -1,31 +1,31 @@
 import { Module } from "@nestjs/common";
-import { WorkoutProgramPlanController } from "./controllers/workout-program-plan.controller";
+import { WorkoutProgramController } from "./controllers/workout-program.controller";
 import { WorkoutHistoryController } from "./controllers/workout-history.controller";
-import { WorkoutDayDefinitionRepository } from "./repositories/workout-day-definition.repository";
-import { WorkoutExerciseDetailRepository } from "./repositories/workout-exercise-detail.repository";
+import { WorkoutRoutineRepository } from "./repositories/workout-routine.repository";
+import { WorkoutExerciseRepository } from "./repositories/workout-exercise.repository";
 import { WorkoutHistoryRepository } from "./repositories/workout-history.repository";
-import { WorkoutProgramPlanRepository } from "./repositories/workout-program-plan.repository";
+import { WorkoutProgramPlanRepository } from "./repositories/workout-program.repository";
 import { WorkoutHistoryService } from "./services/workout-history.service";
-import { WorkoutProgramPlanService } from "./services/workout-program-plan.service";
+import { WorkoutProgramService } from "./services/workout-program.service";
 import { UserModule } from "src/users/user.module";
-import { WorkoutDayDefinitionService } from "./services/workout-day-definition.service";
-import { WorkoutDayDefinitionController } from "./controllers/workout-day-definition.controller";
+import { WorkoutRoutineController } from "./controllers/workout-routine.controller";
+import { WorkoutRoutineService } from "./services/workout-routine.service";
 
 @Module({
     imports: [UserModule],
     controllers: [
         WorkoutHistoryController,
-        WorkoutProgramPlanController,
-        WorkoutDayDefinitionController,
+        WorkoutProgramController,
+        WorkoutRoutineController,
     ],
     providers: [
-        WorkoutDayDefinitionRepository,
-        WorkoutExerciseDetailRepository,
+        WorkoutRoutineRepository,
+        WorkoutExerciseRepository,
         WorkoutHistoryRepository,
         WorkoutProgramPlanRepository,
         WorkoutHistoryService,
-        WorkoutProgramPlanService,
-        WorkoutDayDefinitionService,
+        WorkoutProgramService,
+        WorkoutRoutineService,
     ],
     exports: [],
 })

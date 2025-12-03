@@ -1,16 +1,17 @@
-import { WorkoutProgramPlanEntity } from "src/workout/entities/workout-program-plan.entity";
 import { MockUsers } from "./01-users.seed";
 import { Seeder } from "typeorm-extension";
 import { DataSource } from "typeorm";
+import { WorkoutProgramEntity } from "src/workout/entities/workout-program.entity";
 
-type WorkoutProgramPlanSeed = Omit<WorkoutProgramPlanEntity, 'createdAt' | 'updatedAt' | 'trainee' | 'trainer' | 'dayDefinitions'>;
+type WorkoutProgramSeed = Omit<WorkoutProgramEntity, 'createdAt' | 'updatedAt' | 'trainee' | 'trainer' | 'routines'>;
 
-export class MockWorkoutProgramPlans {
-    static readonly PPL_TEMPLATE_001: WorkoutProgramPlanSeed = {
+export class MockWorkoutPrograms {
+    static readonly PPL_TEMPLATE_001: WorkoutProgramSeed = {
         id: 1,
         name: 'Push Pull Legs (PPL) Template',
         lineUserIdTrainee: MockUsers.TRAINEE_USER_003.lineUserId, // Nullable for template
         lineUserIdTrainer: MockUsers.TRAINER_USER_001.lineUserId,
+        orderInProgram: 1,
     };
 
     static readonly WorkoutProgramPlans = [
@@ -18,12 +19,12 @@ export class MockWorkoutProgramPlans {
     ]
 }
 
-export default class MockWorkoutProgramPlanSeed implements Seeder {
+export default class MockWorkoutProgramSeed implements Seeder {
     async run(dataSource: DataSource): Promise<void> {
-        const repository = dataSource.getRepository(WorkoutProgramPlanEntity);
+        const repository = dataSource.getRepository(WorkoutProgramEntity);
         await repository.query(
             `TRUNCATE "${repository.metadata.tableName}" RESTART IDENTITY CASCADE;`
         )
-        await repository.save(MockWorkoutProgramPlans.WorkoutProgramPlans);
+        await repository.save(MockWorkoutPrograms.WorkoutProgramPlans);
     }
 }

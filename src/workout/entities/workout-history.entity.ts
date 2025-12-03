@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity';
-import { WorkoutDayDefinitionEntity } from './workout-day-definition.entity';
+import { WorkoutRoutineEntity } from './workout-routine.entity'; // Renamed import
 
 @Entity('workout_history')
 export class WorkoutHistoryEntity {
@@ -10,8 +10,8 @@ export class WorkoutHistoryEntity {
   @Column({ name: 'line_user_id', type: 'varchar', nullable: false })
   lineUserId: string;
 
-  @Column({ name: 'workout_day_definition_id', type: 'integer', nullable: false })
-  workoutDayDefinitionId: number;
+  @Column({ name: 'routine_id', type: 'integer', nullable: false })
+  routineId: number;
 
   @Column({ name: 'performed_at', type: 'timestamp', nullable: false })
   performedAt: Date;
@@ -38,7 +38,7 @@ export class WorkoutHistoryEntity {
   @JoinColumn({ name: 'line_user_id', referencedColumnName: 'lineUserId' })
   user: UserEntity;
 
-  @ManyToOne(() => WorkoutDayDefinitionEntity, (day) => day.workoutHistories, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'workout_day_definition_id' })
-  workoutDayDefinition: WorkoutDayDefinitionEntity;
+  @ManyToOne(() => WorkoutRoutineEntity, (routine) => routine.workoutHistories, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'routine_id' })
+  workoutRoutine: WorkoutRoutineEntity;
 }
