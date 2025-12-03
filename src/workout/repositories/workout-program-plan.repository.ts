@@ -18,7 +18,6 @@ export class WorkoutProgramPlanRepository extends Repository<WorkoutProgramPlanE
         return this.createQueryBuilder('plan')
             .leftJoinAndSelect('plan.dayDefinitions', 'dayDef')
             .leftJoinAndSelect('dayDef.exerciseDetails', 'exerciseDetail')
-            .leftJoinAndSelect('plan.scheduleItems', 'scheduleItem')
             .where('plan.id = :id', { id: programPlanId })
             .orderBy('exerciseDetail.orderInDay', 'ASC')
             .getOne();
@@ -34,7 +33,6 @@ export class WorkoutProgramPlanRepository extends Repository<WorkoutProgramPlanE
         return this.createQueryBuilder('plan')
             .leftJoinAndSelect('plan.dayDefinitions', 'dayDef')
             .leftJoinAndSelect('dayDef.exerciseDetails', 'exerciseDetail')
-            .leftJoinAndSelect('plan.scheduleItems', 'scheduleItem')
             .where('plan.lineUserIdTrainee = :lineUserIdTrainee', { lineUserIdTrainee: lineUserId })
             .orderBy('exerciseDetail.orderInDay', 'ASC')
             .getMany();

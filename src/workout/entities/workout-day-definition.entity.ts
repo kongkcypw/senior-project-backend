@@ -14,8 +14,7 @@ export class WorkoutDayDefinitionEntity {
   @Column({ name: 'day_name', type: 'varchar', nullable: false })
   dayName: string;
 
-  @Column({ name: 'notes', type: 'text', nullable: true })
-  notes: string | null;
+  // Removed @Column({ name: 'notes', type: 'text', nullable: true }) as per migration
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

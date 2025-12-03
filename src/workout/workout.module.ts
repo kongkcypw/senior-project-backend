@@ -5,7 +5,6 @@ import { WorkoutDayDefinitionRepository } from "./repositories/workout-day-defin
 import { WorkoutExerciseDetailRepository } from "./repositories/workout-exercise-detail.repository";
 import { WorkoutHistoryRepository } from "./repositories/workout-history.repository";
 import { WorkoutProgramPlanRepository } from "./repositories/workout-program-plan.repository";
-import { WorkoutScheduleItemRepository } from "./repositories/workout-schedule-item.repository";
 import { WorkoutHistoryService } from "./services/workout-history.service";
 import { WorkoutProgramPlanService } from "./services/workout-program-plan.service";
 import { UserModule } from "src/users/user.module";
@@ -24,7 +23,6 @@ import { WorkoutDayDefinitionController } from "./controllers/workout-day-defini
         WorkoutExerciseDetailRepository,
         WorkoutHistoryRepository,
         WorkoutProgramPlanRepository,
-        WorkoutScheduleItemRepository,
         WorkoutHistoryService,
         WorkoutProgramPlanService,
         WorkoutDayDefinitionService,
@@ -32,4 +30,4 @@ import { WorkoutDayDefinitionController } from "./controllers/workout-day-defini
     exports: [],
 })
 
-export class WorkoutModule {}
+export class WorkoutModule { }

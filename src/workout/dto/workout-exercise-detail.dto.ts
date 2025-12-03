@@ -8,13 +8,12 @@ export class WorkoutExerciseDetailDto {
   exerciseName: string;
 
   @Expose()
-  reps: string;
+  reps: number; // Changed type from string to number
 
   @Expose()
   sets: number;
 
-  // Rename to clarify
-  @Expose({ name: 'prescribedWeightKg' })
+  @Expose()
   weightKg: number | null;
 
   @Expose()
@@ -26,7 +25,6 @@ export class WorkoutExerciseDetailDto {
   @Expose()
   orderInDay: number;
 
-  // Exclude internal foreign key and timestamps
   @Exclude()
   workoutDayDefinitionId: number;
 

@@ -9,22 +9,19 @@ export class MockWorkoutDayDefinitions {
     static readonly DAY_PUSH_001: WorkoutDayDefinitionSeed = {
         id: 1,
         programPlanId: MockWorkoutProgramPlans.PPL_TEMPLATE_001.id,
-        dayName: 'Push Day (Chest, Shoulders, Triceps)',
-        notes: 'Focus on compound lifts followed by isolation movements.',
+        dayName: 'Push Day',
     };
 
     static readonly DAY_PULL_002: WorkoutDayDefinitionSeed = {
         id: 2,
         programPlanId: MockWorkoutProgramPlans.PPL_TEMPLATE_001.id,
-        dayName: 'Pull Day (Back, Biceps)',
-        notes: 'Heavy back volume, incorporating both vertical and horizontal pulls.',
+        dayName: 'Pull Day',
     };
 
     static readonly DAY_LEGS_003: WorkoutDayDefinitionSeed = {
         id: 3,
         programPlanId: MockWorkoutProgramPlans.PPL_TEMPLATE_001.id,
-        dayName: 'Leg Day (Quads, Hams, Calves)',
-        notes: 'Squat focus, followed by hamstring and calf work.',
+        dayName: 'Leg Day',
     };
 
     static readonly WorkoutDayDefinitions = [

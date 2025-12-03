@@ -8,15 +8,10 @@ export class WorkoutDayDefinitionDto {
   @Expose()
   dayName: string;
 
-  @Expose()
-  notes: string | null;
-
-  // Use @Type to ensure class-transformer transforms the nested array of entities into DTOs
   @Expose({ name: 'exerciseDetails' })
   @Type(() => WorkoutExerciseDetailDto)
   exercises: WorkoutExerciseDetailDto[];
 
-  // Exclude internal foreign key and timestamps
   @Exclude()
   programPlanId: number;
 

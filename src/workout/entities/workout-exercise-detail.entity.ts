@@ -12,14 +12,14 @@ export class WorkoutExerciseDetailEntity {
   @Column({ name: 'exercise_name', type: 'varchar', nullable: false })
   exerciseName: string;
 
-  @Column({ name: 'reps', type: 'varchar', nullable: false })
-  reps: string;
+  @Column({ name: 'reps', type: 'integer', nullable: false })
+  reps: number; // Changed from 'varchar' to 'number'
 
   @Column({ name: 'sets', type: 'integer', nullable: false })
   sets: number;
 
-  @Column({ name: 'prescribed_weight_kg', type: 'float', nullable: true })
-  prescribedWeightKg: number | null;
+  @Column({ name: 'weight_kg', type: 'real', nullable: true })
+  weightKg: number | null; // Renamed from prescribedWeightKg
 
   @Column({ name: 'rest_time_seconds', type: 'integer', nullable: true })
   restTimeSeconds: number | null;
