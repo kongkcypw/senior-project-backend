@@ -2,4 +2,5 @@ export enum DialogflowIntentName {
     TRIGGER = 'Trigger',
     TEST_PROFILE = 'Test Profile',
     TRIGGER_CALORIES = 'Trigger - Calories',
+    TRIGGER_MANAGE_PROGRAM = 'Trigger - Manage Program',
 }

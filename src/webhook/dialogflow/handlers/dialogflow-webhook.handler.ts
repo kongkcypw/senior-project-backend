@@ -5,6 +5,7 @@ import { MessageEvent } from "@line/bot-sdk";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 import { TestProfileMessages } from "../messages/test-profile.message";
+import { ManageProgramHandler } from "./manage-program.handler";
 
 @Injectable()
 export class DialogflowWebhookHandler {
@@ -12,6 +13,7 @@ export class DialogflowWebhookHandler {
         private readonly triggerHandler: TriggerHandler,
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly manageProgramHandler: ManageProgramHandler
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent): Promise<any> {
@@ -22,8 +24,8 @@ export class DialogflowWebhookHandler {
             return this.triggerHandler.handle(event);
         }
 
-        if (intentName === DialogflowIntentName.TRIGGER_CALORIES) {
-            return this.triggerHandler.handle(event);
+        if (intentName === DialogflowIntentName.TRIGGER_MANAGE_PROGRAM) {
+            return this.manageProgramHandler.handle(event);
         }
 
         if (intentName === DialogflowIntentName.TEST_PROFILE) {

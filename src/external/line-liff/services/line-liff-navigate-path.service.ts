@@ -22,4 +22,8 @@ export class LineLiffNavigatePathService {
     getBodyInformationPage(userId: string): string {
         return `${this.basePath}/${this.liffId}/${WebPath.BODY_INFORMATION}/${userId}`;
     }
+
+    getManageProgramPage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_NUTRITION}/${userId}`;
+    }
 }

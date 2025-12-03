@@ -57,4 +57,14 @@ export class LineGroupMemberService {
 
         return trainerMember.user;
     }
+
+    async findTraineeInGroup(groupId: string): Promise<UserEntity | null> {
+        const traineeMember = await this.lineGroupMemberRepository.findTraineeInGroup(groupId);
+
+        if (!traineeMember) {
+            return null;
+        }
+
+        return traineeMember.user;
+    }
 }   
