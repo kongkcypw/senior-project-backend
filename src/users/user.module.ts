@@ -9,10 +9,12 @@ import { UserRelationshipsController } from "./controllers/user-relationships.co
 import { UserPhysiqueHistoryRepository } from "./repositories/user-physique-history.repository";
 import { UserPhysiqueHistoryService } from "./services/user-physique-history.service";
 import { LineGroupModule } from "src/line-group/line-group.module";
+import { LineMessagingApiModule } from "src/external/line-messaging-api/line-messaging-api.module";
 
 @Module({
     imports: [
         LineGroupModule,
+        LineMessagingApiModule,
     ],
     providers: [
         UserRepository,
@@ -30,4 +32,4 @@ import { LineGroupModule } from "src/line-group/line-group.module";
     exports: [UserService, UserRelationshipsService]
 })
 
-export class UserModule {}
+export class UserModule { }

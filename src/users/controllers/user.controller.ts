@@ -11,7 +11,7 @@ import { UserRole } from "../enums/user-role.enum";
 export class UserController {
     constructor(
         private readonly usersService: UserService
-    ) {}
+    ) { }
 
     @Get('info/:lineUserId')
     @Roles(UserRole.TRAINER, UserRole.TRAINEE)
@@ -27,6 +27,6 @@ export class UserController {
         @Body() body: CreateUserDto
     ): Promise<void> {
         await this.usersService.insertUserIfNotExist(body.lineUserId, body.displayName ?? null, body.role, body.pictureUrl ?? null);;
-        return ;
+        return;
     }
 }

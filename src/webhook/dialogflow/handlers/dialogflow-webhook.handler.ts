@@ -22,6 +22,10 @@ export class DialogflowWebhookHandler {
             return this.triggerHandler.handle(event);
         }
 
+        if (intentName === DialogflowIntentName.TRIGGER_CALORIES) {
+            return this.triggerHandler.handle(event);
+        }
+
         if (intentName === DialogflowIntentName.TEST_PROFILE) {
             const profileUrl = this.lineLiffNavigatePathService.navigateProfilePage;
             await this.lineMessagingApiClientService.sendReplyMessages(
