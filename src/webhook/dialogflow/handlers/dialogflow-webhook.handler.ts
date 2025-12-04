@@ -16,7 +16,7 @@ export class DialogflowWebhookHandler {
         private readonly manageProgramHandler: ManageProgramHandler
     ) { }
 
-    async handleIntent(intentName: string, event: MessageEvent): Promise<any> {
+    async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
 
         console.log('Intent detected:', intentName);
 
@@ -34,6 +34,57 @@ export class DialogflowWebhookHandler {
                 event.replyToken,
                 TestProfileMessages(profileUrl)
             );
+            return;
+        }
+
+        if (intentName === DialogflowIntentName.SAVENOTE && fulfillmentMessages && fulfillmentMessages[0].text.text) {
+            await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, [
+                {
+                    type: 'text',
+                    text: fulfillmentMessages[0].text.text[0],
+                    // quickReply: {
+                    //     items: [
+                    //         {
+                    //             type: 'action',
+                    //             action: {
+                    //                 type: 'message',
+                    //                 label: 'ข้อมูลร่างกาย',
+                    //                 text: 'ข้อมูลร่างกาย',
+                    //             },
+                    //         },
+                    //         {
+                    //             type: 'action',
+                    //             action: {
+                    //                 type: 'message',
+                    //                 label: 'ข้อมูลโภชนาการ',
+                    //                 text: 'ข้อมูลโภชนาการ',
+                    //             },
+                    //         },
+                    //         {
+                    //             type: 'action',
+                    //             action: {
+                    //                 type: 'message',
+                    //                 label: 'ข้อมูลการออกกำลังกาย',
+                    //                 text: 'ข้อมูลการออกกำลังกาย',
+                    //             }
+                    //         }
+                    //     ],
+                    // }
+                }
+            ]);
+        }
+
+        if (fulfillmentMessages && fulfillmentMessages[0].text.text) {
+            await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, [
+                {
+                    type: 'text',
+                    text: fulfillmentMessages[0].text.text[0] || '',
+                }
+            ]);
+        }
+
+        if (parameters) {
+            console.log('Parameters:', parameters);
         }
 
         return;

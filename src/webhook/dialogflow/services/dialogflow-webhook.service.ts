@@ -11,7 +11,7 @@ export class DialogflowWebhookService {
         private readonly dialogflowClientService: DialogflowClientService,
         private readonly dialogflowConfigService: DialogflowConfigService,
         private readonly dialogflowWebhookHandler: DialogflowWebhookHandler,
-    ) {}
+    ) { }
 
     async getFullfilmentTextAndReplyMessage(event: MessageEvent): Promise<void> {
 
@@ -49,8 +49,13 @@ export class DialogflowWebhookService {
                 return;
             }
 
-            if (result.intent.displayName){
-                await this.dialogflowWebhookHandler.handleIntent(result.intent.displayName, event);
+            if (result.parameters) {
+                const parameters = result.parameters.fields;
+                console.log('Extracted Parameters:', parameters);
+            }
+
+            if (result.intent.displayName) {
+                await this.dialogflowWebhookHandler.handleIntent(result.intent.displayName, event, result.fulfillmentMessages ?? undefined, result.parameters);
             }
 
         } catch (error) {

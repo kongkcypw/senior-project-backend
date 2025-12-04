@@ -15,4 +15,8 @@ export class LineMessagingApiConfigService extends BaseConfigService<string> {
     get channelAccessToken(): string {
         return this.getAsString('LINE_CHANNEL_ACCESS_TOKEN');
     }
+
+    get chatbotUserId(): string {
+        return this.getAsString('LINE_CHATBOT_USER_ID');
+    }
 }

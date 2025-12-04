@@ -12,6 +12,7 @@ import { MealHistoryService } from 'src/nutrition/services/meal-history.service'
 import { LineMessagingApiClientService } from 'src/external/line-messaging-api/services/client.service';
 import { MealDetailMessage } from '../messages/meal-detail.message';
 import { GeminiAnalyzeFoodImageResponse } from 'src/external/gemini/types/gemini-analyze-food-image-response.type';
+import { LineMessagingApiConfigService } from 'src/external/line-messaging-api/services/config.service';
 
 @Injectable()
 export class MessageEventHandler implements EventHandler<MessageEvent> {
@@ -20,6 +21,7 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     private readonly dialogflowWebhookService: DialogflowWebhookService,
     private readonly lineMessagingApiClientService: LineMessagingApiClientService,
     private readonly lineMessagingApiMessageContentService: LineMessagingApiMessageContentService,
+    private readonly lineMessagingApiConfigService: LineMessagingApiConfigService,
     private readonly cloudFlareR2Service: CloudFlareR2Service,
     private readonly geminiService: GeminiService,
     private readonly mealHistoryService: MealHistoryService,
@@ -30,13 +32,33 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     console.log('Handling Message Event:', event);
     console.log('Message Event Type:', event.message.type);
 
-    if (event.message.type === WebhookEventMessageType.TEXT) {
+    if (event.message.type === WebhookEventMessageType.IMAGE) {
+      await this.handleImageMessage(event);
+      return;
+    }
+
+    let isBotMentioned = false;
+
+    if (event.message.type === WebhookEventMessageType.TEXT && event.message.mention) {
+      for (const mentionee of event.message.mention.mentionees) {
+        if (mentionee.userId === this.lineMessagingApiConfigService.chatbotUserId) {
+          isBotMentioned = true;
+          break;
+        }
+      }
+
+      if (!isBotMentioned) {
+        console.log('Bot not mentioned in the message. Skipping further processing.');
+        return;
+      }
+
+      console.log('Bot mentioned in the message. Proceeding with Dialogflow processing.');
       await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event);
     }
 
-    if (event.message.type === WebhookEventMessageType.IMAGE) {
-      await this.handleImageMessage(event);
-    }
+    // if (event.message.type === WebhookEventMessageType.TEXT) {
+    //   await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event);
+    // }
 
   }
 
