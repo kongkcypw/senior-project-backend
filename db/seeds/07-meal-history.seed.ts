@@ -1,13 +1,14 @@
 import { MealHistoryEntity } from "src/nutrition/entities/meal-history.entity";
 import { DataSource } from "typeorm";
 import { Seeder } from "typeorm-extension";
+import { MockUsers } from "./01-users.seed";
 
 type MealHistorySeedType = Omit<MealHistoryEntity, 'updatedAt' | 'user'>
 
 export class MockMealHistory {
     static readonly MEAL_HISTORY_001: MealHistorySeedType = {
         id: 1,
-        lineUserId: 'U2201192bbe85b768b35cf892b8325443',
+        lineUserId: MockUsers.TRAINEE_USER_003.lineUserId,
         imageUrl: "https://www.lemon8-app.com/seo/image?item_id=7288567503658238466&index=0&sign=28bed1477283131a0521d9af5cc0ba70",
         foodTitle: 'หมูผัดพริกแกงไข่ดาว',
         calories: 550,
