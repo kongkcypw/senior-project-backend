@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Put, UseGuards } from "@nestjs/common";
 import { MealHistoryService } from "../services/meal-history.service";
 import { MealDetailDto } from "../dto/meal-detail.dto";
 import { ApiResponse } from "@nestjs/swagger";
@@ -22,5 +22,16 @@ export class MealHistoryController {
         @Param('lineUserId') lineUserId: string
     ): Promise<MealDetailDto> {
         return this.mealHistoryService.findMealDetailByMealId(Number(id));
+    }
+
+    @Roles(UserRole.TRAINER, UserRole.TRAINEE)
+    @Put('/:id')
+    @ApiResponse({ status: 200, description: 'Meal confirmed successfully.', type: MealDetailDto })
+    @ApiResponse({ status: 404, description: 'Meal not found.' })
+    async confirmMeal(
+        @Param('id') id: string,
+        @Body() body: MealDetailDto
+    ): Promise<MealDetailDto> {
+        return this.mealHistoryService.confirmMeal(Number(id), body);
     }
 }
