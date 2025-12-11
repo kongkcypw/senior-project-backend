@@ -13,63 +13,37 @@ export class MealHistoryService {
         private readonly nutritionPlanRepository: NutritionPlanRepository,
     ) { }
 
-    private mapToMealDetailDto(meal: MealHistoryEntity, plan: NutritionPlanEntity | null): MealDetailDto {
-        const dto: MealDetailDto = {
-            id: meal.id,
-            lineUserId: meal.lineUserId,
-            imageUrl: meal.imageUrl,
-            foodTitle: meal.foodTitle,
-            calories: meal.calories,
-            protein: meal.protein,
-            carbohydrate: meal.carbohydrate,
-            fat: meal.fat,
-            ingredients: meal.ingredients,
-            createdAt: meal.createdAt,
-            confirmAt: meal.confirmAt,
-            isNutritionPlanExist: !!plan,
-            totalDailyCalories: null,
-            totalDailyProtein: null,
-            totalDailyCarbohydrate: null,
-            totalDailyFat: null,
-        };
-
-        if (plan) {
-            dto.totalDailyCalories = plan.totalCalories;
-            dto.totalDailyProtein = plan.protein;
-            dto.totalDailyCarbohydrate = plan.carbohydrate;
-            dto.totalDailyFat = plan.fat;
-        }
-
-        return dto;
-    }
-
     async findMealDetailByMealId(id: number): Promise<MealDetailDto> {
         const meal = await this.mealHistoryRepository.findOne({ where: { id } });
 
         if (!meal) {
             throw new NotFoundException(`Meal with id ${id} not found`);
         }
+        const mealDto = MealDetailDto.fromEntityToDto(meal);
 
-        const plan = await this.nutritionPlanRepository.findOne({
-            where: { lineUserId: meal.lineUserId },
-        });
-
-        return this.mapToMealDetailDto(meal, plan);
+        return mealDto;
     }
 
-    async insertMealHistory(mealData: Partial<MealHistoryEntity>): Promise<MealHistoryEntity> {
+    async insertMealHistory(mealData: Partial<MealHistoryEntity>): Promise<MealDetailDto> {
         const meal = this.mealHistoryRepository.create(mealData);
-        return this.mealHistoryRepository.save(meal);
+        const mealDto = MealDetailDto.fromEntityToDto(meal);
+        return mealDto;
     }
 
     async confirmMeal(id: number, mealData: Partial<MealHistoryEntity>): Promise<MealDetailDto> {
         const meal = this.mealHistoryRepository.create(mealData);
         meal.confirmAt = new Date();
         await this.mealHistoryRepository.save(meal);
-        const plan = await this.nutritionPlanRepository.findOne({
-            where: { lineUserId: meal.lineUserId },
-        });
+        const mealDto = MealDetailDto.fromEntityToDto(meal);
+        return mealDto;
+    }
 
-        return this.mapToMealDetailDto(meal, plan);
+    async findMealsByDate(lineUserId: string, date: Date): Promise<MealDetailDto[]> {
+        const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+        const meals = await this.mealHistoryRepository.find({ where: { lineUserId, createdAt: Between(startOfDay, endOfDay) } });
+
+        const mealsDto = meals.map(meal => MealDetailDto.fromEntityToDto(meal));
+        return mealsDto;
     }
 }

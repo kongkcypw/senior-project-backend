@@ -26,8 +26,27 @@ export class MockMealHistory {
         confirmAt: null,
     };
 
+    static readonly MEAL_HISTORY_002: MealHistorySeedType = {
+        id: 2,
+        lineUserId: MockUsers.TRAINEE_USER_003.lineUserId,
+        imageUrl: "https://fit-d.com/uploads/food/afb2ccb7050c6a64d52b7e3736d3a6f8.jpg",
+        foodTitle: 'กระเพราไก่ไข่ดาว',
+        calories: 650,
+        carbohydrate: 37,
+        protein: 30,
+        fat: 15,
+        createdAt: new Date(),
+        ingredients: [
+            { name: "ไก่", quantity: 150, quantityUnit: "กรัม" },
+            { name: "ไข่", quantity: 1, quantityUnit: "ฟอง" },
+            { name: "ข้าว", quantity: 250, quantityUnit: "กรัม" },
+        ],
+        confirmAt: null,
+    };
+
     static readonly MealHistories = [
         this.MEAL_HISTORY_001,
+        this.MEAL_HISTORY_002,
     ]
 }
 

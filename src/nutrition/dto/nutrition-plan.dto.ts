@@ -1,29 +1,42 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { NutritionNotificationTimeDto } from "./nutrition-notification-time.dto";
 import { NutritionPlanEntity } from "../entities/nutrition-plan.entity";
+import { MealDetailDto } from "./meal-detail.dto";
+import { Expose, plainToInstance } from "class-transformer";
 
 export class NutritionPlanDto {
 
     @ApiProperty()
+    @Expose()
     line_user_id: string;
 
     @ApiProperty()
+    @Expose()
     totalCalories: number;
 
     @ApiProperty()
+    @Expose()
     protein: number;
 
     @ApiProperty()
+    @Expose()
     carbohydrate: number;
 
     @ApiProperty()
+    @Expose()
     fat: number;
 
     @ApiProperty()
+    @Expose()
     needNotification: boolean;
 
     @ApiProperty()
+    @Expose()
     notificationTimes: NutritionNotificationTimeDto[];
+
+    @ApiProperty()
+    @Expose()
+    meals: MealDetailDto[];
 
     static fromEntity(entity: NutritionPlanEntity): NutritionPlanDto {
         const dto = new NutritionPlanDto();
@@ -39,6 +52,7 @@ export class NutritionPlanDto {
             // Use substring to convert "HH:mm:ss" to "HH:mm"
             sendAt: notification.sendAt.substring(0, 5)
         }));
+        dto.meals = [];
         return dto;
     }
 
@@ -63,5 +77,10 @@ export class NutritionPlanDto {
         entity.fat = dto.fat;
         entity.needNotification = dto.needNotification;
         return entity;
+    }
+
+    static fromEntityToDto(rawData: NutritionPlanEntity): NutritionPlanDto {
+        const transformedDto = plainToInstance(NutritionPlanDto, rawData);
+        return transformedDto;
     }
 }

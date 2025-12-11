@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { UserRole } from "src/users/enums/user-role.enum";
 import { getProtectedGuards } from "src/utils/guards.util";
@@ -9,14 +9,14 @@ import { NutritionPlanDto } from "../dto/nutrition-plan.dto";
 @UseGuards(...getProtectedGuards('liff-jwt'))
 export class NutritionPlanController {
     constructor(
-        private readonly  nutritionPlanService: NutritionPlanService,
+        private readonly nutritionPlanService: NutritionPlanService,
     ) { }
 
     @Get(':lineUserId')
     @Roles(UserRole.TRAINER, UserRole.TRAINEE)
     async getNutritionPlanByLineUserId(
         @Param('lineUserId') lineUserId: string
-    ) : Promise<NutritionPlanDto | null> {
+    ): Promise<NutritionPlanDto | null> {
         return this.nutritionPlanService.getNutritionPlanByLineUserId(lineUserId);
     }
 
@@ -27,5 +27,14 @@ export class NutritionPlanController {
         @Body() nutritionPlanDto: NutritionPlanDto
     ): Promise<void> {
         return this.nutritionPlanService.createOrUpdateNutritionPlan(nutritionPlanDto);
+    }
+
+    @Get('meals/:lineUserId')
+    @Roles(UserRole.TRAINER, UserRole.TRAINEE)
+    async findNutritionPlanWithMeals(
+        @Param('lineUserId') lineUserId: string,
+        @Query('date') date: string
+    ): Promise<NutritionPlanDto | null> {
+        return this.nutritionPlanService.findNutritionPlanWithMealsInDay(lineUserId, date);
     }
 }

@@ -4,12 +4,16 @@ import { NutritionPlanDto } from "../dto/nutrition-plan.dto";
 import { Transactional } from "typeorm-transactional";
 import { NutritionNotificationTimeRepository } from "../repositories/nutrition-notification-time.repository";
 import { NutritionPlanEntity } from "../entities/nutrition-plan.entity";
+import { MealDetailDto } from "../dto/meal-detail.dto";
+import { MealHistoryRepository } from "../repositories/meal-history.repository";
+import { MealHistoryService } from "./meal-history.service";
 
 @Injectable()
 export class NutritionPlanService {
     constructor(
         private readonly nutritionPlanRepository: NutritionPlanRepository,
         private readonly nutritionNotificationTimeRepository: NutritionNotificationTimeRepository,
+        private readonly mealHistoryService: MealHistoryService,
     ) { }
 
     async getNutritionPlanByLineUserId(lineUserId: string): Promise<NutritionPlanDto | null> {
@@ -21,6 +25,7 @@ export class NutritionPlanService {
     }
 
     @Transactional()
+    // TODO: Check this transactional is working or not
     async createOrUpdateNutritionPlan(nutritionPlanDto: NutritionPlanDto): Promise<void> {
         const { notificationTimes } = nutritionPlanDto;
         const nutritionPlan = NutritionPlanDto.toEntityWithoutNotificationTimes(nutritionPlanDto);
@@ -35,7 +40,7 @@ export class NutritionPlanService {
         // Convert "HH:mm" back to "HH:mm:ss" for the DB
         const transformedNotificationTimes = notificationTimes.map(notification => ({
             ...notification,
-            sendAt: `${notification.sendAt}:00`, 
+            sendAt: `${notification.sendAt}:00`,
         }));
 
         const newNotificationTimes = transformedNotificationTimes.filter(notification => !notification.id);
@@ -72,5 +77,15 @@ export class NutritionPlanService {
             savedPlanId,
             currentNotificationIds
         );
+    }
+
+    async findNutritionPlanWithMealsInDay(lineUserId: string, date: string): Promise<NutritionPlanDto | null> {
+        const nutritionPlan = await this.nutritionPlanRepository.findByLineUserId(lineUserId);
+        if (!nutritionPlan) {
+            return NutritionPlanDto.fromNoRecord(lineUserId);
+        }
+        const nutritionPlanDto = NutritionPlanDto.fromEntityToDto(nutritionPlan);
+        nutritionPlanDto.meals = await this.mealHistoryService.findMealsByDate(lineUserId, new Date(date));
+        return nutritionPlanDto;
     }
 }
