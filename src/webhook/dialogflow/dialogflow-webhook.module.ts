@@ -8,10 +8,25 @@ import { LineLiffModule } from "src/external/line-liff/line-liff.module";
 import { ManageProgramHandler } from "./handlers/manage-program.handler";
 import { UserModule } from "src/users/user.module";
 import { LineGroupModule } from "src/line-group/line-group.module";
+import { CaloriesInDayHandler } from "./handlers/calories-in-day.handler";
+import { NutritionModule } from "src/nutrition/nutrition.module";
 
 @Module({
-    imports: [DialogflowModule, LineMessagingApiModule, LineLiffModule, UserModule, LineGroupModule],
-    providers: [DialogflowWebhookService, DialogflowWebhookHandler, TriggerHandler, ManageProgramHandler],
+    imports: [
+        DialogflowModule,
+        LineMessagingApiModule,
+        LineLiffModule,
+        UserModule,
+        LineGroupModule,
+        NutritionModule
+    ],
+    providers: [
+        DialogflowWebhookService,
+        DialogflowWebhookHandler,
+        TriggerHandler,
+        ManageProgramHandler,
+        CaloriesInDayHandler
+    ],
     exports: [DialogflowWebhookService, DialogflowWebhookHandler],
 })
 export class DialogflowWebhookModule { }

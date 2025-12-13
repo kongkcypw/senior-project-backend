@@ -5,10 +5,6 @@ export const ManageProgramMessages = (
 ): messagingApi.Message[] => {
     return [
         {
-            type: "text",
-            text: navigateUrl
-        },
-        {
             type: "flex",
             altText: "โปรไฟล์ของคุณ",
             contents: {

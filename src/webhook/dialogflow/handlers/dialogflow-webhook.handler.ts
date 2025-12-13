@@ -6,6 +6,7 @@ import { LineMessagingApiClientService } from "src/external/line-messaging-api/s
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 import { TestProfileMessages } from "../messages/test-profile.message";
 import { ManageProgramHandler } from "./manage-program.handler";
+import { CaloriesInDayHandler } from "./calories-in-day.handler";
 
 @Injectable()
 export class DialogflowWebhookHandler {
@@ -13,7 +14,8 @@ export class DialogflowWebhookHandler {
         private readonly triggerHandler: TriggerHandler,
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
-        private readonly manageProgramHandler: ManageProgramHandler
+        private readonly manageProgramHandler: ManageProgramHandler,
+        private readonly caloriesInDayHandler: CaloriesInDayHandler
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
@@ -37,39 +39,15 @@ export class DialogflowWebhookHandler {
             return;
         }
 
+        if (intentName === DialogflowIntentName.CALORIES_IN_DAY) {
+            return this.caloriesInDayHandler.handle(event);
+        }
+
         if (intentName === DialogflowIntentName.SAVENOTE && fulfillmentMessages && fulfillmentMessages[0].text.text) {
             await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, [
                 {
                     type: 'text',
                     text: fulfillmentMessages[0].text.text[0],
-                    // quickReply: {
-                    //     items: [
-                    //         {
-                    //             type: 'action',
-                    //             action: {
-                    //                 type: 'message',
-                    //                 label: 'ข้อมูลร่างกาย',
-                    //                 text: 'ข้อมูลร่างกาย',
-                    //             },
-                    //         },
-                    //         {
-                    //             type: 'action',
-                    //             action: {
-                    //                 type: 'message',
-                    //                 label: 'ข้อมูลโภชนาการ',
-                    //                 text: 'ข้อมูลโภชนาการ',
-                    //             },
-                    //         },
-                    //         {
-                    //             type: 'action',
-                    //             action: {
-                    //                 type: 'message',
-                    //                 label: 'ข้อมูลการออกกำลังกาย',
-                    //                 text: 'ข้อมูลการออกกำลังกาย',
-                    //             }
-                    //         }
-                    //     ],
-                    // }
                 }
             ]);
         }

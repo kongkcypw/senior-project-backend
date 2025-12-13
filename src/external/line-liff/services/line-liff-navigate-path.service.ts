@@ -26,4 +26,8 @@ export class LineLiffNavigatePathService {
     getManageProgramPage(userId: string): string {
         return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_NUTRITION}/${userId}`;
     }
+
+    getCaloriesInDayPage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.CALORIES_IN_DAY}/${userId}`;
+    }
 }

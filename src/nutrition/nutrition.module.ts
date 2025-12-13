@@ -21,10 +21,10 @@ import { UserModule } from "src/users/user.module";
         NutritionNotificationTimeRepository,
         NutritionNotificationTimeService],
     controllers: [
-        MealHistoryController, 
+        MealHistoryController,
         NutritionPlanController
     ],
-    exports: [MealHistoryService],
+    exports: [MealHistoryService, NutritionPlanService],
 })
 
-export class NutritionModule {}
+export class NutritionModule { }
