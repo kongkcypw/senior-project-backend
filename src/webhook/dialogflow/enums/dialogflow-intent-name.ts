@@ -5,4 +5,6 @@ export enum DialogflowIntentName {
     TRIGGER_MANAGE_PROGRAM = 'Trigger - Manage Program',
     SAVENOTE = 'Save note',
     CALORIES_IN_DAY = 'CaloriesInday',
+    WORKOUT_PROGRAM = 'WorkoutProgram',
+    MANAGE_PROGRAM = 'ManageProgram',
 }

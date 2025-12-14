@@ -24,6 +24,7 @@ export class LineMessagingApiClientService {
     } catch (error) {
       if (this.isHttpClientError(error)) {
         console.log(`Failed to send reply message due to client error: ${error.message}`)
+        console.log(error.body)
 
         return;
       }
@@ -56,7 +57,7 @@ export class LineMessagingApiClientService {
     } catch (error) {
       if (this.isHttpClientError(error)) {
         console.log(
-            `Failed to link rich menu ID to user due to client error: ${error.message}`,
+          `Failed to link rich menu ID to user due to client error: ${error.message}`,
         )
 
         return;
@@ -72,7 +73,7 @@ export class LineMessagingApiClientService {
     } catch (error) {
       if (this.isHttpClientError(error)) {
         console.log(
-            `Failed to unlink rich menu ID from user due to client error: ${error.message}`,
+          `Failed to unlink rich menu ID from user due to client error: ${error.message}`,
         )
 
         return;

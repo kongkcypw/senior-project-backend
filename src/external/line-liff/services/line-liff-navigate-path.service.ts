@@ -23,11 +23,20 @@ export class LineLiffNavigatePathService {
         return `${this.basePath}/${this.liffId}/${WebPath.BODY_INFORMATION}/${userId}`;
     }
 
-    getManageProgramPage(userId: string): string {
+    getManageNutritionProgramPage(userId: string): string {
         return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_NUTRITION}/${userId}`;
+    }
+
+    getManageWorkoutProgramPage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_WORKOUT}/${userId}`;
     }
 
     getCaloriesInDayPage(userId: string): string {
         return `${this.basePath}/${this.liffId}/${WebPath.CALORIES_IN_DAY}/${userId}`;
+    }
+
+    // TODO: Add workout program page
+    getWorkoutProgramPage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_WORKOUT}/${userId}`;
     }
 }

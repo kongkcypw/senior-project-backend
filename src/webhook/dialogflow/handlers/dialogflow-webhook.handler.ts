@@ -7,6 +7,7 @@ import { LineLiffNavigatePathService } from "src/external/line-liff/services/lin
 import { TestProfileMessages } from "../messages/test-profile.message";
 import { ManageProgramHandler } from "./manage-program.handler";
 import { CaloriesInDayHandler } from "./calories-in-day.handler";
+import { WorkoutProgramHandler } from "./workout-program.handler";
 
 @Injectable()
 export class DialogflowWebhookHandler {
@@ -15,7 +16,8 @@ export class DialogflowWebhookHandler {
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
         private readonly manageProgramHandler: ManageProgramHandler,
-        private readonly caloriesInDayHandler: CaloriesInDayHandler
+        private readonly caloriesInDayHandler: CaloriesInDayHandler,
+        private readonly workoutProgramHandler: WorkoutProgramHandler
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
@@ -26,7 +28,7 @@ export class DialogflowWebhookHandler {
             return this.triggerHandler.handle(event);
         }
 
-        if (intentName === DialogflowIntentName.TRIGGER_MANAGE_PROGRAM) {
+        if (intentName === DialogflowIntentName.MANAGE_PROGRAM) {
             return this.manageProgramHandler.handle(event);
         }
 
@@ -41,6 +43,10 @@ export class DialogflowWebhookHandler {
 
         if (intentName === DialogflowIntentName.CALORIES_IN_DAY) {
             return this.caloriesInDayHandler.handle(event);
+        }
+
+        if (intentName === DialogflowIntentName.WORKOUT_PROGRAM) {
+            return this.workoutProgramHandler.handle(event);
         }
 
         if (intentName === DialogflowIntentName.SAVENOTE && fulfillmentMessages && fulfillmentMessages[0].text.text) {

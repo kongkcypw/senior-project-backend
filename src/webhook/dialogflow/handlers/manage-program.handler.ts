@@ -19,18 +19,14 @@ export class ManageProgramHandler implements IntentHandlerInterface {
 
         const groupId = event.source.type === 'group' ? event.source.groupId : null;
         const userId = event.source.userId;
-        let navigatePath: string;
+        let navigatePathNutrition: string;
+        let navigatePathWorkout: string;
 
         if (!userId) {
             return;
         }
 
         if (!groupId) {
-            navigatePath = this.lineLiffNavigatePathService.getManageProgramPage(userId);
-            await this.lineMessagingApiClientService.sendReplyMessages(
-                event.replyToken,
-                ManageProgramMessages(navigatePath)
-            );
             return
         }
 
@@ -40,11 +36,12 @@ export class ManageProgramHandler implements IntentHandlerInterface {
             return;
         }
 
-        navigatePath = this.lineLiffNavigatePathService.getManageProgramPage(trainee.lineUserId);
+        navigatePathNutrition = this.lineLiffNavigatePathService.getManageNutritionProgramPage(trainee.lineUserId);
+        navigatePathWorkout = this.lineLiffNavigatePathService.getManageWorkoutProgramPage(trainee.lineUserId);
 
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            ManageProgramMessages(navigatePath)
+            ManageProgramMessages(navigatePathNutrition, navigatePathWorkout, trainee.displayName)
         );
     }
 

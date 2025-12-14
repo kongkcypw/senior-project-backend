@@ -10,6 +10,7 @@ import { UserModule } from "src/users/user.module";
 import { LineGroupModule } from "src/line-group/line-group.module";
 import { CaloriesInDayHandler } from "./handlers/calories-in-day.handler";
 import { NutritionModule } from "src/nutrition/nutrition.module";
+import { WorkoutProgramHandler } from "./handlers/workout-program.handler";
 
 @Module({
     imports: [
@@ -25,7 +26,8 @@ import { NutritionModule } from "src/nutrition/nutrition.module";
         DialogflowWebhookHandler,
         TriggerHandler,
         ManageProgramHandler,
-        CaloriesInDayHandler
+        CaloriesInDayHandler,
+        WorkoutProgramHandler,
     ],
     exports: [DialogflowWebhookService, DialogflowWebhookHandler],
 })

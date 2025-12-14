@@ -41,24 +41,20 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
 
     if (event.message.type === WebhookEventMessageType.TEXT && event.message.mention) {
       for (const mentionee of event.message.mention.mentionees) {
+        console.log('Mentionee userId:', mentionee.userId);
         if (mentionee.userId === this.lineMessagingApiConfigService.chatbotUserId) {
           isBotMentioned = true;
           break;
         }
       }
 
+      // Skip if bot is not mentioned
       if (!isBotMentioned) {
-        console.log('Bot not mentioned in the message. Skipping further processing.');
         return;
       }
 
-      console.log('Bot mentioned in the message. Proceeding with Dialogflow processing.');
       await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event);
     }
-
-    // if (event.message.type === WebhookEventMessageType.TEXT) {
-    //   await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event);
-    // }
 
   }
 

@@ -1,15 +1,24 @@
 import { messagingApi } from "@line/bot-sdk";
 
 export const ManageProgramMessages = (
-    navigateUrl: string
+    navigateUrlNutrition: string,
+    navigateUrlWorkout: string,
+    displayName: string | null,
 ): messagingApi.Message[] => {
     return [
         {
             type: "flex",
-            altText: "โปรไฟล์ของคุณ",
+            altText: "Flex Message",
             contents: {
                 type: "bubble",
+                size: "mega",
                 header: {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [],
+                    paddingBottom: "none"
+                },
+                body: {
                     type: "box",
                     layout: "vertical",
                     contents: [
@@ -18,42 +27,61 @@ export const ManageProgramMessages = (
                             text: "จัดการโปรแกรม",
                             weight: "bold",
                             size: "xl",
-                            color: "#1DB446"
-                        }
-                    ],
-                    paddingAll: "20px",
-                    backgroundColor: "#ECFEE5"
-                },
-                body: {
-                    type: "box",
-                    layout: "vertical",
-                    contents: [
+                            color: "#000000"
+                        },
                         {
                             type: "text",
-                            text: "คลิกปุ่มด้านล่างเพื่อเปิดแอปพลิเคชัน LIFF สำหรับจัดการโปรแกรม",
-                            wrap: true,
-                            color: "#666666",
-                            size: "sm"
+                            text: `@${displayName ?? 'ไม่ระบุ'}`,
+                            size: "md",
+                            color: "#555555",
+                            margin: "md",
+                            weight: "bold"
+                        },
+                        {
+                            type: "separator",
+                            margin: "lg",
+                            color: "#FFFFFF00"
                         }
                     ]
                 },
                 footer: {
                     type: "box",
-                    layout: "vertical",
+                    layout: "horizontal",
                     spacing: "sm",
                     contents: [
                         {
                             type: "button",
-                            style: "primary",
-                            height: "sm",
+                            color: "#8C9BAB",
+                            style: "link",
                             action: {
                                 type: "uri",
-                                label: "เปิด",
-                                uri: navigateUrl
+                                label: "โภชนาการ",
+                                uri: navigateUrlNutrition
                             },
-                            color: "#1DB446"
+                            height: "sm",
+                            flex: 1
+                        },
+                        {
+                            type: "button",
+                            color: "#8C9BAB",
+                            style: "link",
+                            action: {
+                                type: "uri",
+                                label: "ออกกำลังกาย",
+                                uri: navigateUrlWorkout
+                            },
+                            height: "sm",
+                            flex: 1
                         }
                     ]
+                },
+                styles: {
+                    header: {
+                        backgroundColor: "#4270ED"
+                    },
+                    body: {
+                        backgroundColor: "#F9F9F9"
+                    }
                 }
             }
         }
