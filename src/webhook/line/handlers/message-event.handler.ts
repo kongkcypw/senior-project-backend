@@ -13,6 +13,9 @@ import { LineMessagingApiClientService } from 'src/external/line-messaging-api/s
 import { MealDetailMessage } from '../messages/meal-detail.message';
 import { GeminiAnalyzeFoodImageResponse } from 'src/external/gemini/types/gemini-analyze-food-image-response.type';
 import { LineMessagingApiConfigService } from 'src/external/line-messaging-api/services/config.service';
+import { NutritionPlanService } from 'src/nutrition/services/nutrition-plan.service';
+import { LineGroupMemberService } from 'src/line-group/services/line-group-member.service';
+import { LineLiffNavigatePathService } from 'src/external/line-liff/services/line-liff-navigate-path.service';
 
 @Injectable()
 export class MessageEventHandler implements EventHandler<MessageEvent> {
@@ -25,6 +28,9 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     private readonly cloudFlareR2Service: CloudFlareR2Service,
     private readonly geminiService: GeminiService,
     private readonly mealHistoryService: MealHistoryService,
+    private readonly lineGroupMemberService: LineGroupMemberService,
+    private readonly nutritionPlanService: NutritionPlanService,
+    private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
   ) {
   }
 
@@ -110,9 +116,44 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
       fat: analysisResult.data.nutritionFacts.fat,
     });
 
-    // TODO: Save to line group chat history
+    if (!userId) {
+      return;
+    }
 
-    this.sendMealDetailMessage(event, analysisResult.data);
+    if (!groupId) {
+      return;
+    }
+
+    const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
+
+    if (!trainee) {
+      return;
+    }
+
+
+    const nutritionPlan = await this.nutritionPlanService.getNutritionPlanByLineUserId(trainee.lineUserId);
+    if (!nutritionPlan) {
+      return;
+    }
+
+    const meals = await this.mealHistoryService.findMealsByDate(trainee.lineUserId, new Date());
+    const totalCaloriesIntake = meals.reduce((total, meal) => total + meal.calories, 0);
+    const remainingCalories = nutritionPlan.totalCalories - totalCaloriesIntake;
+    const formatedDate = new Date().toLocaleString('th-TH', {
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false,
+    });
+
+
+    let navigatePath: string;
+    navigatePath = this.lineLiffNavigatePathService.getCaloriesInDayPage(trainee.lineUserId);
+
+    this.sendMealDetailMessage(event, analysisResult.data, remainingCalories, formatedDate, navigatePath);
   }
 
   async sendErrorGetMessageContent(event: MessageEvent): Promise<void> {
@@ -163,10 +204,10 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     );
   }
 
-  async sendMealDetailMessage(event: MessageEvent, detail: GeminiAnalyzeFoodImageResponse): Promise<void> {
+  async sendMealDetailMessage(event: MessageEvent, detail: GeminiAnalyzeFoodImageResponse, remainingCalories: number, formatedDate: string, navigatePath: string): Promise<void> {
     await this.lineMessagingApiClientService.sendReplyMessages(
       event.replyToken,
-      MealDetailMessage(detail)
+      MealDetailMessage(detail, formatedDate, remainingCalories, navigatePath)
     );
   }
 }

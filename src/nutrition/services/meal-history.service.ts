@@ -26,6 +26,8 @@ export class MealHistoryService {
 
     async insertMealHistory(mealData: Partial<MealHistoryEntity>): Promise<MealDetailDto> {
         const meal = this.mealHistoryRepository.create(mealData);
+        meal.confirmAt = null;
+        await this.mealHistoryRepository.save(meal);
         const mealDto = MealDetailDto.fromEntityToDto(meal);
         return mealDto;
     }

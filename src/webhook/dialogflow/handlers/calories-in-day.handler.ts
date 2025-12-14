@@ -48,12 +48,14 @@ export class CaloriesInDayHandler implements IntentHandlerInterface {
         const meals = await this.mealHistoryService.findMealsByDate(trainee.lineUserId, new Date());
         const totalCaloriesIntake = meals.reduce((total, meal) => total + meal.calories, 0);
         const remainingCalories = nutritionPlan.totalCalories - totalCaloriesIntake;
-        const formatedDate = new Date().toLocaleDateString('th-TH', {
+        const formatedDate = new Date().toLocaleString('th-TH', {
+            timeZone: 'Asia/Bangkok',
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: 'numeric',
-            minute: 'numeric'
+            minute: 'numeric',
+            hour12: false,
         });
         const displayName = trainee.displayName;
 
