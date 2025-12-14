@@ -10,9 +10,15 @@ import { NutritionNotificationTimeService } from "./services/nutrition-notificat
 import { NutritionPlanController } from "./controllers/nutrition-plan.controller";
 import { NutritionPlanService } from "./services/nutrition-plan.service";
 import { UserModule } from "src/users/user.module";
+import { LineLiffModule } from "src/external/line-liff/line-liff.module";
 
 @Module({
-    imports: [LineMessagingApiModule, LineGroupModule, UserModule],
+    imports: [
+        LineMessagingApiModule,
+        LineGroupModule,
+        UserModule,
+        LineLiffModule
+    ],
     providers: [
         MealHistoryRepository,
         MealHistoryService,

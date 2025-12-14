@@ -5,13 +5,17 @@ import { NutritionNotificationTimeRepository } from "../repositories/nutrition-n
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 import { CaloriesIntakeReminderMessages } from "../messages/calories-intake-reminder.message";
+import { MealHistoryService } from "./meal-history.service";
+import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 
 @Injectable()
 export class NutritionNotificationTimeService {
     constructor(
         private readonly nutritionNotificationTimeRepository: NutritionNotificationTimeRepository,
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
-        private readonly lineGroupMemberService: LineGroupMemberService
+        private readonly lineGroupMemberService: LineGroupMemberService,
+        private readonly mealHistoryService: MealHistoryService,
+        private readonly lineLiffNavigatePathService: LineLiffNavigatePathService
     ) { }
 
     @Cron(CronExpression.EVERY_30_MINUTES, {
@@ -34,7 +38,11 @@ export class NutritionNotificationTimeService {
             if (!userPlan || !userPlan.needNotification) continue;
 
             const lineUserId = userPlan.lineUserId;
-            const messages = CaloriesIntakeReminderMessages(userPlan.totalCalories);
+            const meals = await this.mealHistoryService.findMealsByDate(lineUserId, new Date());
+            const totalCaloriesIntake = meals.reduce((total, meal) => total + meal.calories, 0);
+            const remainingCalories = userPlan.totalCalories - totalCaloriesIntake;
+            const navigatePath = this.lineLiffNavigatePathService.getCaloriesInDayPage(lineUserId);
+            const messages = CaloriesIntakeReminderMessages(userPlan.totalCalories, totalCaloriesIntake, remainingCalories, navigatePath);
 
             const groupId = await this.lineGroupMemberService.findGroupIdByMemberLineUserId(lineUserId);
 
