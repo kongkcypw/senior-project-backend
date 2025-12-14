@@ -105,7 +105,7 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
       return;
     }
 
-    await this.mealHistoryService.insertMealHistory({
+    const meal = await this.mealHistoryService.insertMealHistory({
       lineUserId: userId,
       imageUrl: publicUrl,
       foodTitle: analysisResult.data.foodTitle,
@@ -151,7 +151,7 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
 
 
     let navigatePath: string;
-    navigatePath = this.lineLiffNavigatePathService.getCaloriesInDayPage(trainee.lineUserId);
+    navigatePath = this.lineLiffNavigatePathService.getMealDetailPage(trainee.lineUserId, meal.id.toString());
 
     this.sendMealDetailMessage(event, analysisResult.data, remainingCalories, formatedDate, navigatePath);
   }

@@ -27,16 +27,16 @@ export class MealHistoryService {
     async insertMealHistory(mealData: Partial<MealHistoryEntity>): Promise<MealDetailDto> {
         const meal = this.mealHistoryRepository.create(mealData);
         meal.confirmAt = null;
-        await this.mealHistoryRepository.save(meal);
-        const mealDto = MealDetailDto.fromEntityToDto(meal);
+        const insertedMeal = await this.mealHistoryRepository.save(meal);
+        const mealDto = MealDetailDto.fromEntityToDto(insertedMeal);
         return mealDto;
     }
 
     async confirmMeal(id: number, mealData: Partial<MealHistoryEntity>): Promise<MealDetailDto> {
         const meal = this.mealHistoryRepository.create(mealData);
         meal.confirmAt = new Date();
-        await this.mealHistoryRepository.save(meal);
-        const mealDto = MealDetailDto.fromEntityToDto(meal);
+        const updatedMeal = await this.mealHistoryRepository.save(meal);
+        const mealDto = MealDetailDto.fromEntityToDto(updatedMeal);
         return mealDto;
     }
 

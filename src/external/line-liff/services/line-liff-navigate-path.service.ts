@@ -39,4 +39,8 @@ export class LineLiffNavigatePathService {
     getWorkoutProgramPage(userId: string): string {
         return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_WORKOUT}/${userId}`;
     }
+
+    getMealDetailPage(userId: string, mealId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.MEAL_DETAIL}/${userId}/${mealId}`;
+    }
 }
