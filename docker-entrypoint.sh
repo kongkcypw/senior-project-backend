@@ -18,6 +18,12 @@ done
 # 1. Run migrations
 npm run typeorm:migration:run:prod
 
+# check to stop the process if the migration fails.
+if [ $? -ne 0 ]; then
+  echo "Migration failed! Exiting..."
+  exit 1
+fi
+
 # 2. Start the NestJS application
 echo "Starting NestJS server..."
 exec npm run start:prod
