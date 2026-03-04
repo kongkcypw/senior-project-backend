@@ -3,6 +3,7 @@ import { DialogflowClientService } from 'src/external/dialogflow-client/services
 import { DialogflowConfigService } from 'src/external/dialogflow-client/services/config.service';
 import { MessageEvent } from '@line/bot-sdk';
 import { DialogflowWebhookHandler } from '../handlers/dialogflow-webhook.handler';
+import { FallbackIntentService } from './fallback-intent.service';
 
 @Injectable()
 export class DialogflowWebhookService {
@@ -11,6 +12,7 @@ export class DialogflowWebhookService {
         private readonly dialogflowClientService: DialogflowClientService,
         private readonly dialogflowConfigService: DialogflowConfigService,
         private readonly dialogflowWebhookHandler: DialogflowWebhookHandler,
+        private readonly fallbackIntentService: FallbackIntentService,
     ) { }
 
     async getFullfilmentTextAndReplyMessage(event: MessageEvent): Promise<void> {
@@ -46,6 +48,7 @@ export class DialogflowWebhookService {
             }
 
             if (!result.intent) {
+                await this.fallbackIntentService.handleFallbackIntent(event.message.text, event);
                 return;
             }
 

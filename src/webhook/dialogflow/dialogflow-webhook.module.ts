@@ -11,6 +11,8 @@ import { LineGroupModule } from "src/line-group/line-group.module";
 import { CaloriesInDayHandler } from "./handlers/calories-in-day.handler";
 import { NutritionModule } from "src/nutrition/nutrition.module";
 import { WorkoutProgramHandler } from "./handlers/workout-program.handler";
+import { RagApiModule } from "src/external/rag-api/rag-api.module";
+import { FallbackIntentService } from "./services/fallback-intent.service";
 
 @Module({
     imports: [
@@ -19,7 +21,8 @@ import { WorkoutProgramHandler } from "./handlers/workout-program.handler";
         LineLiffModule,
         UserModule,
         LineGroupModule,
-        NutritionModule
+        NutritionModule,
+        RagApiModule,
     ],
     providers: [
         DialogflowWebhookService,
@@ -28,6 +31,7 @@ import { WorkoutProgramHandler } from "./handlers/workout-program.handler";
         ManageProgramHandler,
         CaloriesInDayHandler,
         WorkoutProgramHandler,
+        FallbackIntentService,
     ],
     exports: [DialogflowWebhookService, DialogflowWebhookHandler],
 })
