@@ -17,4 +17,13 @@ export class UserRelationshipsRepository extends Repository<UserRelationshipEnti
             }
         });
     }
+
+    async findActiveRelationshipsByTrainee(traineeLineUserId: string): Promise<UserRelationshipEntity | null> {
+        return this.findOne({
+            where: {
+                traineeLineUserId,
+                isActive: true,
+            }
+        });
+    }
 }

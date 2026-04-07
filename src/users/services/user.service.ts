@@ -4,14 +4,15 @@ import { UserInfoDto } from "../dto/user-info.dto";
 import { UserRole } from "../enums/user-role.enum";
 import { UserEntity } from "../entities/user.entity";
 import { UserRelationshipsRepository } from "../repositories/user-relationships.repository";
+import { UserStatusDashboardDto } from "../dto/user-status-dashboard.dto";
 
 @Injectable()
 export class UserService {
     constructor(
         private readonly usersRepository: UserRepository,
         private readonly userRelationshipsRepository: UserRelationshipsRepository
-    ) {}
-    
+    ) { }
+
     async findByLineUserId(id: string | null): Promise<UserInfoDto> {
 
         if (!id) {
@@ -43,12 +44,12 @@ export class UserService {
      */
     async insertUserIfNotExist(userId: string, displayName: string | null, role: UserRole, pictureUrl: string | null): Promise<void> {
         const existingUser = await this.usersRepository.findByLineUserId(userId);
-        if(existingUser) {
+        if (existingUser) {
             return;
         }
 
-        const newUser = this.usersRepository.create({ 
-            lineUserId: userId, 
+        const newUser = this.usersRepository.create({
+            lineUserId: userId,
             displayName,
             role,
             pictureUrl,
@@ -77,5 +78,34 @@ export class UserService {
         }
         user.pictureUrl = pictureUrl;
         await this.usersRepository.save(user);
+    }
+
+    /**
+     * Find user status for eligible dashboard access
+     * @param lineUserId - The Line User ID
+     * @returns User status for eligible dashboard access
+     */
+    async findUserStatusForEligibleDashboardAccess(lineUserId: string): Promise<UserStatusDashboardDto | null> {
+        const user = await this.usersRepository.findByLineUserId(lineUserId);
+
+        if (!user) {
+            return null
+        }
+
+        let isActiveTrainee = false;
+        if (user.role === UserRole.TRAINEE) {
+            const activeRelationship = await this.userRelationshipsRepository.findActiveRelationshipsByTrainee(lineUserId);
+            isActiveTrainee = activeRelationship !== null;
+        }
+
+        return {
+            id: user.id,
+            lineUserId: user.lineUserId,
+            displayName: user.displayName,
+            pictureUrl: user.pictureUrl,
+            role: user.role,
+            isTrainer: user.role === UserRole.TRAINER,
+            isActiveTrainee: isActiveTrainee
+        };
     }
 }
