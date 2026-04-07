@@ -27,10 +27,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const frontendBaseUrl = configService.get<string>('FRONTEND_BASE_URL');
+  const frontendDashboardBaseUrl = configService.get<string>('FRONTEND_DASHBOARD_BASE_URL');
   app.enableCors({
-    origin: [frontendBaseUrl], 
+    origin: [frontendBaseUrl, frontendDashboardBaseUrl],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, 
+    credentials: true,
   });
 
   const config = new DocumentBuilder()
