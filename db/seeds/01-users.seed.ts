@@ -28,7 +28,7 @@ export class MockUsers {
     };
 
     static readonly TRAINEE_USER_003: UserEntity = {
-        id: 2,
+        id: 3,
         lineUserId: 'Ue2589f779cb7eb3107afcb35b9921bc2',
         displayName: 'Latif Danai',
         role: UserRole.TRAINEE,
@@ -37,10 +37,46 @@ export class MockUsers {
         updatedAt: new Date(),
     };
 
+    // High performer — good macro adherence + consistent workout
+    static readonly TRAINEE_USER_004: UserEntity = {
+        id: 4,
+        lineUserId: 'Uf1234567890abcdef1234567890abcde',
+        displayName: 'Arisa Natcha',
+        role: UserRole.TRAINEE,
+        pictureUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
+    // Medium performer — partial adherence
+    static readonly TRAINEE_USER_005: UserEntity = {
+        id: 5,
+        lineUserId: 'Ua9876543210fedcba9876543210fedcb',
+        displayName: 'Tawan Kraiwit',
+        role: UserRole.TRAINEE,
+        pictureUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
+    // Low performer — minimal logs
+    static readonly TRAINEE_USER_006: UserEntity = {
+        id: 6,
+        lineUserId: 'Ub1122334455667788990011223344556',
+        displayName: 'Nuch Piyanat',
+        role: UserRole.TRAINEE,
+        pictureUrl: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
     static readonly Users = [
         this.TRAINER_USER_001,
         this.TRAINEE_USER_002,
         this.TRAINEE_USER_003,
+        this.TRAINEE_USER_004,
+        this.TRAINEE_USER_005,
+        this.TRAINEE_USER_006,
     ]
 }
 

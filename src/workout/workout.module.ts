@@ -41,7 +41,7 @@ import { WorkoutExerciseSetRepository } from "./repositories/workout-exercise-se
         WorkoutRoutineTemplateService,
         WorkoutExerciseSetRepository,
     ],
-    exports: [],
+    exports: [WorkoutHistoryRepository, WorkoutProgramPlanRepository],
 })
 
 export class WorkoutModule { }

@@ -28,7 +28,6 @@ export class UserController {
         @Param('lineUserId') id: string
     ): Promise<UserStatusDashboardDto | null> {
         const userStatus = await this.usersService.findUserStatusForEligibleDashboardAccess(id);
-        console.log(userStatus);
         return userStatus;
     }
 

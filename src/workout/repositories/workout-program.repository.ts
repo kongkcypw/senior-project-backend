@@ -37,4 +37,18 @@ export class WorkoutProgramPlanRepository extends Repository<WorkoutProgramEntit
             .orderBy('exercise.orderInRoutine', 'ASC')
             .getMany();
     }
-}
+
+    /**
+     * Count the total number of distinct workout routines across all programs
+     * assigned to a trainee. Used as the denominator for workout score.
+     */
+    async countRoutinesByTrainee(lineUserIdTrainee: string): Promise<number> {
+        const result = await this.createQueryBuilder('plan')
+            .innerJoin('plan.routines', 'routine')
+            .select('COUNT(routine.id)', 'count')
+            .where('plan.lineUserIdTrainee = :lineUserIdTrainee', { lineUserIdTrainee })
+            .getRawOne<{ count: string }>();
+
+        return parseInt(result?.count ?? '0', 10);
+    }
+}

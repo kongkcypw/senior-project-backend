@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
+import { DataSource, In, Repository } from "typeorm";
 import { UserEntity } from "../entities/user.entity";
 import { UserRole } from "../enums/user-role.enum";
 
 @Injectable()
 export class UserRepository extends Repository<UserEntity> {
-    constructor(private datasource: DataSource){
+    constructor(private datasource: DataSource) {
         super(UserEntity, datasource.createEntityManager());
     }
 
@@ -15,5 +15,9 @@ export class UserRepository extends Repository<UserEntity> {
 
     async findByLineUserIdAndRole(lineUserId: string, role: UserRole): Promise<UserEntity | null> {
         return this.findOne({ where: { lineUserId, role } });
+    }
+
+    async findByLineUserIds(lineUserIds: string[]): Promise<UserEntity[]> {
+        return this.find({ where: { lineUserId: In(lineUserIds) } });
     }
 }

@@ -26,4 +26,13 @@ export class UserRelationshipsRepository extends Repository<UserRelationshipEnti
             }
         });
     }
+
+    async findAllActiveRelationshipsByTrainer(trainerLineUserId: string): Promise<UserRelationshipEntity[]> {
+        return this.find({
+            where: {
+                trainerLineUserId,
+                isActive: true,
+            }
+        });
+    }
 }

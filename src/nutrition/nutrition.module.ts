@@ -30,7 +30,7 @@ import { LineLiffModule } from "src/external/line-liff/line-liff.module";
         MealHistoryController,
         NutritionPlanController
     ],
-    exports: [MealHistoryService, NutritionPlanService],
+    exports: [MealHistoryService, NutritionPlanService, MealHistoryRepository, NutritionPlanRepository],
 })
 
 export class NutritionModule { }

@@ -6,6 +6,7 @@ import { DataSource } from "typeorm";
 type NutritionPlanSeed = Omit<NutritionPlanEntity, 'createdAt' | 'updatedAt' | 'user' | 'notificationTimes'>;
 
 export class MockNutritionPlan {
+    // Latif's plan
     static readonly NUTRITION_PLAN_001: NutritionPlanSeed = {
         id: 1,
         lineUserId: MockUsers.TRAINEE_USER_003.lineUserId,
@@ -16,8 +17,44 @@ export class MockNutritionPlan {
         needNotification: true,
     };
 
+    // Arisa — clean-bulk plan (high performer)
+    static readonly NUTRITION_PLAN_002: NutritionPlanSeed = {
+        id: 2,
+        lineUserId: MockUsers.TRAINEE_USER_004.lineUserId,
+        totalCalories: 2000,
+        protein: 120,
+        carbohydrate: 200,
+        fat: 65,
+        needNotification: true,
+    };
+
+    // Tawan — moderate cut (medium performer)
+    static readonly NUTRITION_PLAN_003: NutritionPlanSeed = {
+        id: 3,
+        lineUserId: MockUsers.TRAINEE_USER_005.lineUserId,
+        totalCalories: 2200,
+        protein: 140,
+        carbohydrate: 220,
+        fat: 70,
+        needNotification: false,
+    };
+
+    // Nuch — maintenance plan (low performer — barely logs)
+    static readonly NUTRITION_PLAN_004: NutritionPlanSeed = {
+        id: 4,
+        lineUserId: MockUsers.TRAINEE_USER_006.lineUserId,
+        totalCalories: 1800,
+        protein: 100,
+        carbohydrate: 180,
+        fat: 55,
+        needNotification: false,
+    };
+
     static readonly NutritionPlans = [
         this.NUTRITION_PLAN_001,
+        this.NUTRITION_PLAN_002,
+        this.NUTRITION_PLAN_003,
+        this.NUTRITION_PLAN_004,
     ]
 }
 
