@@ -27,7 +27,9 @@ export class UserController {
     async getUserStatusForEligibleDashboardAccess(
         @Param('lineUserId') id: string
     ): Promise<UserStatusDashboardDto | null> {
-        return this.usersService.findUserStatusForEligibleDashboardAccess(id);
+        const userStatus = await this.usersService.findUserStatusForEligibleDashboardAccess(id);
+        console.log(userStatus);
+        return userStatus;
     }
 
     @Post('create')

@@ -92,7 +92,10 @@ export class UserService {
             return null
         }
 
+        const isTrainer = user.role === UserRole.TRAINER;
         let isActiveTrainee = false;
+
+        // Check if user is an active trainee
         if (user.role === UserRole.TRAINEE) {
             const activeRelationship = await this.userRelationshipsRepository.findActiveRelationshipsByTrainee(lineUserId);
             isActiveTrainee = activeRelationship !== null;
@@ -104,7 +107,7 @@ export class UserService {
             displayName: user.displayName,
             pictureUrl: user.pictureUrl,
             role: user.role,
-            isTrainer: user.role === UserRole.TRAINER,
+            isTrainer: isTrainer,
             isActiveTrainee: isActiveTrainee
         };
     }
