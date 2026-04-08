@@ -53,6 +53,26 @@ export class MealHistoryRepository extends Repository<MealHistoryEntity> {
     }
 
     /**
+     * Count the number of meal rows (one row = one logged meal) the trainee
+     * logged within the given date range [from, to). Used for timeline-based
+     * nutrition status.
+     */
+    async countMealsInWindow(
+        lineUserId: string,
+        from: Date,
+        to: Date,
+    ): Promise<number> {
+        const result = await this.createQueryBuilder('mh')
+            .select('COUNT(mh.id)', 'count')
+            .where('mh.lineUserId = :lineUserId', { lineUserId })
+            .andWhere('mh.createdAt >= :from', { from })
+            .andWhere('mh.createdAt < :to', { to })
+            .getRawOne<{ count: string }>();
+
+        return parseInt(result?.count ?? '0', 10);
+    }
+
+    /**
      * Sum macros grouped by DATE_TRUNC bucket (day | week | month).
      * Returns a Map keyed by bucket-start ISO string.
      */

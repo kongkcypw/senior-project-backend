@@ -28,6 +28,7 @@ import {
     NutritionWindowDto,
 } from "../dto/trainee-with-progress.dto";
 import { ScoreHistoryDto, ScoreHistoryPointDto } from "../dto/score-history.dto";
+import { HomeStatsDto } from "../dto/home-stats.dto";
 import { UserEntity } from "../entities/user.entity";
 import { NutritionPlanEntity } from "src/nutrition/entities/nutrition-plan.entity";
 
@@ -186,6 +187,113 @@ export class UserRelationshipsService {
         );
 
         return results;
+    }
+
+    // -------------------------------------------------------------------------
+    // Home stats (timeline-based nutrition status + weekly workout completion)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the stat counts shown on the trainer home page.
+     *
+     * Nutrition (today, timeline-based):
+     *   - completed: all notification-time slots for today have a logged meal
+     *   - onTrack:   all slots whose send-time has already passed have a logged meal,
+     *                and the next upcoming slot hasn't been reached yet
+     *   - late:      at least one slot is overdue by more than 30 minutes without a
+     *                matching meal log
+     *   Trainees without a nutrition plan or without any notification times are
+     *   excluded from the nutrition total entirely — their status can't be
+     *   determined, so counting them as late would misrepresent the trainer's
+     *   actual situation.
+     *
+     * Workout (this week):
+     *   - completed:  distinct session days this week >= total routines in program
+     *   - incomplete: otherwise
+     *   Trainees without any routines assigned are counted as incomplete.
+     */
+    async getHomeStatsForTrainer(trainerLineUserId: string): Promise<HomeStatsDto> {
+        const relationships = await this.userRelationshipsRepository.findAllActiveRelationshipsByTrainer(trainerLineUserId);
+
+        if (!relationships || relationships.length === 0) {
+            return {
+                nutrition: { total: 0, completed: 0, onTrack: 0, late: 0 },
+                workout:   { total: 0, completed: 0, incomplete: 0 },
+            };
+        }
+
+        const traineeLineUserIds = relationships.map(r => r.traineeLineUserId);
+        const daily  = dailyWindow();
+        const weekly = weeklyWindow();
+
+        const LATE_THRESHOLD_MS = 30 * 60 * 1000;
+        const now = new Date();
+
+        // Build "HH:MM:SS of today" helper to compare against notification.sendAt (time type)
+        const parseSlotTimeToday = (sendAt: string): Date => {
+            // sendAt is "HH:MM:SS" — anchor to the start-of-day from `daily.from`
+            const [h, m, s] = sendAt.split(':').map((v) => parseInt(v, 10));
+            const slot = new Date(daily.from);
+            slot.setHours(h || 0, m || 0, s || 0, 0);
+            return slot;
+        };
+
+        // Fetch everything in parallel per trainee
+        const perTrainee = await Promise.all(traineeLineUserIds.map(async (lid) => {
+            const [nutritionPlan, mealsToday, workoutDaysThisWeek, totalRoutines] = await Promise.all([
+                this.nutritionPlanRepository.findByLineUserId(lid),
+                this.mealHistoryRepository.countMealsInWindow(lid, daily.from, daily.to),
+                this.workoutHistoryRepository.countDistinctSessionDays(lid, weekly.from, weekly.to),
+                this.workoutProgramRepository.countRoutinesByTrainee(lid),
+            ]);
+            return { lid, nutritionPlan, mealsToday, workoutDaysThisWeek, totalRoutines };
+        }));
+
+        let nCompleted = 0, nOnTrack = 0, nLate = 0, nTotal = 0;
+        let wCompleted = 0, wIncomplete = 0;
+
+        for (const t of perTrainee) {
+            // ---- Nutrition classification ----
+            const slots = t.nutritionPlan?.notificationTimes ?? [];
+            if (t.nutritionPlan && slots.length > 0) {
+                nTotal += 1;
+
+                const slotTimes = slots
+                    .map((s) => parseSlotTimeToday(s.sendAt))
+                    .sort((a, b) => a.getTime() - b.getTime());
+
+                const totalSlots    = slotTimes.length;
+                const passedSlots   = slotTimes.filter((s) => s.getTime() <= now.getTime()).length;
+                const overdueSlots  = slotTimes.filter((s) => now.getTime() - s.getTime() >= LATE_THRESHOLD_MS).length;
+
+                if (t.mealsToday >= totalSlots) {
+                    nCompleted += 1;
+                } else if (t.mealsToday >= passedSlots) {
+                    // Caught up on everything due so far; waiting on upcoming slot.
+                    nOnTrack += 1;
+                } else if (t.mealsToday >= overdueSlots) {
+                    // Slot just became due (within 30-min grace window). Still on-track.
+                    nOnTrack += 1;
+                } else {
+                    nLate += 1;
+                }
+            }
+            // Trainees without a plan or without notification times are excluded
+            // from the nutrition total entirely.
+
+            // ---- Workout classification ----
+            if (t.totalRoutines > 0 && t.workoutDaysThisWeek >= t.totalRoutines) {
+                wCompleted += 1;
+            } else {
+                wIncomplete += 1;
+            }
+        }
+
+        const wTotal = perTrainee.length;
+        return {
+            nutrition: { total: nTotal, completed: nCompleted, onTrack: nOnTrack, late: nLate },
+            workout:   { total: wTotal, completed: wCompleted, incomplete: wIncomplete },
+        };
     }
 
     // -------------------------------------------------------------------------
