@@ -140,3 +140,133 @@ export function monthlyWindow(): DateWindow {
     const to   = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     return { from, to };
 }
+
+// ---------------------------------------------------------------------------
+// Score-history buckets (for the trainer-wide average chart)
+// ---------------------------------------------------------------------------
+
+export type HistoryPeriod = 'daily' | 'weekly' | 'monthly';
+export type TruncUnit = 'day' | 'week' | 'month';
+
+export interface ScoreBucket {
+    /** Display label for the X-axis (e.g. "จ", "W1", "ม.ค."). */
+    label: string;
+    /** Bucket start (inclusive). Used as the Map key when joining DB results. */
+    from: Date;
+    /** Bucket end (exclusive). */
+    to: Date;
+    /** Number of days this bucket covers, used to scale nutrition targets. */
+    windowDays: number;
+    /** True if the whole bucket lies in the future (from > now). */
+    isFuture: boolean;
+}
+
+export interface HistoryBuckets {
+    /** The SQL DATE_TRUNC unit that groups rows into the same bucket span. */
+    truncUnit: TruncUnit;
+    /** Overall range that covers all buckets — use as the WHERE range in SQL. */
+    rangeFrom: Date;
+    rangeTo: Date;
+    /** Ordered list of buckets for rendering. */
+    buckets: ScoreBucket[];
+}
+
+const THAI_DAY_LABELS = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
+const THAI_MONTH_LABELS = [
+    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+];
+
+/**
+ * Build the bucket list for the score-history chart.
+ *
+ * - `daily`   → 7 buckets, Mon–Sun of the current ISO week (windowDays = 1)
+ * - `weekly`  → one bucket per ISO week that overlaps the current month,
+ *               each 7 days long, starting on Monday (windowDays = 7)
+ * - `monthly` → 12 buckets, Jan–Dec of the current year (windowDays = days in that month)
+ *
+ * `isFuture` is true when the bucket starts strictly after "now", so the caller
+ * can emit null values for those buckets (chart shows a gap).
+ */
+export function buildHistoryBuckets(period: HistoryPeriod): HistoryBuckets {
+    const now = new Date();
+
+    if (period === 'daily') {
+        // Mon–Sun of this week, 7 buckets
+        const { from: weekStart } = weeklyWindow();
+        const buckets: ScoreBucket[] = [];
+        for (let i = 0; i < 7; i++) {
+            const bucketFrom = new Date(weekStart);
+            bucketFrom.setDate(weekStart.getDate() + i);
+            const bucketTo = new Date(bucketFrom);
+            bucketTo.setDate(bucketFrom.getDate() + 1);
+            buckets.push({
+                label: THAI_DAY_LABELS[i],
+                from: bucketFrom,
+                to: bucketTo,
+                windowDays: 1,
+                isFuture: bucketFrom > now,
+            });
+        }
+        const rangeTo = new Date(weekStart);
+        rangeTo.setDate(weekStart.getDate() + 7);
+        return { truncUnit: 'day', rangeFrom: weekStart, rangeTo, buckets };
+    }
+
+    if (period === 'weekly') {
+        // Every ISO week (Mon start) that overlaps the current calendar month.
+        // Range is the union of those weeks (so a week that straddles a month
+        // boundary is still counted fully).
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+        // First bucket: Monday of the week that contains monthStart
+        const firstBucketFrom = new Date(monthStart);
+        const dow = firstBucketFrom.getDay(); // 0 = Sun
+        const daysToMonday = (dow + 6) % 7;
+        firstBucketFrom.setDate(firstBucketFrom.getDate() - daysToMonday);
+        firstBucketFrom.setHours(0, 0, 0, 0);
+
+        const buckets: ScoreBucket[] = [];
+        let cursor = firstBucketFrom;
+        let weekIndex = 1;
+        while (cursor < monthEnd) {
+            const bucketTo = new Date(cursor);
+            bucketTo.setDate(cursor.getDate() + 7);
+            buckets.push({
+                label: `W${weekIndex}`,
+                from: cursor,
+                to: bucketTo,
+                windowDays: 7,
+                isFuture: cursor > now,
+            });
+            cursor = bucketTo;
+            weekIndex++;
+        }
+        const rangeFrom = buckets[0].from;
+        const rangeTo   = buckets[buckets.length - 1].to;
+        return { truncUnit: 'week', rangeFrom, rangeTo, buckets };
+    }
+
+    // monthly — 12 buckets, Jan–Dec of current year
+    const year = now.getFullYear();
+    const buckets: ScoreBucket[] = [];
+    for (let m = 0; m < 12; m++) {
+        const bucketFrom = new Date(year, m, 1);
+        const bucketTo   = new Date(year, m + 1, 1);
+        const daysInMonth = Math.round((bucketTo.getTime() - bucketFrom.getTime()) / (1000 * 60 * 60 * 24));
+        buckets.push({
+            label: THAI_MONTH_LABELS[m],
+            from: bucketFrom,
+            to: bucketTo,
+            windowDays: daysInMonth,
+            isFuture: bucketFrom > now,
+        });
+    }
+    return {
+        truncUnit: 'month',
+        rangeFrom: new Date(year, 0, 1),
+        rangeTo:   new Date(year + 1, 0, 1),
+        buckets,
+    };
+}

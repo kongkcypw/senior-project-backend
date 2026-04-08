@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { WorkoutHistoryEntity } from "../entities/workout-history.entity";
 
+export type TruncUnit = 'day' | 'week' | 'month';
+
 @Injectable()
 export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
     constructor(private datasource: DataSource) {
@@ -26,4 +28,34 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
 
         return parseInt(result?.count ?? '0', 10);
     }
-}
+
+    /**
+     * Count distinct workout days grouped by DATE_TRUNC bucket (day | week | month).
+     * Used for the trainer's score-history chart — one SQL query yields every
+     * bucket's day-count for a trainee in one round-trip.
+     *
+     * Returns a Map whose key is the bucket start timestamp (ISO string) and
+     * whose value is the number of distinct days the trainee trained in that bucket.
+     */
+    async countDaysGroupedByBucket(
+        lineUserId: string,
+        from: Date,
+        to: Date,
+        truncUnit: TruncUnit,
+    ): Promise<Map<string, number>> {
+        const rows = await this.createQueryBuilder('wh')
+            .select(`DATE_TRUNC('${truncUnit}', wh.performed_at)`, 'bucket')
+            .addSelect('COUNT(DISTINCT DATE(wh.performed_at))', 'count')
+            .where('wh.line_user_id = :lineUserId', { lineUserId })
+            .andWhere('wh.performed_at >= :from', { from })
+            .andWhere('wh.performed_at < :to', { to })
+            .groupBy('bucket')
+            .getRawMany<{ bucket: Date; count: string }>();
+
+        const map = new Map<string, number>();
+        for (const row of rows) {
+            map.set(new Date(row.bucket).toISOString(), parseInt(row.count, 10));
+        }
+        return map;
+    }
+}
