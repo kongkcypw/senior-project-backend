@@ -1,4 +1,4 @@
-import { Expose } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 
 export class WorkoutExerciseSetDto {
 
@@ -6,20 +6,20 @@ export class WorkoutExerciseSetDto {
     id: number;
 
     @Expose()
-    exerciseId: number;
-
-    @Expose({ name: 'setNumber' })
-    setNumber: number;
+    set: number;
 
     @Expose()
-    reps: number;
+    rep: number;
 
     @Expose()
     weightKg: number | null;
 
-    @Expose()
+    @Exclude()
+    exerciseId: number;
+
+    @Exclude()
     createdAt: Date;
 
-    @Expose()
+    @Exclude()
     updatedAt: Date;
 }

@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import { WorkoutExerciseSetDto } from './workout-exercise-set.dto';
 
 export class WorkoutExerciseDto {
@@ -18,7 +18,8 @@ export class WorkoutExerciseDto {
   restTimeSecond: number | null;
 
   @Expose()
-  sets: WorkoutExerciseSetDto[];
+  @Type(() => WorkoutExerciseSetDto)
+  setDetails: WorkoutExerciseSetDto[];
 
   @Exclude()
   routineId: number;

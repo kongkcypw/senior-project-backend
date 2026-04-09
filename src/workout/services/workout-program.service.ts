@@ -21,6 +21,11 @@ export class WorkoutProgramService {
         return plans.map(plan => WorkoutProgramDto.fromEntityToDto(plan));
     }
 
+    async getProgramPlanByLineUserIdTrainer(lineUserId: string): Promise<WorkoutProgramDto[]> {
+        const plans = await this.workoutProgramPlanRepository.findFullProgramByLineUserIdTrainer(lineUserId);
+        return plans.map(plan => WorkoutProgramDto.fromEntityToDto(plan));
+    }
+
     async createProgramPlan(name: string, lineUserIdTrainee: string, lineUserIdTrainer: string): Promise<WorkoutProgramDto> {
         const newPlan = this.workoutProgramPlanRepository.create({
             name,

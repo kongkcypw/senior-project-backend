@@ -2,34 +2,50 @@ import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
 import { WorkoutRoutineDto } from './workout-routine.dto'; // Renamed import
 import { WorkoutProgramEntity } from '../entities/workout-program.entity'; // Renamed import
 
+export class WorkoutProgramTraineeDto {
+    @Expose()
+    lineUserId!: string;
+
+    @Expose()
+    displayName!: string | null;
+
+    @Expose()
+    pictureUrl!: string | null;
+}
+
 export class WorkoutProgramDto {
     @Expose()
-    id: number;
+    id!: number;
 
     @Expose()
-    name: string;
+    name!: string;
 
     @Expose()
-    lineUserIdTrainee: string;
+    lineUserIdTrainee!: string;
 
     @Expose()
-    lineUserIdTrainer: string;
+    lineUserIdTrainer!: string;
 
     @Expose()
-    orderInProgram: number;
+    orderInProgram!: number;
+
+    // Trainee owner (only populated when the query joins the trainee relation)
+    @Expose()
+    @Type(() => WorkoutProgramTraineeDto)
+    trainee?: WorkoutProgramTraineeDto;
 
     // Nested collections
     @Expose({ name: 'routines' }) // Renamed property and exposed name
     @Type(() => WorkoutRoutineDto)
-    routines: WorkoutRoutineDto[];
+    routines!: WorkoutRoutineDto[];
 
     // Removed scheduleItems property
 
-    @Exclude()
-    createdAt: Date;
+    @Expose()
+    createdAt!: Date;
 
     @Exclude()
-    updatedAt: Date;
+    updatedAt!: Date;
 
     static fromEntityToDto(rawData: WorkoutProgramEntity): WorkoutProgramDto {
         const transformedDto = plainToInstance(WorkoutProgramDto, rawData);

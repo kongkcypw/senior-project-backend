@@ -11,18 +11,25 @@ export class WorkoutProgramController {
         private readonly workoutProgramService: WorkoutProgramService,
     ) { }
 
-    @Get(':lineUserId')
+    @Get('by-trainer/:lineUserId')
     getByLineUserIdTrainer(
         @Param('lineUserId') lineUserId: string,
     ) {
-        return this.workoutProgramService.getProgramPlanByLineUserIdTrainee(lineUserId);
+        return this.workoutProgramService.getProgramPlanByLineUserIdTrainer(lineUserId);
     }
 
-    @Get('test')
-    getProgramPlanDetails(
+    @Get('detail/:programId')
+    getProgramById(
+        @Param('programId') programId: string,
     ) {
-        const programPlanId = 1;
-        return this.workoutProgramService.getProgramPlanByPlanId(Number(programPlanId));
+        return this.workoutProgramService.getProgramPlanByPlanId(Number(programId));
+    }
+
+    @Get(':lineUserId')
+    getByLineUserIdTrainee(
+        @Param('lineUserId') lineUserId: string,
+    ) {
+        return this.workoutProgramService.getProgramPlanByLineUserIdTrainee(lineUserId);
     }
 
     @Post()

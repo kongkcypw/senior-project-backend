@@ -16,10 +16,14 @@ export class WorkoutProgramPlanRepository extends Repository<WorkoutProgramEntit
      */
     async findFullProgramByProgramPlanId(programPlanId: number): Promise<WorkoutProgramEntity | null> {
         return this.createQueryBuilder('plan')
+            .leftJoinAndSelect('plan.trainee', 'trainee')
             .leftJoinAndSelect('plan.routines', 'routine')
             .leftJoinAndSelect('routine.exercises', 'exercise')
+            .leftJoinAndSelect('exercise.setDetails', 'setDetail')
             .where('plan.id = :id', { id: programPlanId })
-            .orderBy('exercise.orderInRoutine', 'ASC')
+            .orderBy('routine.orderInProgram', 'ASC')
+            .addOrderBy('exercise.orderInRoutine', 'ASC')
+            .addOrderBy('setDetail.set', 'ASC')
             .getOne();
     }
 
@@ -33,8 +37,29 @@ export class WorkoutProgramPlanRepository extends Repository<WorkoutProgramEntit
         return this.createQueryBuilder('plan')
             .leftJoinAndSelect('plan.routines', 'routine')
             .leftJoinAndSelect('routine.exercises', 'exercise')
+            .leftJoinAndSelect('exercise.setDetails', 'setDetail')
             .where('plan.lineUserIdTrainee = :lineUserIdTrainee', { lineUserIdTrainee: lineUserId })
-            .orderBy('exercise.orderInRoutine', 'ASC')
+            .orderBy('routine.orderInProgram', 'ASC')
+            .addOrderBy('exercise.orderInRoutine', 'ASC')
+            .addOrderBy('setDetail.set', 'ASC')
+            .getMany();
+    }
+
+    /**
+     * Retrieves all workout programs created by a trainer (across all their trainees),
+     * including routines and exercises.
+     */
+    async findFullProgramByLineUserIdTrainer(lineUserId: string): Promise<WorkoutProgramEntity[]> {
+        return this.createQueryBuilder('plan')
+            .leftJoinAndSelect('plan.trainee', 'trainee')
+            .leftJoinAndSelect('plan.routines', 'routine')
+            .leftJoinAndSelect('routine.exercises', 'exercise')
+            .leftJoinAndSelect('exercise.setDetails', 'setDetail')
+            .where('plan.lineUserIdTrainer = :lineUserIdTrainer', { lineUserIdTrainer: lineUserId })
+            .orderBy('plan.orderInProgram', 'ASC')
+            .addOrderBy('routine.orderInProgram', 'ASC')
+            .addOrderBy('exercise.orderInRoutine', 'ASC')
+            .addOrderBy('setDetail.set', 'ASC')
             .getMany();
     }
 

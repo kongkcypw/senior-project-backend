@@ -74,11 +74,11 @@ export class WorkoutRoutineService {
             const savedExercise = await this.exerciseRepository.save(exercise);
 
             // Handle Sets
-            if (exerciseDto.sets && exerciseDto.sets.length > 0) {
-                const setEntities = exerciseDto.sets.map((setDto) => this.setRepository.create({
+            if (exerciseDto.setDetails && exerciseDto.setDetails.length > 0) {
+                const setEntities = exerciseDto.setDetails.map((setDto) => this.setRepository.create({
                     exerciseId: savedExercise.id,
-                    set: setDto.setNumber,
-                    rep: setDto.reps,
+                    set: setDto.set,
+                    rep: setDto.rep,
                     weightKg: setDto.weightKg,
                 }));
                 // Bulk save the sets
