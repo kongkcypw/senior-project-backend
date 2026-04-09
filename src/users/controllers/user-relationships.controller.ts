@@ -22,6 +22,14 @@ export class UserRelationshipsController {
         return this.userRelationshipsService.findAllTraineeByTrainerLineUserId(trainerLineUserId);
     }
 
+    @Get('trainee/:traineeId')
+    @Roles(UserRole.TRAINER)
+    async getTraineeDetail(
+        @Param('traineeId') traineeId: string,
+    ) {
+        return this.userRelationshipsService.getTraineeDetailById(parseInt(traineeId, 10));
+    }
+
     @Get('home-stats/:lineUserId')
     @Roles(UserRole.TRAINER)
     async getHomeStats(

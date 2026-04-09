@@ -29,6 +29,7 @@ import {
 } from "../dto/trainee-with-progress.dto";
 import { ScoreHistoryDto, ScoreHistoryPointDto } from "../dto/score-history.dto";
 import { HomeStatsDto } from "../dto/home-stats.dto";
+import { TraineeDetailDto } from "../dto/trainee-detail.dto";
 import { UserEntity } from "../entities/user.entity";
 import { NutritionPlanEntity } from "src/nutrition/entities/nutrition-plan.entity";
 
@@ -295,6 +296,105 @@ export class UserRelationshipsService {
             workout:   { total: wTotal, completed: wCompleted, incomplete: wIncomplete },
         };
     }
+
+    // -------------------------------------------------------------------------
+    // Trainee detail (full profile: nutrition + workout + scores)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the full trainee profile with today's nutrition detail and
+     * this week's workout completion status.
+     */
+    async getTraineeDetailById(traineeId: number): Promise<TraineeDetailDto> {
+        const trainee = await this.userRepository.findOne({ where: { id: traineeId } });
+        if (!trainee) {
+            throw new Error(`Trainee with id ${traineeId} not found`);
+        }
+
+        const daily = dailyWindow();
+        const weekly = weeklyWindow();
+        const monthly = monthlyWindow();
+
+        // Fetch all necessary data
+        const [totalRoutines, nutritionPlan] = await Promise.all([
+            this.workoutProgramRepository.countRoutinesByTrainee(trainee.lineUserId),
+            this.nutritionPlanRepository.findByLineUserId(trainee.lineUserId),
+        ]);
+
+        const [workoutDaysDaily, workoutDaysWeekly, workoutDaysMonthly, macrosToday, macrosWeekly, macrosMonthly] =
+            await Promise.all([
+                this.workoutHistoryRepository.countDistinctSessionDays(trainee.lineUserId, daily.from, daily.to),
+                this.workoutHistoryRepository.countDistinctSessionDays(trainee.lineUserId, weekly.from, weekly.to),
+                this.workoutHistoryRepository.countDistinctSessionDays(trainee.lineUserId, monthly.from, monthly.to),
+                this.mealHistoryRepository.sumMacrosInWindow(trainee.lineUserId, daily.from, daily.to),
+                this.mealHistoryRepository.sumMacrosInWindow(trainee.lineUserId, weekly.from, weekly.to),
+                this.mealHistoryRepository.sumMacrosInWindow(trainee.lineUserId, monthly.from, monthly.to),
+            ]);
+
+        const dailyWorkout   = computeWorkoutScore(workoutDaysDaily, totalRoutines);
+        const dailyNutrition = computeNutritionScore(macrosToday, nutritionPlan, 1);
+        const dailyTotal     = computeTotalScore(dailyWorkout, dailyNutrition);
+
+        const weeklyWorkout   = computeWorkoutScore(workoutDaysWeekly, totalRoutines);
+        const weeklyNutrition = computeNutritionScore(macrosWeekly, nutritionPlan, 7);
+        const weeklyTotal     = computeTotalScore(weeklyWorkout, weeklyNutrition);
+
+        const monthlyWorkout   = computeWorkoutScore(workoutDaysMonthly, totalRoutines);
+        const monthlyNutrition = computeNutritionScore(macrosMonthly, nutritionPlan, 30);
+        const monthlyTotal     = computeTotalScore(monthlyWorkout, monthlyNutrition);
+
+        // Compute last week's score for trend
+        const lastWeekly = lastWeeklyWindow();
+        const lastWeekWorkoutDays = await this.workoutHistoryRepository.countDistinctSessionDays(
+            trainee.lineUserId,
+            lastWeekly.from,
+            lastWeekly.to,
+        );
+        const lastWeekWorkoutScore = computeWorkoutScore(lastWeekWorkoutDays, totalRoutines);
+        const lastWeekMacros = await this.mealHistoryRepository.sumMacrosInWindow(
+            trainee.lineUserId,
+            lastWeekly.from,
+            lastWeekly.to,
+        );
+        const lastWeekNutritionScore = computeNutritionScore(lastWeekMacros, nutritionPlan, 7);
+        const lastWeeklyTotal = computeTotalScore(lastWeekWorkoutScore, lastWeekNutritionScore);
+
+        const trend = computeTrend(weeklyTotal, lastWeeklyTotal);
+
+        return {
+            id: trainee.id,
+            lineUserId: trainee.lineUserId,
+            displayName: trainee.displayName,
+            pictureUrl: trainee.pictureUrl ?? null,
+            role: trainee.role,
+            joinDate: trainee.createdAt ? trainee.createdAt.toISOString().split('T')[0] : '—',
+            calories: {
+                consumed: Math.round(macrosToday.calories),
+                goal: nutritionPlan?.totalCalories ?? 0,
+            },
+            macros: {
+                protein: Math.round(macrosToday.protein),
+                carbs: Math.round(macrosToday.carbohydrate),
+                fat: Math.round(macrosToday.fat),
+            },
+            macroTargets: {
+                protein: nutritionPlan?.protein ?? 0,
+                carbs: nutritionPlan?.carbohydrate ?? 0,
+                fat: nutritionPlan?.fat ?? 0,
+            },
+            weekWorkout: {
+                completed: Math.min(workoutDaysWeekly, totalRoutines),
+                total: totalRoutines,
+            },
+            scores: {
+                daily: { workout: dailyWorkout, nutrition: dailyNutrition, total: dailyTotal },
+                weekly: { workout: weeklyWorkout, nutrition: weeklyNutrition, total: weeklyTotal },
+                monthly: { workout: monthlyWorkout, nutrition: monthlyNutrition, total: monthlyTotal },
+            },
+            trend,
+        };
+    }
+
 
     // -------------------------------------------------------------------------
     // Trainees summary (lightweight — no score computation)
