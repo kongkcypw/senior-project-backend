@@ -22,12 +22,12 @@ export class UserRelationshipsController {
         return this.userRelationshipsService.findAllTraineeByTrainerLineUserId(trainerLineUserId);
     }
 
-    @Get('trainee/:traineeId')
+    @Get('trainee/:lineUserId')
     @Roles(UserRole.TRAINER)
     async getTraineeDetail(
-        @Param('traineeId') traineeId: string,
+        @Param('lineUserId') lineUserId: string,
     ) {
-        return this.userRelationshipsService.getTraineeDetailById(parseInt(traineeId, 10));
+        return this.userRelationshipsService.getTraineeDetailByLineUserId(lineUserId);
     }
 
     @Get('home-stats/:lineUserId')

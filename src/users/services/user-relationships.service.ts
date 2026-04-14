@@ -305,10 +305,10 @@ export class UserRelationshipsService {
      * Returns the full trainee profile with today's nutrition detail and
      * this week's workout completion status.
      */
-    async getTraineeDetailById(traineeId: number): Promise<TraineeDetailDto> {
-        const trainee = await this.userRepository.findOne({ where: { id: traineeId } });
+    async getTraineeDetailByLineUserId(lineUserId: string): Promise<TraineeDetailDto> {
+        const trainee = await this.userRepository.findOne({ where: { lineUserId } });
         if (!trainee) {
-            throw new Error(`Trainee with id ${traineeId} not found`);
+            throw new Error(`Trainee with lineUserId ${lineUserId} not found`);
         }
 
         const daily = dailyWindow();
