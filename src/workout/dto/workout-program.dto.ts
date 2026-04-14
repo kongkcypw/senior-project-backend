@@ -48,7 +48,8 @@ export class WorkoutProgramDto {
     updatedAt!: Date;
 
     static fromEntityToDto(rawData: WorkoutProgramEntity): WorkoutProgramDto {
-        const transformedDto = plainToInstance(WorkoutProgramDto, rawData);
-        return transformedDto;
+        return plainToInstance(WorkoutProgramDto, rawData, {
+            excludeExtraneousValues: true,
+        });
     }
 }
