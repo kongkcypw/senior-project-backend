@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { WorkoutProgramPlanRepository } from "../repositories/workout-program.repository";
 import { WorkoutProgramDto } from "../dto/workout-program.dto";
 
@@ -9,11 +9,17 @@ export class WorkoutProgramService {
     ) { }
 
     async getProgramPlanByPlanId(programPlanId: number): Promise<WorkoutProgramDto | null> {
-        const plan = await this.workoutProgramPlanRepository.findFullProgramByProgramPlanId(programPlanId);
-        if (!plan) {
-            return null;
+        try {
+            const plan = await this.workoutProgramPlanRepository.findFullProgramByProgramPlanId(programPlanId);
+            if (!plan) {
+                return null;
+            }
+            return WorkoutProgramDto.fromEntityToDto(plan);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            console.error('[WorkoutProgramService] getProgramPlanByPlanId error:', message);
+            throw new InternalServerErrorException(message);
         }
-        return WorkoutProgramDto.fromEntityToDto(plan);
     }
 
     async getProgramPlanByLineUserIdTrainee(lineUserId: string): Promise<WorkoutProgramDto[]> {
