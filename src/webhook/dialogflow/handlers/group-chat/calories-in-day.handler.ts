@@ -1,9 +1,9 @@
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
-import { IntentHandlerInterface } from "../interfaces/intent-handler.interface";
+import { IntentHandlerInterface } from "../../interfaces/intent-handler.interface";
 import { Injectable } from "@nestjs/common";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 import { MessageEvent } from "@line/bot-sdk";
-import { CaloriesInDayMessages } from "../messages/calories-in-day.message";
+import { CaloriesInDayMessages } from "../../messages/calories-in-day.message";
 import { NutritionPlanService } from "src/nutrition/services/nutrition-plan.service";
 import { MealHistoryService } from "src/nutrition/services/meal-history.service";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";

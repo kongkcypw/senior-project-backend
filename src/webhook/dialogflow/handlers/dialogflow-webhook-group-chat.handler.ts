@@ -1,16 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { DialogflowIntentName } from "../enums/dialogflow-intent-name";
-import { TriggerHandler } from "./trigger.handler";
+import { TriggerHandler } from "./group-chat/trigger.handler";
 import { MessageEvent } from "@line/bot-sdk";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 import { TestProfileMessages } from "../messages/test-profile.message";
-import { ManageProgramHandler } from "./manage-program.handler";
-import { CaloriesInDayHandler } from "./calories-in-day.handler";
-import { WorkoutProgramHandler } from "./workout-program.handler";
+import { ManageProgramHandler } from "./group-chat/manage-program.handler";
+import { CaloriesInDayHandler } from "./group-chat/calories-in-day.handler";
+import { WorkoutProgramHandler } from "./group-chat/workout-program.handler";
 
 @Injectable()
-export class DialogflowWebhookHandler {
+export class DialogflowWebhookGroupChatHandler {
     constructor(
         private readonly triggerHandler: TriggerHandler,
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,

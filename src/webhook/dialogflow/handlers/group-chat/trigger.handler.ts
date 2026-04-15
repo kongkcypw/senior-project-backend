@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { IntentHandlerInterface } from "../interfaces/intent-handler.interface";
+import { IntentHandlerInterface } from "../../interfaces/intent-handler.interface";
 import { Response } from "express";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { MessageEvent } from "@line/bot-sdk";

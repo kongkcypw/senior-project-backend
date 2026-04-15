@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { DialogflowClientService } from 'src/external/dialogflow-client/services/client.service';
 import { DialogflowConfigService } from 'src/external/dialogflow-client/services/config.service';
 import { MessageEvent } from '@line/bot-sdk';
-import { DialogflowWebhookHandler } from '../handlers/dialogflow-webhook.handler';
+import { DialogflowWebhookGroupChatHandler } from '../handlers/dialogflow-webhook-group-chat.handler';
 import { FallbackIntentService } from './fallback-intent.service';
+import { DialogflowWebhookPersonalChatHandler } from '../handlers/dialogflow-webhook-personal-chat.handler';
+import { ConfidenceFallbackThreshold } from '../constants/intent-detect-confidence';
 
 @Injectable()
 export class DialogflowWebhookService {
@@ -11,11 +13,12 @@ export class DialogflowWebhookService {
     constructor(
         private readonly dialogflowClientService: DialogflowClientService,
         private readonly dialogflowConfigService: DialogflowConfigService,
-        private readonly dialogflowWebhookHandler: DialogflowWebhookHandler,
+        private readonly dialogflowWebhookGroupChatHandler: DialogflowWebhookGroupChatHandler,
+        private readonly dialogflowWebhookPersonalChatHandler: DialogflowWebhookPersonalChatHandler,
         private readonly fallbackIntentService: FallbackIntentService,
     ) { }
 
-    async getFullfilmentTextAndReplyMessage(event: MessageEvent): Promise<void> {
+    async getFullfilmentTextAndReplyMessage(event: MessageEvent, isGroupChat: boolean): Promise<void> {
 
         if (event.message.type !== 'text') {
             return;
@@ -43,12 +46,11 @@ export class DialogflowWebhookService {
 
             console.log(`Dialogflow response for user ${event.source.userId}:`);
 
-            if (!result) {
-                return;
-            }
+            console.log(JSON.stringify(result, null, 2));
 
-            if (!result.intent) {
-                await this.fallbackIntentService.handleFallbackIntent(event.message.text, event);
+            if (!result || !result.intent || (result.intentDetectionConfidence && result.intentDetectionConfidence < ConfidenceFallbackThreshold)) {
+                // await this.fallbackIntentService.handleFallbackIntent(event.message.text, event);
+                console.log('No intent matched. Consider handling fallback intent.');
                 return;
             }
 
@@ -58,8 +60,13 @@ export class DialogflowWebhookService {
             }
 
             if (result.intent.displayName) {
-                await this.dialogflowWebhookHandler.handleIntent(result.intent.displayName, event, result.fulfillmentMessages ?? undefined, result.parameters);
+                if (isGroupChat) {
+                    await this.dialogflowWebhookGroupChatHandler.handleIntent(result.intent.displayName, event, result.fulfillmentMessages ?? undefined, result.parameters);
+                } else {
+                    await this.dialogflowWebhookPersonalChatHandler.handleIntent(result.intent.displayName, event, result.fulfillmentMessages ?? undefined, result.parameters);
+                }
             }
+
 
         } catch (error) {
             console.error('Error handling Dialogflow text event:', error);

@@ -38,11 +38,33 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     console.log('Handling Message Event:', event);
     console.log('Message Event Type:', event.message.type);
 
+    const isGroupChat = event.source.type === WebhookEventSourceType.GROUP;
+    const isPersonalChat = event.source.type === WebhookEventSourceType.USER;
+    console.log('Is Group Chat:', isGroupChat);
+    console.log('Is Personal Chat:', isPersonalChat);
+
+    if (isGroupChat) {
+      await this.handleGroupChatTextMessage(event);
+      return;
+    }
+
+    if (isPersonalChat) {
+      await this.handlePersonalChatTextMessage(event);
+      return;
+    }
+
     if (event.message.type === WebhookEventMessageType.IMAGE) {
       await this.handleImageMessage(event);
       return;
     }
+  }
 
+  async handleGroupChatTextMessage(event: MessageEvent): Promise<void> {
+    if (event.message.type !== WebhookEventMessageType.TEXT) {
+      return;
+    }
+
+    const isGroupChat = true;
     let isBotMentioned = false;
 
     if (event.message.type === WebhookEventMessageType.TEXT && event.message.mention) {
@@ -59,9 +81,16 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
         return;
       }
 
-      await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event);
+      await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event, isGroupChat);
     }
+  }
 
+  async handlePersonalChatTextMessage(event: MessageEvent): Promise<void> {
+    if (event.message.type !== WebhookEventMessageType.TEXT) {
+      return;
+    }
+    const isGroupChat = false;
+    await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event, isGroupChat);
   }
 
   async handleImageMessage(event: MessageEvent): Promise<void> {

@@ -1,31 +1,33 @@
 import { Injectable } from "@nestjs/common";
-import { IntentHandlerInterface } from "../interfaces/intent-handler.interface";
-import { MessageEvent } from "@line/bot-sdk";
+import { IntentHandlerInterface } from "../../interfaces/intent-handler.interface";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
-import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
-import { WorkoutProgramMessages } from "../messages/workout-program.message";
+import { MessageEvent } from "@line/bot-sdk";
+import { ManageProgramMessages } from "../../messages/manage-program.message";
+import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 
 @Injectable()
-export class WorkoutProgramHandler implements IntentHandlerInterface {
+export class ManageProgramHandler implements IntentHandlerInterface {
+
     constructor(
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
-        private readonly lineGroupMemberService: LineGroupMemberService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly lineGroupMemberService: LineGroupMemberService,
     ) { }
 
     async handle(event: MessageEvent): Promise<void> {
 
         const groupId = event.source.type === 'group' ? event.source.groupId : null;
         const userId = event.source.userId;
-        let navigatePath: string;
+        let navigatePathNutrition: string;
+        let navigatePathWorkout: string;
 
         if (!userId) {
             return;
         }
 
         if (!groupId) {
-            return;
+            return
         }
 
         const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
@@ -34,17 +36,13 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
             return;
         }
 
-        // Inside your service method
-        navigatePath = this.lineLiffNavigatePathService.getWorkoutProgramPage(trainee.lineUserId);
-        const payload = WorkoutProgramMessages(navigatePath);
+        navigatePathNutrition = this.lineLiffNavigatePathService.getManageNutritionProgramPage(trainee.lineUserId);
+        navigatePathWorkout = this.lineLiffNavigatePathService.getManageWorkoutProgramPage(trainee.lineUserId);
 
-        // LOG THE PAYLOAD
-        console.log("SENDING PAYLOAD:", JSON.stringify(payload, null, 2))
-
-        // TODO: Implement fetch workout program data
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            payload
+            ManageProgramMessages(navigatePathNutrition, navigatePathWorkout, trainee.displayName)
         );
     }
+
 }
