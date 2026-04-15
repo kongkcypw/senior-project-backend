@@ -1,16 +1,25 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { UserService } from 'src/users/services/user.service';
+import { Reflector } from '@nestjs/core';
 import { UserRole } from 'src/users/enums/user-role.enum';
 import { UserInfoDto } from 'src/users/dto/user-info.dto';
 import { UserRelationshipsService } from 'src/users/services/user-relationships.service';
+import { SKIP_TRAINER_GUARD_KEY } from '../decorators/skip-trainer-guard.decorator';
 
 @Injectable()
 export class AssignedTrainerGuard implements CanActivate {
 
-  // Inject the UserService to perform the database lookup
-  constructor(private readonly userRelationshipsService: UserRelationshipsService) { }
+  constructor(
+    private readonly userRelationshipsService: UserRelationshipsService,
+    private readonly reflector: Reflector,
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const skip = this.reflector.getAllAndOverride<boolean>(SKIP_TRAINER_GUARD_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (skip) return true;
+
     const request = context.switchToHttp().getRequest();
 
     // The authenticated viewer (placed by LiffJwtStrategy)

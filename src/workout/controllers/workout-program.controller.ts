@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { WorkoutProgramService } from "../services/workout-program.service";
 import { getProtectedGuards } from "src/utils/guards.util";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { UserRole } from "src/users/enums/user-role.enum";
+import { SkipAssignedTrainerGuard } from "src/auth/decorators/skip-trainer-guard.decorator";
 
 @Controller('workout-program')
 @UseGuards(...getProtectedGuards('liff-jwt'))
@@ -18,6 +19,7 @@ export class WorkoutProgramController {
         return this.workoutProgramService.getProgramPlanByLineUserIdTrainer(lineUserId);
     }
 
+    @SkipAssignedTrainerGuard()
     @Get('detail/:programId')
     getProgramById(
         @Param('programId') programId: string,
