@@ -14,6 +14,9 @@ import { WorkoutProgramHandler } from "./handlers/group-chat/workout-program.han
 import { RagApiModule } from "src/external/rag-api/rag-api.module";
 import { FallbackIntentService } from "./services/fallback-intent.service";
 import { DialogflowWebhookPersonalChatHandler } from "./handlers/dialogflow-webhook-personal-chat.handler";
+import { DialogflowFindTuneService } from "./services/dialogflow-find-tune.service";
+import { DialogflowFineTuneRunnerService } from "./services/dialogflow-fine-tune-runner.service";
+import { DialogflowFineTuneController } from "./controllers/dialogflow-fine-tune.controller";
 
 @Module({
     imports: [
@@ -25,6 +28,9 @@ import { DialogflowWebhookPersonalChatHandler } from "./handlers/dialogflow-webh
         NutritionModule,
         RagApiModule,
     ],
+    controllers: [
+        DialogflowFineTuneController,
+    ],
     providers: [
         DialogflowWebhookService,
         DialogflowWebhookGroupChatHandler,
@@ -34,10 +40,12 @@ import { DialogflowWebhookPersonalChatHandler } from "./handlers/dialogflow-webh
         CaloriesInDayHandler,
         WorkoutProgramHandler,
         FallbackIntentService,
+        DialogflowFindTuneService,
+        DialogflowFineTuneRunnerService,
     ],
     exports: [
-        DialogflowWebhookService, 
-        DialogflowWebhookGroupChatHandler, 
+        DialogflowWebhookService,
+        DialogflowWebhookGroupChatHandler,
         DialogflowWebhookPersonalChatHandler
     ],
 })

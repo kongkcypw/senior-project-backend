@@ -48,7 +48,12 @@ export class DialogflowWebhookService {
 
             console.log(JSON.stringify(result, null, 2));
 
-            if (!result || !result.intent || (result.intentDetectionConfidence && result.intentDetectionConfidence < ConfidenceFallbackThreshold)) {
+            // Route to RAG fallback when any of the following is true:
+            // 1. !result || !result.intent       — Dialogflow returned no result at all (unexpected error / empty response)
+            // 2. displayName === 'Default Fallback Intent' — Dialogflow is certain no trained intent matches (confidence: 1 but it is a fallback)
+            // 3. confidence < threshold           — Dialogflow guessed a real intent but is not confident enough;
+            //                                       treat ambiguous matches (e.g. "อยากปรับโปรแกรม..." hitting WorkoutProgram at 0.42) as fallback
+            if (!result || !result.intent || result.intent.displayName === 'Default Fallback Intent' || (result.intentDetectionConfidence ?? 0) < ConfidenceFallbackThreshold) {
                 // await this.fallbackIntentService.handleFallbackIntent(event.message.text, event);
                 console.log('No intent matched. Consider handling fallback intent.');
                 return;
