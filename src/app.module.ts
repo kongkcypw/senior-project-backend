@@ -16,6 +16,7 @@ import { CloudflareModule } from './external/cloudflare/cloudflare.module';
 import { AuthModule } from './auth/auth.module';
 import { LineLiffModule } from './external/line-liff/line-liff.module';
 import { WorkoutModule } from './workout/workout.module';
+import { FeatureFlagModule } from './feature-flag/feature-flag.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { WorkoutModule } from './workout/workout.module';
     LineGroupModule,
     NutritionModule,
     WorkoutModule,
+    FeatureFlagModule,
   ],
   controllers: [AppController],
   providers: [AppService],

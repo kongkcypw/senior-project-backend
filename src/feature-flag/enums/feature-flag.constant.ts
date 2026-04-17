@@ -1,0 +1,4 @@
+export enum FeatureFlagKey {
+    RAG_LLM_SERVICE = 'RAG-LLM-SERVICE',
+    VECTOR_EMBEDDING = 'VECTOR_EMBEDDING',
+}

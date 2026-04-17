@@ -17,6 +17,8 @@ import { DialogflowWebhookPersonalChatHandler } from "./handlers/dialogflow-webh
 import { DialogflowFindTuneService } from "./services/dialogflow-find-tune.service";
 import { DialogflowFineTuneRunnerService } from "./services/dialogflow-fine-tune-runner.service";
 import { DialogflowFineTuneController } from "./controllers/dialogflow-fine-tune.controller";
+import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
+import { FeatureDisableHandler } from "./handlers/global/feature-disable.handler";
 
 @Module({
     imports: [
@@ -27,6 +29,7 @@ import { DialogflowFineTuneController } from "./controllers/dialogflow-fine-tune
         LineGroupModule,
         NutritionModule,
         RagApiModule,
+        FeatureFlagModule,
     ],
     controllers: [
         DialogflowFineTuneController,
@@ -42,6 +45,7 @@ import { DialogflowFineTuneController } from "./controllers/dialogflow-fine-tune
         FallbackIntentService,
         DialogflowFindTuneService,
         DialogflowFineTuneRunnerService,
+        FeatureDisableHandler,
     ],
     exports: [
         DialogflowWebhookService,

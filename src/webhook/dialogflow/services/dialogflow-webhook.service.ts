@@ -6,6 +6,9 @@ import { DialogflowWebhookGroupChatHandler } from '../handlers/dialogflow-webhoo
 import { FallbackIntentService } from './fallback-intent.service';
 import { DialogflowWebhookPersonalChatHandler } from '../handlers/dialogflow-webhook-personal-chat.handler';
 import { ConfidenceFallbackThreshold } from '../constants/intent-detect-confidence';
+import { FeatureFlagService } from 'src/feature-flag/services/feature-flag.service';
+import { FeatureFlagKey } from 'src/feature-flag/enums/feature-flag.constant';
+import { FeatureDisableHandler } from '../handlers/global/feature-disable.handler';
 
 @Injectable()
 export class DialogflowWebhookService {
@@ -16,6 +19,8 @@ export class DialogflowWebhookService {
         private readonly dialogflowWebhookGroupChatHandler: DialogflowWebhookGroupChatHandler,
         private readonly dialogflowWebhookPersonalChatHandler: DialogflowWebhookPersonalChatHandler,
         private readonly fallbackIntentService: FallbackIntentService,
+        private readonly featureFlagService: FeatureFlagService,
+        private readonly featureDisableHandler: FeatureDisableHandler,
     ) { }
 
     async getFullfilmentTextAndReplyMessage(event: MessageEvent, isGroupChat: boolean): Promise<void> {
@@ -54,7 +59,12 @@ export class DialogflowWebhookService {
             // 3. confidence < threshold           — Dialogflow guessed a real intent but is not confident enough;
             //                                       treat ambiguous matches (e.g. "อยากปรับโปรแกรม..." hitting WorkoutProgram at 0.42) as fallback
             if (!result || !result.intent || result.intent.displayName === 'Default Fallback Intent' || (result.intentDetectionConfidence ?? 0) < ConfidenceFallbackThreshold) {
-                // await this.fallbackIntentService.handleFallbackIntent(event.message.text, event);
+                const isRagEnabled = await this.featureFlagService.isEnabled(FeatureFlagKey.RAG_LLM_SERVICE);
+                if (!isRagEnabled) {
+                    await this.featureDisableHandler.handle(event);
+                    return;
+                }
+                await this.fallbackIntentService.handleFallbackIntent(event.message.text, event);
                 console.log('No intent matched. Consider handling fallback intent.');
                 return;
             }
