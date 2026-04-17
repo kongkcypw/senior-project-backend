@@ -26,4 +26,21 @@ export class FeatureRateLimitService {
 
         return record.usagePerDay >= record.maxPerDay;
     }
+
+    async incrementUsage(key: FeatureRateLimitKey, count: number = 1): Promise<void> {
+        const record = await this.featureRateLimitRepository.findByKey(key);
+        if (!record) return;
+
+        const today = new Date().toISOString().split('T')[0];
+        const lastReset = new Date(record.lastResetDate).toISOString().split('T')[0];
+
+        if (lastReset < today) {
+            record.usagePerDay = count;
+            record.lastResetDate = new Date();
+        } else {
+            record.usagePerDay += count;
+        }
+
+        await this.featureRateLimitRepository.save(record);
+    }
 }

@@ -10,7 +10,10 @@ export class RagAgentService {
         private readonly httpService: HttpService,
     ) { }
 
-    async getRAGResponse(message: string, line_user_id: string, role: string): Promise<string> {
+    async getRAGResponse(message: string, line_user_id: string, role: string): Promise<{
+    message: string;
+    gemini_call_count: number;
+    }> {
         try {
             const url = `${this.ragApiConfigService.ragApiUrl}/agent`;
             const observable = this.httpService.post(url, {
@@ -19,10 +22,16 @@ export class RagAgentService {
                 user_role: role,
             });
             const response = await lastValueFrom(observable);
-            return response.data.response;
+            return {
+                message: response.data.response,
+                gemini_call_count: response.data.gemini_call_count
+            };
         } catch (error) {
             console.error('Error getting RAG response:', error);
-            return 'ขออภัย ไม่สามารถเชื่อมต่อกับระบบ RAG ได้ในขณะนี้';
+            return {
+                message: 'ขุนพันธ์ขออภัยครับ เกิดข้อผิดพลาดในการประมวลผล กรุณาลองใหม่อีกครั้งภายหลังครับ',
+                gemini_call_count: 0
+            };
         }
     }
 }
