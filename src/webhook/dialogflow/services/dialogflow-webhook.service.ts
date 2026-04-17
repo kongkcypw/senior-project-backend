@@ -9,6 +9,9 @@ import { ConfidenceFallbackThreshold } from '../constants/intent-detect-confiden
 import { FeatureFlagService } from 'src/feature-flag/services/feature-flag.service';
 import { FeatureFlagKey } from 'src/feature-flag/enums/feature-flag.constant';
 import { FeatureDisableHandler } from '../handlers/global/feature-disable.handler';
+import { FeatureRateLimitService } from 'src/feature-rate-limit/services/feature-rate-limit.service';
+import { FeatureRateLimitKey } from 'src/feature-rate-limit/enums/feature-rate-limit.enum';
+import { FeatureReachRateLimitHandler } from '../handlers/global/feature-reach-rate-limit.handler';
 
 @Injectable()
 export class DialogflowWebhookService {
@@ -21,6 +24,8 @@ export class DialogflowWebhookService {
         private readonly fallbackIntentService: FallbackIntentService,
         private readonly featureFlagService: FeatureFlagService,
         private readonly featureDisableHandler: FeatureDisableHandler,
+        private readonly featureRateLimitService: FeatureRateLimitService,
+        private readonly featureReachRateLimitHandler: FeatureReachRateLimitHandler,
     ) { }
 
     async getFullfilmentTextAndReplyMessage(event: MessageEvent, isGroupChat: boolean): Promise<void> {
@@ -62,6 +67,13 @@ export class DialogflowWebhookService {
                 const isRagEnabled = await this.featureFlagService.isEnabled(FeatureFlagKey.RAG_LLM_SERVICE);
                 if (!isRagEnabled) {
                     await this.featureDisableHandler.handle(event);
+                    console.warn('RAG LLM Service is disabled. Handling fallback intent with feature disable handler.');
+                    return;
+                }
+                const isRateLimitReached = await this.featureRateLimitService.isLimitReached(FeatureRateLimitKey.RAG_LLM_SERVICE);
+                if (isRateLimitReached) {
+                    await this.featureReachRateLimitHandler.handle(event);
+                    console.warn('RAG LLM Service rate limit reached. Handling fallback intent with feature reach rate limit handler.');
                     return;
                 }
                 await this.fallbackIntentService.handleFallbackIntent(event.message.text, event);

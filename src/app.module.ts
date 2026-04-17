@@ -17,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
 import { LineLiffModule } from './external/line-liff/line-liff.module';
 import { WorkoutModule } from './workout/workout.module';
 import { FeatureFlagModule } from './feature-flag/feature-flag.module';
+import { FeatureRateLimitModule } from './feature-rate-limit/feature-rate-limit.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { FeatureFlagModule } from './feature-flag/feature-flag.module';
     NutritionModule,
     WorkoutModule,
     FeatureFlagModule,
+    FeatureRateLimitModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -19,6 +19,8 @@ import { DialogflowFineTuneRunnerService } from "./services/dialogflow-fine-tune
 import { DialogflowFineTuneController } from "./controllers/dialogflow-fine-tune.controller";
 import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
 import { FeatureDisableHandler } from "./handlers/global/feature-disable.handler";
+import { FeatureRateLimitModule } from "src/feature-rate-limit/feature-rate-limit.module";
+import { FeatureReachRateLimitHandler } from "./handlers/global/feature-reach-rate-limit.handler";
 
 @Module({
     imports: [
@@ -30,6 +32,7 @@ import { FeatureDisableHandler } from "./handlers/global/feature-disable.handler
         NutritionModule,
         RagApiModule,
         FeatureFlagModule,
+        FeatureRateLimitModule,
     ],
     controllers: [
         DialogflowFineTuneController,
@@ -46,6 +49,7 @@ import { FeatureDisableHandler } from "./handlers/global/feature-disable.handler
         DialogflowFindTuneService,
         DialogflowFineTuneRunnerService,
         FeatureDisableHandler,
+        FeatureReachRateLimitHandler,
     ],
     exports: [
         DialogflowWebhookService,
