@@ -3,7 +3,7 @@ import { DataSource } from "typeorm";;
 import { WorkoutRoutineEntity } from "src/workout/entities/workout-routine.entity";
 import { MockWorkoutPrograms } from "./08-workout-program.seed";
 
-type WorkoutRoutineSeed = Omit<WorkoutRoutineEntity, 'createdAt' | 'updatedAt' | 'workoutProgram' | 'exercises' | 'workoutHistories'>;
+type WorkoutRoutineSeed = Omit<WorkoutRoutineEntity, 'createdAt' | 'updatedAt' | 'description' | 'workoutProgram' | 'exercises' | 'workoutHistories'>;
 
 export class MockWorkoutRoutines {
     // --- Latif PPL (program 1) ---

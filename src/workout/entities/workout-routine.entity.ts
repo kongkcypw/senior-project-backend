@@ -15,7 +15,10 @@ export class WorkoutRoutineEntity {
   name: string; // Renamed from dayName
 
   @Column({ name: 'order_in_program', type: 'integer', default: 1, nullable: false })
-  orderInProgram: number; // New column
+  orderInProgram: number;
+
+  @Column({ name: 'description', type: 'text', nullable: true })
+  description: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
