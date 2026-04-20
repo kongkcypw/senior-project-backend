@@ -1,8 +1,17 @@
-import { Controller, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from "@nestjs/common";
 import { getProtectedGuards } from "src/utils/guards.util";
+import { WorkoutHistoryService } from "../services/workout-history.service";
 
 @Controller('workout-history')
 @UseGuards(...getProtectedGuards('liff-jwt'))
 export class WorkoutHistoryController {
-    constructor() {}
+    constructor(private readonly workoutHistoryService: WorkoutHistoryService) {}
+
+    @Get('latest-session/:routineId')
+    getLatestSession(
+        @Param('routineId', ParseIntPipe) routineId: number,
+        @Query('lineUserId') lineUserId: string,
+    ) {
+        return this.workoutHistoryService.getLatestSession(lineUserId, routineId);
+    }
 }

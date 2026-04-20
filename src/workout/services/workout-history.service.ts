@@ -6,4 +6,8 @@ export class WorkoutHistoryService {
     constructor(
         private readonly workoutHistoryRepository: WorkoutHistoryRepository,
     ) {}
+
+    getLatestSession(lineUserId: string, routineId: number) {
+        return this.workoutHistoryRepository.findLatestSession(lineUserId, routineId);
+    }
 }

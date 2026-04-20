@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity';
-import { WorkoutRoutineEntity } from './workout-routine.entity'; // Renamed import
+import { WorkoutRoutineEntity } from './workout-routine.entity';
+import { WorkoutExerciseEntity } from './workout-exercise.entity';
 
 @Entity('workout_history')
 export class WorkoutHistoryEntity {
@@ -13,17 +14,23 @@ export class WorkoutHistoryEntity {
   @Column({ name: 'routine_id', type: 'integer', nullable: false })
   routineId: number;
 
-  @Column({ name: 'performed_at', type: 'timestamp', nullable: false })
-  performedAt: Date;
+  @Column({ name: 'started_at', type: 'timestamp', nullable: false })
+  startedAt: Date;
 
-  @Column({ name: 'set_number', type: 'integer', nullable: false })
+  @Column({ name: 'finished_at', type: 'timestamp', nullable: false })
+  finishedAt: Date;
+
+  @Column({ name: 'set', type: 'integer', nullable: false })
   setNumber: number;
 
-  @Column({ name: 'actual_reps', type: 'integer', nullable: false })
+  @Column({ name: 'rep', type: 'integer', nullable: false })
   actualReps: number;
 
-  @Column({ name: 'actual_weight_kg', type: 'float', nullable: false })
+  @Column({ name: 'weight_kg', type: 'float', nullable: false })
   actualWeightKg: number;
+
+  @Column({ name: 'exercise_id', type: 'integer', nullable: false })
+  exerciseId: number;
 
   @Column({ name: 'notes', type: 'varchar', nullable: true })
   notes: string | null;
@@ -41,4 +48,8 @@ export class WorkoutHistoryEntity {
   @ManyToOne(() => WorkoutRoutineEntity, (routine) => routine.workoutHistories, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'routine_id' })
   workoutRoutine: WorkoutRoutineEntity;
+
+  @ManyToOne(() => WorkoutExerciseEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'exercise_id' })
+  workoutExercise: WorkoutExerciseEntity;
 }

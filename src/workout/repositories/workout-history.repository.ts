@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
+import { Between, DataSource, Repository } from "typeorm";
 import { WorkoutHistoryEntity } from "../entities/workout-history.entity";
 
 export type TruncUnit = 'day' | 'week' | 'month';
@@ -37,6 +37,33 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
      * Returns a Map whose key is the bucket start timestamp (ISO string) and
      * whose value is the number of distinct days the trainee trained in that bucket.
      */
+    async findLatestSession(
+        lineUserId: string,
+        routineId: number,
+    ): Promise<{ performedAt: Date; sets: { setNumber: number; actualReps: number; actualWeightKg: number }[] } | null> {
+        const latest = await this.findOne({
+            where: { lineUserId, routineId },
+            order: { finishedAt: 'DESC' },
+        });
+
+        if (!latest) return null;
+
+        const dayStart = new Date(latest.finishedAt);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(latest.finishedAt);
+        dayEnd.setHours(23, 59, 59, 999);
+
+        const sets = await this.find({
+            where: { lineUserId, routineId, finishedAt: Between(dayStart, dayEnd) },
+            order: { setNumber: 'ASC' },
+        });
+
+        return {
+            performedAt: latest.finishedAt,
+            sets: sets.map(s => ({ setNumber: s.setNumber, actualReps: s.actualReps, actualWeightKg: s.actualWeightKg })),
+        };
+    }
+
     async countDaysGroupedByBucket(
         lineUserId: string,
         from: Date,
@@ -44,11 +71,11 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         truncUnit: TruncUnit,
     ): Promise<Map<string, number>> {
         const rows = await this.createQueryBuilder('wh')
-            .select(`DATE_TRUNC('${truncUnit}', wh.performed_at)`, 'bucket')
-            .addSelect('COUNT(DISTINCT DATE(wh.performed_at))', 'count')
+            .select(`DATE_TRUNC('${truncUnit}', wh.finished_at)`, 'bucket')
+            .addSelect('COUNT(DISTINCT DATE(wh.finished_at))', 'count')
             .where('wh.line_user_id = :lineUserId', { lineUserId })
-            .andWhere('wh.performed_at >= :from', { from })
-            .andWhere('wh.performed_at < :to', { to })
+            .andWhere('wh.finished_at >= :from', { from })
+            .andWhere('wh.finished_at < :to', { to })
             .groupBy('bucket')
             .getRawMany<{ bucket: Date; count: string }>();
 

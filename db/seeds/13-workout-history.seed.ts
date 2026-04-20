@@ -3,12 +3,18 @@ import { DataSource } from "typeorm";
 import { Seeder } from "typeorm-extension";
 import { MockUsers } from "./01-users.seed";
 import { MockWorkoutRoutines } from "./09-workout-routine.seed";
+import { MockWorkoutExerciseDetails } from "./10-workout-exercise-detail.seed";
 
-type WorkoutHistorySeedType = Omit<WorkoutHistoryEntity, 'createdAt' | 'updatedAt' | 'user' | 'workoutRoutine'>;
+type WorkoutHistorySeedType = Omit<WorkoutHistoryEntity, 'createdAt' | 'updatedAt' | 'user' | 'workoutRoutine' | 'workoutExercise'>;
 
-// Helper to create a Date at a specific time on a calendar day
-function at(year: number, month: number, date: number, hour = 9): Date {
-    return new Date(year, month - 1, date, hour, 0, 0);
+// Creates a Date at a specific time on a calendar day
+function at(year: number, month: number, date: number, hour = 9, minute = 0): Date {
+    return new Date(year, month - 1, date, hour, minute, 0);
+}
+
+// Returns finishedAt by adding seconds to startedAt (default 90 s per set)
+function fin(start: Date, seconds = 90): Date {
+    return new Date(start.getTime() + seconds * 1000);
 }
 
 // All dates relative to today: 2026-04-18 (Friday)
@@ -28,19 +34,19 @@ export class MockWorkoutHistory {
     // -----------------------------------------------------------------------
     static readonly LATIF_SETS: WorkoutHistorySeedType[] = [
         // Apr 1 – Push
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PUSH_001.id, performedAt: at(2026, 4, 1), setNumber: 1, actualReps: 10, actualWeightKg: 60, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PUSH_001.id, performedAt: at(2026, 4, 1), setNumber: 2, actualReps: 8,  actualWeightKg: 65, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PUSH_001.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_001_BENCH_PRESS.id, startedAt: at(2026, 4, 1, 9, 0),  finishedAt: fin(at(2026, 4, 1, 9, 0)),  setNumber: 1, actualReps: 10, actualWeightKg: 60,  notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PUSH_001.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_001_BENCH_PRESS.id, startedAt: at(2026, 4, 1, 9, 3),  finishedAt: fin(at(2026, 4, 1, 9, 3)),  setNumber: 2, actualReps: 8,  actualWeightKg: 65,  notes: null },
         // Apr 5 – Pull
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PULL_002.id, performedAt: at(2026, 4, 5), setNumber: 1, actualReps: 8,  actualWeightKg: 100, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PULL_002.id, performedAt: at(2026, 4, 5), setNumber: 2, actualReps: 6,  actualWeightKg: 110, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PULL_002.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_003_DEADLIFT.id,    startedAt: at(2026, 4, 5, 9, 0),  finishedAt: fin(at(2026, 4, 5, 9, 0)),  setNumber: 1, actualReps: 8,  actualWeightKg: 100, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PULL_002.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_003_DEADLIFT.id,    startedAt: at(2026, 4, 5, 9, 3),  finishedAt: fin(at(2026, 4, 5, 9, 3)),  setNumber: 2, actualReps: 6,  actualWeightKg: 110, notes: null },
         // Apr 14 – Push (this week)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PUSH_001.id, performedAt: at(2026, 4, 14), setNumber: 1, actualReps: 10, actualWeightKg: 60, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PUSH_001.id, performedAt: at(2026, 4, 14), setNumber: 2, actualReps: 9,  actualWeightKg: 62, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PUSH_001.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_001_BENCH_PRESS.id, startedAt: at(2026, 4, 14, 9, 0), finishedAt: fin(at(2026, 4, 14, 9, 0)), setNumber: 1, actualReps: 10, actualWeightKg: 60,  notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PUSH_001.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_001_BENCH_PRESS.id, startedAt: at(2026, 4, 14, 9, 3), finishedAt: fin(at(2026, 4, 14, 9, 3)), setNumber: 2, actualReps: 9,  actualWeightKg: 62,  notes: null },
         // Apr 16 – Pull (this week)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PULL_002.id, performedAt: at(2026, 4, 16), setNumber: 1, actualReps: 8,  actualWeightKg: 100, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_PULL_002.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_003_DEADLIFT.id,    startedAt: at(2026, 4, 16, 9, 0), finishedAt: fin(at(2026, 4, 16, 9, 0)), setNumber: 1, actualReps: 8,  actualWeightKg: 100, notes: null },
         // Apr 18 – Legs (this week, today)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_LEGS_003.id, performedAt: at(2026, 4, 18), setNumber: 1, actualReps: 12, actualWeightKg: 80,  notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_LEGS_003.id, performedAt: at(2026, 4, 18), setNumber: 2, actualReps: 10, actualWeightKg: 85,  notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_LEGS_003.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_004_SQUAT.id,        startedAt: at(2026, 4, 18, 9, 0), finishedAt: fin(at(2026, 4, 18, 9, 0)), setNumber: 1, actualReps: 12, actualWeightKg: 80,  notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_003.lineUserId, routineId: MockWorkoutRoutines.DAY_LEGS_003.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_004_SQUAT.id,        startedAt: at(2026, 4, 18, 9, 3), finishedAt: fin(at(2026, 4, 18, 9, 3)), setNumber: 2, actualReps: 10, actualWeightKg: 85,  notes: null },
     ];
 
     // -----------------------------------------------------------------------
@@ -50,23 +56,23 @@ export class MockWorkoutHistory {
     // -----------------------------------------------------------------------
     static readonly ARISA_SETS: WorkoutHistorySeedType[] = [
         // Apr 4 – Push
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, performedAt: at(2026, 4, 4), setNumber: 1, actualReps: 12, actualWeightKg: 40, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, performedAt: at(2026, 4, 4), setNumber: 2, actualReps: 10, actualWeightKg: 42, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, performedAt: at(2026, 4, 4), setNumber: 3, actualReps: 10, actualWeightKg: 42, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_005_INCLINE_BENCH.id,  startedAt: at(2026, 4, 4, 9, 0),  finishedAt: fin(at(2026, 4, 4, 9, 0)),  setNumber: 1, actualReps: 12, actualWeightKg: 40, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_005_INCLINE_BENCH.id,  startedAt: at(2026, 4, 4, 9, 3),  finishedAt: fin(at(2026, 4, 4, 9, 3)),  setNumber: 2, actualReps: 10, actualWeightKg: 42, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_005_INCLINE_BENCH.id,  startedAt: at(2026, 4, 4, 9, 6),  finishedAt: fin(at(2026, 4, 4, 9, 6)),  setNumber: 3, actualReps: 10, actualWeightKg: 42, notes: null },
         // Apr 8 – Pull
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PULL_005.id, performedAt: at(2026, 4, 8), setNumber: 1, actualReps: 10, actualWeightKg: 50, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PULL_005.id, performedAt: at(2026, 4, 8), setNumber: 2, actualReps: 8,  actualWeightKg: 55, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PULL_005.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_006_LAT_PULLDOWN.id,   startedAt: at(2026, 4, 8, 9, 0),  finishedAt: fin(at(2026, 4, 8, 9, 0)),  setNumber: 1, actualReps: 10, actualWeightKg: 50, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PULL_005.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_006_LAT_PULLDOWN.id,   startedAt: at(2026, 4, 8, 9, 3),  finishedAt: fin(at(2026, 4, 8, 9, 3)),  setNumber: 2, actualReps: 8,  actualWeightKg: 55, notes: null },
         // Apr 14 – Push (this week)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, performedAt: at(2026, 4, 14), setNumber: 1, actualReps: 12, actualWeightKg: 42, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, performedAt: at(2026, 4, 14), setNumber: 2, actualReps: 10, actualWeightKg: 45, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, performedAt: at(2026, 4, 14), setNumber: 3, actualReps: 10, actualWeightKg: 45, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_005_INCLINE_BENCH.id,  startedAt: at(2026, 4, 14, 9, 0), finishedAt: fin(at(2026, 4, 14, 9, 0)), setNumber: 1, actualReps: 12, actualWeightKg: 42, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_005_INCLINE_BENCH.id,  startedAt: at(2026, 4, 14, 9, 3), finishedAt: fin(at(2026, 4, 14, 9, 3)), setNumber: 2, actualReps: 10, actualWeightKg: 45, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PUSH_004.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_005_INCLINE_BENCH.id,  startedAt: at(2026, 4, 14, 9, 6), finishedAt: fin(at(2026, 4, 14, 9, 6)), setNumber: 3, actualReps: 10, actualWeightKg: 45, notes: null },
         // Apr 16 – Pull (this week)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PULL_005.id, performedAt: at(2026, 4, 16), setNumber: 1, actualReps: 10, actualWeightKg: 52, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PULL_005.id, performedAt: at(2026, 4, 16), setNumber: 2, actualReps: 8,  actualWeightKg: 57, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PULL_005.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_006_LAT_PULLDOWN.id,   startedAt: at(2026, 4, 16, 9, 0), finishedAt: fin(at(2026, 4, 16, 9, 0)), setNumber: 1, actualReps: 10, actualWeightKg: 52, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_PULL_005.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_006_LAT_PULLDOWN.id,   startedAt: at(2026, 4, 16, 9, 3), finishedAt: fin(at(2026, 4, 16, 9, 3)), setNumber: 2, actualReps: 8,  actualWeightKg: 57, notes: null },
         // Apr 18 – Legs (this week, today)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_LEGS_006.id, performedAt: at(2026, 4, 18), setNumber: 1, actualReps: 15, actualWeightKg: 60, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_LEGS_006.id, performedAt: at(2026, 4, 18), setNumber: 2, actualReps: 12, actualWeightKg: 65, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_LEGS_006.id, performedAt: at(2026, 4, 18), setNumber: 3, actualReps: 10, actualWeightKg: 70, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_LEGS_006.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_007_LEG_PRESS.id,      startedAt: at(2026, 4, 18, 9, 0), finishedAt: fin(at(2026, 4, 18, 9, 0)), setNumber: 1, actualReps: 15, actualWeightKg: 60, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_LEGS_006.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_007_LEG_PRESS.id,      startedAt: at(2026, 4, 18, 9, 3), finishedAt: fin(at(2026, 4, 18, 9, 3)), setNumber: 2, actualReps: 12, actualWeightKg: 65, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_004.lineUserId, routineId: MockWorkoutRoutines.ARISA_LEGS_006.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_007_LEG_PRESS.id,      startedAt: at(2026, 4, 18, 9, 6), finishedAt: fin(at(2026, 4, 18, 9, 6)), setNumber: 3, actualReps: 10, actualWeightKg: 70, notes: null },
     ];
 
     // -----------------------------------------------------------------------
@@ -76,11 +82,11 @@ export class MockWorkoutHistory {
     // -----------------------------------------------------------------------
     static readonly TAWAN_SETS: WorkoutHistorySeedType[] = [
         // Apr 16 – Upper A (this week)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_005.lineUserId, routineId: MockWorkoutRoutines.TAWAN_UPPER_A_007.id, performedAt: at(2026, 4, 16), setNumber: 1, actualReps: 10, actualWeightKg: 55, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_005.lineUserId, routineId: MockWorkoutRoutines.TAWAN_UPPER_A_007.id, performedAt: at(2026, 4, 16), setNumber: 2, actualReps: 8,  actualWeightKg: 60, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_005.lineUserId, routineId: MockWorkoutRoutines.TAWAN_UPPER_A_007.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_008_BENCH_PRESS_TAWAN.id, startedAt: at(2026, 4, 16, 9, 0), finishedAt: fin(at(2026, 4, 16, 9, 0)), setNumber: 1, actualReps: 10, actualWeightKg: 55, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_005.lineUserId, routineId: MockWorkoutRoutines.TAWAN_UPPER_A_007.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_008_BENCH_PRESS_TAWAN.id, startedAt: at(2026, 4, 16, 9, 3), finishedAt: fin(at(2026, 4, 16, 9, 3)), setNumber: 2, actualReps: 8,  actualWeightKg: 60, notes: null },
         // Apr 18 – Upper B (this week, today)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_005.lineUserId, routineId: MockWorkoutRoutines.TAWAN_UPPER_B_008.id, performedAt: at(2026, 4, 18), setNumber: 1, actualReps: 10, actualWeightKg: 50, notes: null },
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_005.lineUserId, routineId: MockWorkoutRoutines.TAWAN_UPPER_B_008.id, performedAt: at(2026, 4, 18), setNumber: 2, actualReps: 8,  actualWeightKg: 55, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_005.lineUserId, routineId: MockWorkoutRoutines.TAWAN_UPPER_B_008.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_009_SEATED_OHP.id,        startedAt: at(2026, 4, 18, 9, 0), finishedAt: fin(at(2026, 4, 18, 9, 0)), setNumber: 1, actualReps: 10, actualWeightKg: 50, notes: null },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_005.lineUserId, routineId: MockWorkoutRoutines.TAWAN_UPPER_B_008.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_009_SEATED_OHP.id,        startedAt: at(2026, 4, 18, 9, 3), finishedAt: fin(at(2026, 4, 18, 9, 3)), setNumber: 2, actualReps: 8,  actualWeightKg: 55, notes: null },
     ];
 
     // -----------------------------------------------------------------------
@@ -90,7 +96,7 @@ export class MockWorkoutHistory {
     // -----------------------------------------------------------------------
     static readonly NUCH_SETS: WorkoutHistorySeedType[] = [
         // Apr 18 – Full Body A (today only)
-        { id: id(), lineUserId: MockUsers.TRAINEE_USER_006.lineUserId, routineId: MockWorkoutRoutines.NUCH_FULL_A_011.id, performedAt: at(2026, 4, 18), setNumber: 1, actualReps: 10, actualWeightKg: 30, notes: 'First session' },
+        { id: id(), lineUserId: MockUsers.TRAINEE_USER_006.lineUserId, routineId: MockWorkoutRoutines.NUCH_FULL_A_011.id, exerciseId: MockWorkoutExerciseDetails.EXERCISE_010_GOBLET_SQUAT.id, startedAt: at(2026, 4, 18, 9, 0), finishedAt: fin(at(2026, 4, 18, 9, 0)), setNumber: 1, actualReps: 10, actualWeightKg: 30, notes: 'First session' },
     ];
 
     static readonly AllSets: WorkoutHistorySeedType[] = [
