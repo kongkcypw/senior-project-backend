@@ -13,9 +13,6 @@ import { WorkoutRoutineService } from "./services/workout-routine.service";
 import { WorkoutExerciseTemplateController } from "./controllers/workout-exercise-template.controller";
 import { WorkoutExerciseTemplateService } from "./services/workout-exercise-template.service";
 import { WorkoutExerciseTemplateRepository } from "./repositories/workout-exercise-template.repository";
-import { WorkoutRoutineTemplateRepository } from "./repositories/workout-routine-template.repository";
-import { WorkoutRoutineTemplateService } from "./services/workout-routine-template.service";
-import { WorkoutRoutineTemplateController } from "./controllers/workout-routine-template.controller";
 import { WorkoutExerciseSetRepository } from "./repositories/workout-exercise-set.repository";
 
 @Module({
@@ -25,7 +22,6 @@ import { WorkoutExerciseSetRepository } from "./repositories/workout-exercise-se
         WorkoutProgramController,
         WorkoutRoutineController,
         WorkoutExerciseTemplateController,
-        WorkoutRoutineTemplateController,
     ],
     providers: [
         WorkoutRoutineRepository,
@@ -36,9 +32,7 @@ import { WorkoutExerciseSetRepository } from "./repositories/workout-exercise-se
         WorkoutProgramService,
         WorkoutRoutineService,
         WorkoutExerciseTemplateRepository,
-        WorkoutRoutineTemplateRepository,
         WorkoutExerciseTemplateService,
-        WorkoutRoutineTemplateService,
         WorkoutExerciseSetRepository,
     ],
     exports: [WorkoutHistoryRepository, WorkoutProgramPlanRepository],

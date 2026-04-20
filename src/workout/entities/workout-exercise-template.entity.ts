@@ -1,33 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { WorkoutRoutineTemplateEntity } from './workout-routine-template.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('workout_exercise_template')
 export class WorkoutExerciseTemplateEntity {
     @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column({ name: 'routine_template_id', type: 'integer', nullable: true })
-    routineTemplateId: number | null;
+    id!: number;
 
     @Column({ name: 'name', type: 'varchar', nullable: false })
-    name: string;
-
-    @Column({ name: 'rest_time_second', type: 'integer', nullable: true })
-    restTimeSecond: number | null;
+    name!: string;
 
     @Column({ name: 'image_url', type: 'varchar', nullable: true })
-    imageUrl: string | null;
-
-    @Column({ name: 'order_in_routine', type: 'integer', nullable: true })
-    orderInRoutine: number | null;
+    imageUrl!: string | null;
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
-    createdAt: Date;
+    createdAt!: Date;
 
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
-    updatedAt: Date;
-
-    @ManyToOne(() => WorkoutRoutineTemplateEntity, (routine) => routine.exerciseTemplates, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'routine_template_id' })
-    workoutRoutineTemplate: WorkoutRoutineTemplateEntity;
+    updatedAt!: Date;
 }

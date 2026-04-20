@@ -12,16 +12,10 @@ export class WorkoutExerciseTemplateDto {
     @Expose()
     imageUrl: string | null;
 
-    @Expose()
-    restTimeSecond: number | null;
-
     // Use the @Type decorator and Expose the array property directly
     @Expose()
     @Type(() => WorkoutExerciseSetDto)
-    sets: Array<WorkoutExerciseSetDto>; // Removed default value here
-
-    @Expose()
-    orderInRoutine: number | null;
+    sets: Array<WorkoutExerciseSetDto>;
 
     @Expose()
     isTemplate: true = true;
