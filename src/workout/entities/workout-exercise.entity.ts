@@ -15,8 +15,8 @@ export class WorkoutExerciseEntity {
 
   // --- REMOVED fixed prescription columns (rep, set, weightKg) ---
 
-  @Column({ name: 'rest_time_second', type: 'integer', nullable: true })
-  restTimeSecond: number | null;
+  @Column({ name: 'description', type: 'text', nullable: true })
+  description: string | null;
 
   @Column({ name: 'image_url', type: 'varchar', nullable: true })
   imageUrl: string | null;

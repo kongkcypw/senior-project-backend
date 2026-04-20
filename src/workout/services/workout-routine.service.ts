@@ -67,7 +67,7 @@ export class WorkoutRoutineService {
                 routineId: savedRoutine.id,
                 name: exerciseDto.name,
                 imageUrl: exerciseDto.imageUrl,
-                restTimeSecond: exerciseDto.restTimeSecond,
+                description: exerciseDto.description,
                 orderInRoutine: exerciseDto.orderInRoutine,
             });
             // We use save() here, relying on the @Transactional() wrapper to manage the underlying connection

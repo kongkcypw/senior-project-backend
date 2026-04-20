@@ -3,7 +3,7 @@ import { MockWorkoutRoutines } from "./09-workout-routine.seed";
 import { Seeder } from "typeorm-extension";
 import { DataSource } from "typeorm";
 
-type WorkoutExerciseSeed = Omit<WorkoutExerciseEntity, 'createdAt' | 'updatedAt' | 'workoutRoutine'>;
+type WorkoutExerciseSeed = Omit<WorkoutExerciseEntity, 'createdAt' | 'updatedAt' | 'description' | 'workoutRoutine' | 'setDetails'>;
 
 export class MockWorkoutExerciseDetails {
 
@@ -11,7 +11,6 @@ export class MockWorkoutExerciseDetails {
         id: 1,
         routineId: MockWorkoutRoutines.DAY_PUSH_001.id,
         name: 'Barbell Bench Press',
-        restTimeSecond: 120,
         imageUrl: 'http://example.com/images/bench_press.jpg',
         orderInRoutine: 1,
     };
@@ -20,17 +19,15 @@ export class MockWorkoutExerciseDetails {
         id: 2,
         routineId: MockWorkoutRoutines.DAY_PUSH_001.id,
         name: 'Dumbbell Overhead Press',
-        restTimeSecond: 90,
         imageUrl: 'http://example.com/images/ohp.jpg',
         orderInRoutine: 2,
     };
 
-    // --- Pull Day Exercises (ID 2) ---
+    // --- Pull Day Exercises (routine 2) ---
     static readonly EXERCISE_003_DEADLIFT: WorkoutExerciseSeed = {
         id: 3,
         routineId: MockWorkoutRoutines.DAY_PULL_002.id,
         name: 'Conventional Deadlift',
-        restTimeSecond: 180,
         imageUrl: 'http://example.com/images/deadlift.jpg',
         orderInRoutine: 3,
     };
@@ -40,7 +37,6 @@ export class MockWorkoutExerciseDetails {
         id: 4,
         routineId: MockWorkoutRoutines.DAY_LEGS_003.id,
         name: 'Barbell Squat',
-        restTimeSecond: 180,
         imageUrl: null,
         orderInRoutine: 1,
     };
@@ -50,7 +46,6 @@ export class MockWorkoutExerciseDetails {
         id: 5,
         routineId: MockWorkoutRoutines.ARISA_PUSH_004.id,
         name: 'Incline Bench Press',
-        restTimeSecond: 120,
         imageUrl: null,
         orderInRoutine: 1,
     };
@@ -60,7 +55,6 @@ export class MockWorkoutExerciseDetails {
         id: 6,
         routineId: MockWorkoutRoutines.ARISA_PULL_005.id,
         name: 'Lat Pulldown',
-        restTimeSecond: 90,
         imageUrl: null,
         orderInRoutine: 1,
     };
@@ -70,7 +64,6 @@ export class MockWorkoutExerciseDetails {
         id: 7,
         routineId: MockWorkoutRoutines.ARISA_LEGS_006.id,
         name: 'Leg Press',
-        restTimeSecond: 120,
         imageUrl: null,
         orderInRoutine: 1,
     };
@@ -80,7 +73,6 @@ export class MockWorkoutExerciseDetails {
         id: 8,
         routineId: MockWorkoutRoutines.TAWAN_UPPER_A_007.id,
         name: 'Barbell Bench Press',
-        restTimeSecond: 120,
         imageUrl: null,
         orderInRoutine: 1,
     };
@@ -90,7 +82,6 @@ export class MockWorkoutExerciseDetails {
         id: 9,
         routineId: MockWorkoutRoutines.TAWAN_UPPER_B_008.id,
         name: 'Seated Overhead Press',
-        restTimeSecond: 90,
         imageUrl: null,
         orderInRoutine: 1,
     };
@@ -100,7 +91,6 @@ export class MockWorkoutExerciseDetails {
         id: 10,
         routineId: MockWorkoutRoutines.NUCH_FULL_A_011.id,
         name: 'Goblet Squat',
-        restTimeSecond: 90,
         imageUrl: null,
         orderInRoutine: 1,
     };

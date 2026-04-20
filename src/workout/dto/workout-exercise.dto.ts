@@ -15,7 +15,7 @@ export class WorkoutExerciseDto {
   orderInRoutine: number;
 
   @Expose()
-  restTimeSecond: number | null;
+  description: string | null;
 
   @Expose()
   @Type(() => WorkoutExerciseSetDto)

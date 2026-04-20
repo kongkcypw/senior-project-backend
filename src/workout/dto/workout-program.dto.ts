@@ -24,7 +24,7 @@ export class WorkoutExerciseResponseDto {
     name!: string;
     imageUrl!: string | null;
     orderInRoutine!: number;
-    restTimeSecond!: number | null;
+    description!: string | null;
     setDetails!: WorkoutExerciseSetResponseDto[];
 }
 
@@ -94,7 +94,7 @@ export class WorkoutProgramDto {
                 e.name           = exercise.name;
                 e.imageUrl       = exercise.imageUrl;
                 e.orderInRoutine = exercise.orderInRoutine;
-                e.restTimeSecond = exercise.restTimeSecond;
+                e.description    = exercise.description;
 
                 e.setDetails = (exercise.setDetails ?? []).map((s) => {
                     const sd = new WorkoutExerciseSetResponseDto();
