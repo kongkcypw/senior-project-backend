@@ -46,10 +46,10 @@ export class WorkoutProgramDto {
     lineUserIdTrainee!: string;
 
     @Expose()
-    lineUserIdTrainer!: string;
+    lineUserIdTrainer!: string | null;
 
     @Expose()
-    orderInProgram!: number;
+    orderInWorkout!: number;
 
     @Expose()
     @Type(() => WorkoutProgramTraineeDto)
@@ -71,7 +71,7 @@ export class WorkoutProgramDto {
         dto.name             = entity.name;
         dto.lineUserIdTrainee = entity.lineUserIdTrainee;
         dto.lineUserIdTrainer = entity.lineUserIdTrainer;
-        dto.orderInProgram   = entity.orderInProgram;
+        dto.orderInWorkout   = entity.orderInWorkout;
         dto.createdAt        = entity.createdAt;
 
         if (entity.trainee) {

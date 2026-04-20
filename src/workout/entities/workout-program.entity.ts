@@ -13,11 +13,14 @@ export class WorkoutProgramEntity {
     @Column({ name: 'line_user_id_trainee', type: 'varchar', nullable: false })
     lineUserIdTrainee: string;
 
-    @Column({ name: 'line_user_id_trainer', type: 'varchar', nullable: false })
-    lineUserIdTrainer: string;
+    @Column({ name: 'line_user_id_trainer', type: 'varchar', nullable: true })
+    lineUserIdTrainer: string | null;
 
-    @Column({ name: 'order_in_program', type: 'integer', default: 1, nullable: false })
-    orderInProgram: number;
+    @Column({ name: 'order_in_workout', type: 'integer', default: 1, nullable: false })
+    orderInWorkout!: number;
+
+    @Column({ name: 'description', type: 'text', nullable: true })
+    description: string | null;
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
     createdAt: Date;

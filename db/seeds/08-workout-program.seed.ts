@@ -3,7 +3,7 @@ import { Seeder } from "typeorm-extension";
 import { DataSource } from "typeorm";
 import { WorkoutProgramEntity } from "src/workout/entities/workout-program.entity";
 
-type WorkoutProgramSeed = Omit<WorkoutProgramEntity, 'createdAt' | 'updatedAt' | 'trainee' | 'trainer' | 'routines'>;
+type WorkoutProgramSeed = Omit<WorkoutProgramEntity, 'createdAt' | 'updatedAt' | 'description' | 'trainee' | 'trainer' | 'routines'>;
 
 export class MockWorkoutPrograms {
     // Latif — PPL (3 routines)
@@ -12,7 +12,7 @@ export class MockWorkoutPrograms {
         name: 'Push Pull Legs (PPL) Template',
         lineUserIdTrainee: MockUsers.TRAINEE_USER_003.lineUserId,
         lineUserIdTrainer: MockUsers.TRAINER_USER_001.lineUserId,
-        orderInProgram: 1,
+        orderInWorkout: 1,
     };
 
     // Arisa — PPL (3 routines) — high performer
@@ -21,7 +21,7 @@ export class MockWorkoutPrograms {
         name: 'Push Pull Legs — Arisa',
         lineUserIdTrainee: MockUsers.TRAINEE_USER_004.lineUserId,
         lineUserIdTrainer: MockUsers.TRAINER_USER_001.lineUserId,
-        orderInProgram: 1,
+        orderInWorkout: 1,
     };
 
     // Tawan — Upper / Lower (4 routines) — medium performer
@@ -30,7 +30,7 @@ export class MockWorkoutPrograms {
         name: 'Upper Lower Split — Tawan',
         lineUserIdTrainee: MockUsers.TRAINEE_USER_005.lineUserId,
         lineUserIdTrainer: MockUsers.TRAINER_USER_001.lineUserId,
-        orderInProgram: 1,
+        orderInWorkout: 1,
     };
 
     // Nuch — Full Body (3 routines) — low performer
@@ -39,7 +39,7 @@ export class MockWorkoutPrograms {
         name: 'Full Body Program — Nuch',
         lineUserIdTrainee: MockUsers.TRAINEE_USER_006.lineUserId,
         lineUserIdTrainer: MockUsers.TRAINER_USER_001.lineUserId,
-        orderInProgram: 1,
+        orderInWorkout: 1,
     };
 
     static readonly WorkoutProgramPlans = [
