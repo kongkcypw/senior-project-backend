@@ -24,10 +24,10 @@ export class WorkoutHistoryEntity {
   setNumber: number;
 
   @Column({ name: 'rep', type: 'integer', nullable: false })
-  actualReps: number;
+  rep: number;
 
   @Column({ name: 'weight_kg', type: 'float', nullable: false })
-  actualWeightKg: number;
+  weightKg!: number;
 
   @Column({ name: 'exercise_id', type: 'integer', nullable: false })
   exerciseId: number;

@@ -40,7 +40,7 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
     async findLatestSession(
         lineUserId: string,
         routineId: number,
-    ): Promise<{ performedAt: Date; sets: { setNumber: number; actualReps: number; actualWeightKg: number }[] } | null> {
+    ): Promise<{ performedAt: Date; sets: { setNumber: number; reps: number; weightKg: number }[] } | null> {
         const latest = await this.findOne({
             where: { lineUserId, routineId },
             order: { finishedAt: 'DESC' },
@@ -60,7 +60,7 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
 
         return {
             performedAt: latest.finishedAt,
-            sets: sets.map(s => ({ setNumber: s.setNumber, actualReps: s.actualReps, actualWeightKg: s.actualWeightKg })),
+            sets: sets.map(s => ({ setNumber: s.setNumber, reps: s.rep, weightKg: s.weightKg })),
         };
     }
 

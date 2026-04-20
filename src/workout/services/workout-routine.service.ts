@@ -5,6 +5,7 @@ import { WorkoutExerciseDto } from "../dto/workout-exercise.dto";
 import { WorkoutExerciseRepository } from "../repositories/workout-exercise.repository";
 import { WorkoutExerciseSetRepository } from "../repositories/workout-exercise-set.repository";
 import { Transactional } from "typeorm-transactional";
+import { WorkoutExerciseResponseDto, WorkoutExerciseSetResponseDto, WorkoutRoutineResponseDto } from "../dto/workout-program.dto";
 
 @Injectable()
 export class WorkoutRoutineService {
@@ -13,6 +14,35 @@ export class WorkoutRoutineService {
         private readonly exerciseRepository: WorkoutExerciseRepository,
         private readonly setRepository: WorkoutExerciseSetRepository,
     ) { }
+
+    async getById(id: number): Promise<WorkoutRoutineResponseDto | null> {
+        const routine = await this.workoutRoutineRepository.findByIdWithExercisesAndSets(id);
+        if (!routine) return null;
+
+        const dto = new WorkoutRoutineResponseDto();
+        dto.id             = routine.id;
+        dto.name           = routine.name;
+        dto.orderInProgram = routine.orderInProgram;
+        dto.exercises      = (routine.exercises ?? []).map((ex) => {
+            const e         = new WorkoutExerciseResponseDto();
+            e.id             = ex.id;
+            e.name           = ex.name;
+            e.imageUrl       = ex.imageUrl;
+            e.restTimeSecond = null;
+            e.orderInRoutine = ex.orderInRoutine;
+            e.description    = ex.description;
+            e.sets           = (ex.setDetails ?? []).map((s) => {
+                const sd      = new WorkoutExerciseSetResponseDto();
+                sd.id       = s.id;
+                sd.setNumber = s.set;
+                sd.reps     = s.rep;
+                sd.weight   = s.weightKg;
+                return sd;
+            });
+            return e;
+        });
+        return dto;
+    }
 
     async deleteById(id: number): Promise<void> {
         await this.workoutRoutineRepository.delete(id);

@@ -14,18 +14,19 @@ export class WorkoutProgramTraineeDto {
 
 export class WorkoutExerciseSetResponseDto {
     id!: number;
-    set!: number;
-    rep!: number;
-    weightKg!: number | null;
+    setNumber!: number;
+    reps!: number;
+    weight!: number | null;
 }
 
 export class WorkoutExerciseResponseDto {
     id!: number;
     name!: string;
     imageUrl!: string | null;
+    restTimeSecond!: number | null;
     orderInRoutine!: number;
     description!: string | null;
-    setDetails!: WorkoutExerciseSetResponseDto[];
+    sets!: WorkoutExerciseSetResponseDto[];
 }
 
 export class WorkoutRoutineResponseDto {
@@ -96,12 +97,13 @@ export class WorkoutProgramDto {
                 e.orderInRoutine = exercise.orderInRoutine;
                 e.description    = exercise.description;
 
-                e.setDetails = (exercise.setDetails ?? []).map((s) => {
+                e.restTimeSecond = null;
+                e.sets = (exercise.setDetails ?? []).map((s) => {
                     const sd = new WorkoutExerciseSetResponseDto();
-                    sd.id       = s.id;
-                    sd.set      = s.set;
-                    sd.rep      = s.rep;
-                    sd.weightKg = s.weightKg;
+                    sd.id        = s.id;
+                    sd.setNumber = s.set;
+                    sd.reps      = s.rep;
+                    sd.weight    = s.weightKg;
                     return sd;
                 });
 

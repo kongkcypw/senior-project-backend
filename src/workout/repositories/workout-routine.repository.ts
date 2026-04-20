@@ -8,4 +8,13 @@ export class WorkoutRoutineRepository extends Repository<WorkoutRoutineEntity> {
         super(WorkoutRoutineEntity, datasource.createEntityManager());
     }
 
+    findByIdWithExercisesAndSets(id: number): Promise<WorkoutRoutineEntity | null> {
+        return this.createQueryBuilder('routine')
+            .leftJoinAndSelect('routine.exercises', 'exercise')
+            .leftJoinAndSelect('exercise.setDetails', 'setDetail')
+            .where('routine.id = :id', { id })
+            .orderBy('exercise.orderInRoutine', 'ASC')
+            .addOrderBy('setDetail.set', 'ASC')
+            .getOne();
+    }
 }
