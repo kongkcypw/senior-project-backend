@@ -10,14 +10,14 @@ export class WorkoutHistoryExerciseRepository extends Repository<WorkoutHistoryE
 
     async saveExerciseLogs(
         workoutHistoryRoutineId: number,
-        sets: Array<{ exerciseId: number; setNumber: number; reps: number; weightKg: number | null; notes?: string }>,
+        sets: Array<{ exerciseId: number; setNumber: number; rep: number; weightKg: number | null; notes?: string }>,
     ): Promise<void> {
         const entities = sets.map(s =>
             this.create({
                 workoutHistoryRoutineId,
                 exerciseId: s.exerciseId,
                 setNumber: s.setNumber,
-                rep: s.reps,
+                rep: s.rep,
                 weightKg: s.weightKg ?? null,
                 notes: s.notes ?? null,
             }),

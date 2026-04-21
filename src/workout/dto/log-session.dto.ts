@@ -1,7 +1,7 @@
 export class LogSetDto {
     exerciseId!: number;
     setNumber!: number;
-    reps!: number;
+    rep!: number;
     weightKg!: number | null;
     notes?: string;
 }

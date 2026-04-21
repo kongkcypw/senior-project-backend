@@ -39,20 +39,23 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
     async findLatestSession(
         lineUserId: string,
         routineId: number,
-    ): Promise<{ performedAt: Date; sets: { setNumber: number; reps: number; weightKg: number }[] } | null> {
-        const latest = await this.findOne({
-            where: { lineUserId, routineId },
-            order: { finishedAt: 'DESC' },
-            relations: ['exerciseLogs'],
-        });
+    ): Promise<{ finishedAt: Date; sets: { exerciseId: number; setNumber: number; rep: number; weightKg: number }[] } | null> {
+        const latest = await this.createQueryBuilder('wh')
+            .innerJoinAndSelect('wh.exerciseLogs', 'el')
+            .where('wh.line_user_id = :lineUserId', { lineUserId })
+            .andWhere('wh.routine_id = :routineId', { routineId })
+            .andWhere('wh.finished_at IS NOT NULL')
+            .orderBy('wh.finished_at', 'DESC')
+            .getOne();
 
-        if (!latest || !latest.finishedAt) return null;
+        if (!latest) return null;
 
         return {
-            performedAt: latest.finishedAt,
-            sets: (latest.exerciseLogs ?? []).map(s => ({
+            finishedAt: latest.finishedAt!,
+            sets: latest.exerciseLogs!.map(s => ({
+                exerciseId: s.exerciseId,
                 setNumber: s.setNumber,
-                reps: s.rep,
+                rep: s.rep,
                 weightKg: s.weightKg ?? 0,
             })),
         };

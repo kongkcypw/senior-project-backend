@@ -35,7 +35,7 @@ export class WorkoutRoutineService {
                 const sd      = new WorkoutExerciseSetResponseDto();
                 sd.id       = s.id;
                 sd.setNumber = s.set;
-                sd.reps     = s.rep;
+                sd.rep     = s.rep;
                 sd.weight   = s.weightKg;
                 return sd;
             });

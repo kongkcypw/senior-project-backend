@@ -15,7 +15,7 @@ export class WorkoutProgramTraineeDto {
 export class WorkoutExerciseSetResponseDto {
     id!: number;
     setNumber!: number;
-    reps!: number;
+    rep!: number;
     weight!: number | null;
 }
 
@@ -102,7 +102,7 @@ export class WorkoutProgramDto {
                     const sd = new WorkoutExerciseSetResponseDto();
                     sd.id        = s.id;
                     sd.setNumber = s.set;
-                    sd.reps      = s.rep;
+                    sd.rep      = s.rep;
                     sd.weight    = s.weightKg;
                     return sd;
                 });
