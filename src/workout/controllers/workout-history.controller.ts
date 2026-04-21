@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { getProtectedGuards } from "src/utils/guards.util";
 import { WorkoutHistoryService } from "../services/workout-history.service";
 import { LogSessionDto } from "../dto/log-session.dto";
@@ -11,6 +11,16 @@ export class WorkoutHistoryController {
     @Get('done-this-week')
     getRoutinesDoneThisWeek(@Query('lineUserId') lineUserId: string) {
         return this.workoutHistoryService.getRoutinesDoneThisWeek(lineUserId);
+    }
+
+    @Get('active-session')
+    getActiveSession(@Query('lineUserId') lineUserId: string) {
+        return this.workoutHistoryService.getActiveSession(lineUserId);
+    }
+
+    @Delete('session/:sessionId')
+    discardSession(@Param('sessionId', ParseIntPipe) sessionId: number) {
+        return this.workoutHistoryService.discardSession(sessionId);
     }
 
     @Post('start-session')

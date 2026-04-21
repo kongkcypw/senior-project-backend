@@ -11,6 +11,21 @@ export class WorkoutHistoryService {
         private readonly workoutHistoryExerciseRepository: WorkoutHistoryExerciseRepository,
     ) {}
 
+    async getActiveSession(lineUserId: string) {
+        const session = await this.workoutHistoryRepository.findActiveSession(lineUserId);
+        if (!session) return null;
+        return {
+            sessionId: session.id,
+            routineId: session.routineId,
+            routineName: session.workoutRoutine?.name ?? null,
+            startedAt: session.startedAt.toISOString(),
+        };
+    }
+
+    async discardSession(sessionId: number): Promise<void> {
+        await this.workoutHistoryRepository.deleteSession(sessionId);
+    }
+
     getLatestSession(lineUserId: string, routineId: number) {
         return this.workoutHistoryRepository.findLatestSession(lineUserId, routineId);
     }

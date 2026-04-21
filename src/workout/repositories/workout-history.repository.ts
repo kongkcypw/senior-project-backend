@@ -10,6 +10,19 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         super(WorkoutHistoryEntity, datasource.createEntityManager());
     }
 
+    async findActiveSession(lineUserId: string): Promise<WorkoutHistoryEntity | null> {
+        return this.createQueryBuilder('wh')
+            .leftJoinAndSelect('wh.workoutRoutine', 'wr')
+            .where('wh.line_user_id = :lineUserId', { lineUserId })
+            .andWhere('wh.finished_at IS NULL')
+            .orderBy('wh.started_at', 'DESC')
+            .getOne();
+    }
+
+    async deleteSession(sessionId: number): Promise<void> {
+        await this.delete(sessionId);
+    }
+
     async createSession(lineUserId: string, routineId: number): Promise<WorkoutHistoryEntity> {
         const session = this.create({ lineUserId, routineId, startedAt: new Date(), finishedAt: null });
         return this.save(session);
