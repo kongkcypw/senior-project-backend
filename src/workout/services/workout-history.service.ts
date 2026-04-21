@@ -1,25 +1,33 @@
 import { Injectable } from "@nestjs/common";
 import { WorkoutHistoryRepository } from "../repositories/workout-history.repository";
+import { WorkoutHistoryExerciseRepository } from "../repositories/workout-history-exercise.repository";
+import { LogSessionDto } from "../dto/log-session.dto";
+import { weeklyWindow } from "src/common/utils/score.util";
 
 @Injectable()
 export class WorkoutHistoryService {
     constructor(
         private readonly workoutHistoryRepository: WorkoutHistoryRepository,
+        private readonly workoutHistoryExerciseRepository: WorkoutHistoryExerciseRepository,
     ) {}
 
     getLatestSession(lineUserId: string, routineId: number) {
         return this.workoutHistoryRepository.findLatestSession(lineUserId, routineId);
     }
 
+    async startSession(lineUserId: string, routineId: number): Promise<{ sessionId: number; startedAt: string }> {
+        const session = await this.workoutHistoryRepository.createSession(lineUserId, routineId);
+        return { sessionId: session.id, startedAt: session.startedAt.toISOString() };
+    }
+
+    async logSession(dto: LogSessionDto): Promise<void> {
+        const finishedAt = new Date(dto.finishedAt);
+        await this.workoutHistoryRepository.finishSession(dto.sessionId, finishedAt);
+        await this.workoutHistoryExerciseRepository.saveExerciseLogs(dto.sessionId, dto.sets);
+    }
+
     getRoutinesDoneThisWeek(lineUserId: string): Promise<number[]> {
-        const now = new Date();
-        const day = now.getDay();
-        const diffToMonday = (day === 0 ? -6 : 1 - day);
-        const from = new Date(now);
-        from.setDate(now.getDate() + diffToMonday);
-        from.setHours(0, 0, 0, 0);
-        const to = new Date(from);
-        to.setDate(from.getDate() + 7);
+        const { from, to } = weeklyWindow();
         return this.workoutHistoryRepository.findRoutinesDoneThisWeek(lineUserId, from, to);
     }
 }

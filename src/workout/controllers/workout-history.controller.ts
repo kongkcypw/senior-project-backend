@@ -1,6 +1,7 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { getProtectedGuards } from "src/utils/guards.util";
 import { WorkoutHistoryService } from "../services/workout-history.service";
+import { LogSessionDto } from "../dto/log-session.dto";
 
 @Controller('workout-history')
 @UseGuards(...getProtectedGuards('liff-jwt'))
@@ -10,6 +11,16 @@ export class WorkoutHistoryController {
     @Get('done-this-week')
     getRoutinesDoneThisWeek(@Query('lineUserId') lineUserId: string) {
         return this.workoutHistoryService.getRoutinesDoneThisWeek(lineUserId);
+    }
+
+    @Post('start-session')
+    startSession(@Body() body: { lineUserId: string; routineId: number }) {
+        return this.workoutHistoryService.startSession(body.lineUserId, body.routineId);
+    }
+
+    @Post('log-session')
+    logSession(@Body() dto: LogSessionDto) {
+        return this.workoutHistoryService.logSession(dto);
     }
 
     @Get('latest-session/:routineId')

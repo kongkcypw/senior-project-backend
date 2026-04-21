@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Between, DataSource, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { WorkoutHistoryEntity } from "../entities/workout-history.entity";
 
 export type TruncUnit = 'day' | 'week' | 'month';
@@ -10,32 +10,18 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         super(WorkoutHistoryEntity, datasource.createEntityManager());
     }
 
-    /**
-     * Count the number of distinct calendar days the trainee logged
-     * any workout set within the given date range [from, to).
-     */
-    async countDistinctSessionDays(
-        lineUserId: string,
-        from: Date,
-        to: Date,
-    ): Promise<number> {
-        const result = await this.createQueryBuilder('wh')
-            .select('COUNT(DISTINCT DATE(wh.performedAt))', 'count')
-            .where('wh.lineUserId = :lineUserId', { lineUserId })
-            .andWhere('wh.performedAt >= :from', { from })
-            .andWhere('wh.performedAt < :to', { to })
-            .getRawOne<{ count: string }>();
+    async createSession(lineUserId: string, routineId: number): Promise<WorkoutHistoryEntity> {
+        const session = this.create({ lineUserId, routineId, startedAt: new Date(), finishedAt: null });
+        return this.save(session);
+    }
 
-        return parseInt(result?.count ?? '0', 10);
+    async finishSession(sessionId: number, finishedAt: Date): Promise<void> {
+        await this.update(sessionId, { finishedAt });
     }
 
     /**
-     * Count distinct workout days grouped by DATE_TRUNC bucket (day | week | month).
-     * Used for the trainer's score-history chart — one SQL query yields every
-     * bucket's day-count for a trainee in one round-trip.
-     *
-     * Returns a Map whose key is the bucket start timestamp (ISO string) and
-     * whose value is the number of distinct days the trainee trained in that bucket.
+     * Returns the sets logged in the most recent completed session for a routine.
+     * Used by RoutineDetailPage / EditRoutinePage to pre-fill last-session values.
      */
     async findLatestSession(
         lineUserId: string,
@@ -44,39 +30,48 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         const latest = await this.findOne({
             where: { lineUserId, routineId },
             order: { finishedAt: 'DESC' },
+            relations: ['exerciseLogs'],
         });
 
-        if (!latest) return null;
-
-        const dayStart = new Date(latest.finishedAt);
-        dayStart.setHours(0, 0, 0, 0);
-        const dayEnd = new Date(latest.finishedAt);
-        dayEnd.setHours(23, 59, 59, 999);
-
-        const sets = await this.find({
-            where: { lineUserId, routineId, finishedAt: Between(dayStart, dayEnd) },
-            order: { setNumber: 'ASC' },
-        });
+        if (!latest || !latest.finishedAt) return null;
 
         return {
             performedAt: latest.finishedAt,
-            sets: sets.map(s => ({ setNumber: s.setNumber, reps: s.rep, weightKg: s.weightKg })),
+            sets: (latest.exerciseLogs ?? []).map(s => ({
+                setNumber: s.setNumber,
+                reps: s.rep,
+                weightKg: s.weightKg ?? 0,
+            })),
         };
     }
 
-    async findRoutinesDoneThisWeek(
-        lineUserId: string,
-        from: Date,
-        to: Date,
-    ): Promise<number[]> {
+    /**
+     * Returns routine IDs that have at least one completed session in the given week window.
+     */
+    async findRoutinesDoneThisWeek(lineUserId: string, from: Date, to: Date): Promise<number[]> {
         const rows = await this.createQueryBuilder('wh')
             .select('wh.routineId', 'routineId')
             .where('wh.lineUserId = :lineUserId', { lineUserId })
-            .andWhere('wh.finishedAt >= :from', { from })
-            .andWhere('wh.finishedAt < :to', { to })
+            .andWhere('wh.finishedAt IS NOT NULL')
+            .andWhere('wh.startedAt >= :from', { from })
+            .andWhere('wh.startedAt < :to', { to })
             .groupBy('wh.routineId')
             .getRawMany<{ routineId: number }>();
         return rows.map(r => Number(r.routineId));
+    }
+
+    /**
+     * Count distinct calendar days with a completed session in [from, to).
+     */
+    async countDistinctSessionDays(lineUserId: string, from: Date, to: Date): Promise<number> {
+        const result = await this.createQueryBuilder('wh')
+            .select('COUNT(DISTINCT DATE(wh.startedAt))', 'count')
+            .where('wh.lineUserId = :lineUserId', { lineUserId })
+            .andWhere('wh.finishedAt IS NOT NULL')
+            .andWhere('wh.startedAt >= :from', { from })
+            .andWhere('wh.startedAt < :to', { to })
+            .getRawOne<{ count: string }>();
+        return parseInt(result?.count ?? '0', 10);
     }
 
     async countDaysGroupedByBucket(
@@ -86,11 +81,12 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         truncUnit: TruncUnit,
     ): Promise<Map<string, number>> {
         const rows = await this.createQueryBuilder('wh')
-            .select(`DATE_TRUNC('${truncUnit}', wh.finished_at)`, 'bucket')
-            .addSelect('COUNT(DISTINCT DATE(wh.finished_at))', 'count')
+            .select(`DATE_TRUNC('${truncUnit}', wh.started_at)`, 'bucket')
+            .addSelect('COUNT(DISTINCT DATE(wh.started_at))', 'count')
             .where('wh.line_user_id = :lineUserId', { lineUserId })
-            .andWhere('wh.finished_at >= :from', { from })
-            .andWhere('wh.finished_at < :to', { to })
+            .andWhere('wh.finished_at IS NOT NULL')
+            .andWhere('wh.started_at >= :from', { from })
+            .andWhere('wh.started_at < :to', { to })
             .groupBy('bucket')
             .getRawMany<{ bucket: Date; count: string }>();
 

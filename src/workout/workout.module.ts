@@ -4,6 +4,7 @@ import { WorkoutHistoryController } from "./controllers/workout-history.controll
 import { WorkoutRoutineRepository } from "./repositories/workout-routine.repository";
 import { WorkoutExerciseRepository } from "./repositories/workout-exercise.repository";
 import { WorkoutHistoryRepository } from "./repositories/workout-history.repository";
+import { WorkoutHistoryExerciseRepository } from "./repositories/workout-history-exercise.repository";
 import { WorkoutProgramPlanRepository } from "./repositories/workout-program.repository";
 import { WorkoutHistoryService } from "./services/workout-history.service";
 import { WorkoutProgramService } from "./services/workout-program.service";
@@ -27,6 +28,7 @@ import { WorkoutExerciseSetRepository } from "./repositories/workout-exercise-se
         WorkoutRoutineRepository,
         WorkoutExerciseRepository,
         WorkoutHistoryRepository,
+        WorkoutHistoryExerciseRepository,
         WorkoutProgramPlanRepository,
         WorkoutHistoryService,
         WorkoutProgramService,
