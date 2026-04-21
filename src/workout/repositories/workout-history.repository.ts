@@ -64,6 +64,21 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         };
     }
 
+    async findRoutinesDoneThisWeek(
+        lineUserId: string,
+        from: Date,
+        to: Date,
+    ): Promise<number[]> {
+        const rows = await this.createQueryBuilder('wh')
+            .select('wh.routineId', 'routineId')
+            .where('wh.lineUserId = :lineUserId', { lineUserId })
+            .andWhere('wh.finishedAt >= :from', { from })
+            .andWhere('wh.finishedAt < :to', { to })
+            .groupBy('wh.routineId')
+            .getRawMany<{ routineId: number }>();
+        return rows.map(r => Number(r.routineId));
+    }
+
     async countDaysGroupedByBucket(
         lineUserId: string,
         from: Date,

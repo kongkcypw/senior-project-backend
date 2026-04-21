@@ -7,6 +7,11 @@ import { WorkoutHistoryService } from "../services/workout-history.service";
 export class WorkoutHistoryController {
     constructor(private readonly workoutHistoryService: WorkoutHistoryService) {}
 
+    @Get('done-this-week')
+    getRoutinesDoneThisWeek(@Query('lineUserId') lineUserId: string) {
+        return this.workoutHistoryService.getRoutinesDoneThisWeek(lineUserId);
+    }
+
     @Get('latest-session/:routineId')
     getLatestSession(
         @Param('routineId', ParseIntPipe) routineId: number,
