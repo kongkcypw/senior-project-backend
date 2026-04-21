@@ -440,6 +440,34 @@ export class UserRelationshipsService {
      * queries (workout-days per bucket, meal-macros per bucket), then combine
      * the results in memory and average across trainees.
      */
+    async getScoreHistoryForTrainee(
+        traineeLineUserId: string,
+        period: HistoryPeriod,
+    ): Promise<ScoreHistoryDto> {
+        const { truncUnit, rangeFrom, rangeTo, buckets } = buildHistoryBuckets(period);
+
+        const [totalRoutines, nutritionPlan, workoutDaysMap, macrosMap] = await Promise.all([
+            this.workoutProgramRepository.countRoutinesByTrainee(traineeLineUserId),
+            this.nutritionPlanRepository.findByLineUserId(traineeLineUserId),
+            this.workoutHistoryRepository.countDaysGroupedByBucket(traineeLineUserId, rangeFrom, rangeTo, truncUnit),
+            this.mealHistoryRepository.sumMacrosGroupedByBucket(traineeLineUserId, rangeFrom, rangeTo, truncUnit),
+        ]);
+
+        const points: ScoreHistoryPointDto[] = buckets.map((bucket) => {
+            if (bucket.isFuture) return { label: bucket.label, avg: null };
+
+            const bucketKey = bucket.from.toISOString();
+            const daysLogged = workoutDaysMap.get(bucketKey) ?? 0;
+            const macros = macrosMap.get(bucketKey) ?? { calories: 0, protein: 0, carbohydrate: 0, fat: 0 };
+
+            const wScore = computeWorkoutScore(daysLogged, totalRoutines);
+            const nScore = computeNutritionScore(macros, nutritionPlan, bucket.windowDays);
+            return { label: bucket.label, avg: computeTotalScore(wScore, nScore) };
+        });
+
+        return { period, points };
+    }
+
     async getScoreHistoryForTrainer(
         trainerLineUserId: string,
         period: HistoryPeriod,
