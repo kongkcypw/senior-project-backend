@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { DialogflowClientService } from 'src/external/dialogflow-client/services/client.service';
 import { DialogflowConfigService } from 'src/external/dialogflow-client/services/config.service';
 import { MessageEvent } from '@line/bot-sdk';
-import { DialogflowWebhookGroupChatHandler } from '../handlers/dialogflow-webhook-group-chat.handler';
+import { DialogflowWebhookGroupChatHandler } from '../handlers/main/dialogflow-webhook-group-chat.handler';
 import { FallbackIntentService } from './fallback-intent.service';
-import { DialogflowWebhookPersonalChatHandler } from '../handlers/dialogflow-webhook-personal-chat.handler';
+import { DialogflowWebhookPersonalChatHandler } from '../handlers/main/dialogflow-webhook-personal-chat.handler';
 import { ConfidenceFallbackThreshold } from '../constants/intent-detect-confidence';
 import { FeatureFlagService } from 'src/feature-flag/services/feature-flag.service';
 import { FeatureFlagKey } from 'src/feature-flag/enums/feature-flag.constant';
-import { FeatureDisableHandler } from '../handlers/global/feature-disable.handler';
 import { FeatureRateLimitService } from 'src/feature-rate-limit/services/feature-rate-limit.service';
 import { FeatureRateLimitKey } from 'src/feature-rate-limit/enums/feature-rate-limit.enum';
-import { FeatureReachRateLimitHandler } from '../handlers/global/feature-reach-rate-limit.handler';
+import { FeatureReachRateLimitHandler } from '../handlers/feature-reach-rate-limit.handler';
+import { FeatureDisableHandler } from '../handlers/feature-disable.handler';
 
 @Injectable()
 export class DialogflowWebhookService {
@@ -66,13 +66,13 @@ export class DialogflowWebhookService {
             if (!result || !result.intent || result.intent.displayName === 'Default Fallback Intent' || (result.intentDetectionConfidence ?? 0) < ConfidenceFallbackThreshold) {
                 const isRagEnabled = await this.featureFlagService.isEnabled(FeatureFlagKey.RAG_LLM_SERVICE);
                 if (!isRagEnabled) {
-                    await this.featureDisableHandler.handle(event);
+                    await this.featureDisableHandler.handleGeneral(event);
                     console.warn('RAG LLM Service is disabled. Handling fallback intent with feature disable handler.');
                     return;
                 }
                 const isRateLimitReached = await this.featureRateLimitService.isLimitReached(FeatureRateLimitKey.RAG_LLM_SERVICE);
                 if (isRateLimitReached) {
-                    await this.featureReachRateLimitHandler.handle(event);
+                    await this.featureReachRateLimitHandler.handleGeneral(event);
                     console.warn('RAG LLM Service rate limit reached. Handling fallback intent with feature reach rate limit handler.');
                     return;
                 }

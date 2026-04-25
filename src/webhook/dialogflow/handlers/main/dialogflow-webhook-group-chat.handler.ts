@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { DialogflowIntentName } from "../enums/dialogflow-intent-name";
-import { TriggerHandler } from "./group-chat/trigger.handler";
+import { DialogflowIntentName } from "../../enums/dialogflow-intent-name";
+import { TriggerHandler } from "../trigger.handler";
 import { MessageEvent } from "@line/bot-sdk";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
-import { TestProfileMessages } from "../messages/test-profile.message";
-import { ManageProgramHandler } from "./group-chat/manage-program.handler";
-import { CaloriesInDayHandler } from "./group-chat/calories-in-day.handler";
-import { WorkoutProgramHandler } from "./group-chat/workout-program.handler";
+import { TestProfileMessages } from "../../messages/test-profile.message";
+import { ManageProgramHandler } from "../manage-program.handler";
+import { CaloriesInDayHandler } from "../calories-in-day.handler";
+import { WorkoutProgramHandler } from "../workout-program.handler";
 
 @Injectable()
 export class DialogflowWebhookGroupChatHandler {
@@ -25,11 +25,11 @@ export class DialogflowWebhookGroupChatHandler {
         console.log('Intent detected:', intentName);
 
         if (intentName === DialogflowIntentName.TRIGGER) {
-            return this.triggerHandler.handle(event);
+            return this.triggerHandler.handleGroupChat(event);
         }
 
         if (intentName === DialogflowIntentName.MANAGE_PROGRAM) {
-            return this.manageProgramHandler.handle(event);
+            return this.manageProgramHandler.handleGroupChat(event);
         }
 
         if (intentName === DialogflowIntentName.TEST_PROFILE) {
@@ -42,11 +42,11 @@ export class DialogflowWebhookGroupChatHandler {
         }
 
         if (intentName === DialogflowIntentName.CALORIES_IN_DAY) {
-            return this.caloriesInDayHandler.handle(event);
+            return this.caloriesInDayHandler.handleGroupChat(event);
         }
 
         if (intentName === DialogflowIntentName.WORKOUT_PROGRAM) {
-            return this.workoutProgramHandler.handle(event);
+            return this.workoutProgramHandler.handleGroupChat(event);
         }
 
         if (intentName === DialogflowIntentName.SAVENOTE && fulfillmentMessages && fulfillmentMessages[0].text.text) {

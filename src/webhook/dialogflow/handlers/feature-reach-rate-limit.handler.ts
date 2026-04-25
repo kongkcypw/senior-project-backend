@@ -1,14 +1,15 @@
 import { MessageEvent } from "@line/bot-sdk";
 import { Injectable } from "@nestjs/common";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
+import { IntentHandlerInterface } from "../interfaces/intent-handler.interface";
 
 @Injectable()
-export class FeatureReachRateLimitHandler {
+export class FeatureReachRateLimitHandler implements IntentHandlerInterface {
     constructor(
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
     ) { }
 
-    async handle(event: MessageEvent): Promise<void> {
+    async handleGeneral(event: MessageEvent): Promise<void> {
         await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, [
             {
                 type: 'text',

@@ -6,5 +6,7 @@ export interface IntentHandlerInterface {
      * @param event The LINE message event associated with the intent
      * @returns A promise that resolves when the intent has been handled
      */
-    handle: (event: MessageEvent) => Promise<void>;
+    handleGroupChat?: (event: MessageEvent) => Promise<void>;
+    handlePersonalChat?: (event: MessageEvent) => Promise<void>;
+    handleGeneral?: (event: MessageEvent) => Promise<void>;
 }

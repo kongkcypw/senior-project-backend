@@ -4,12 +4,21 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { ConfidenceFallbackThreshold } from "../constants/intent-detect-confidence";
 import { DialogflowFineTuneRunnerService } from "../services/dialogflow-fine-tune-runner.service";
+import { DialogflowFindTuneService } from "../services/dialogflow-find-tune.service";
 
 @Controller('dialogflow/fine-tune')
 export class DialogflowFineTuneController {
     constructor(
+        private readonly dialogflowFindTuneService: DialogflowFindTuneService,
         private readonly dialogflowFineTuneRunnerService: DialogflowFineTuneRunnerService,
     ) { }
+
+    @Get('test')
+    async test(@Query('message') message: string){
+        const result = this.dialogflowFindTuneService.getDialogflowIntentAndConfidence(message);
+
+        return result;
+    }
 
     /**
      * Run the full dataset at a single threshold.

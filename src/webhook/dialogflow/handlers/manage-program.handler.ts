@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { IntentHandlerInterface } from "../../interfaces/intent-handler.interface";
+import { IntentHandlerInterface } from "../interfaces/intent-handler.interface";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 import { MessageEvent } from "@line/bot-sdk";
-import { ManageProgramMessages } from "../../messages/manage-program.message";
+import { ManageProgramMessages } from "../messages/manage-program.message";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 
 @Injectable()
@@ -15,7 +15,7 @@ export class ManageProgramHandler implements IntentHandlerInterface {
         private readonly lineGroupMemberService: LineGroupMemberService,
     ) { }
 
-    async handle(event: MessageEvent): Promise<void> {
+    async handleGroupChat(event: MessageEvent): Promise<void> {
 
         const groupId = event.source.type === 'group' ? event.source.groupId : null;
         const userId = event.source.userId;
@@ -45,4 +45,5 @@ export class ManageProgramHandler implements IntentHandlerInterface {
         );
     }
 
+    async handlePersonalChat(event: MessageEvent): Promise<void> {}
 }
