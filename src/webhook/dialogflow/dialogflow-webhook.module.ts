@@ -21,6 +21,8 @@ import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
 import { FeatureRateLimitModule } from "src/feature-rate-limit/feature-rate-limit.module";
 import { FeatureReachRateLimitHandler } from "./handlers/feature-reach-rate-limit.handler";
 import { FeatureDisableHandler } from "./handlers/feature-disable.handler";
+import { NutritionPlanHandler } from "./handlers/nutrition-plan.handler";
+import { TodayNutritionSummaryHandler } from "./handlers/today-nutrition-summary.handler";
 
 @Module({
     imports: [
@@ -50,6 +52,8 @@ import { FeatureDisableHandler } from "./handlers/feature-disable.handler";
         DialogflowFineTuneRunnerService,
         FeatureDisableHandler,
         FeatureReachRateLimitHandler,
+        NutritionPlanHandler,
+        TodayNutritionSummaryHandler,   
     ],
     exports: [
         DialogflowWebhookService,

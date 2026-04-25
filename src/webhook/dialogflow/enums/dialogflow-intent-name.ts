@@ -7,4 +7,8 @@ export enum DialogflowIntentName {
     CALORIES_IN_DAY = 'CaloriesInday',
     WORKOUT_PROGRAM = 'WorkoutProgram',
     MANAGE_PROGRAM = 'ManageProgram',
+
+    // New (After benchmark)
+    NUTRITION_PLAN = 'NutritionPlan',
+    TODAY_NUTRITION_SUMMARY = 'TodayNutritionSummary',
 }
