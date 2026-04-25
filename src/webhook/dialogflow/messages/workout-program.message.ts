@@ -10,7 +10,7 @@ export interface WorkoutRoutineItem {
 
 const buildBubble = (item: WorkoutRoutineItem): messagingApi.FlexBubble => ({
     type: "bubble",
-    size: "kilo",
+    size: "deca",
 
     // ── Hero: full-width image + absolute badge ──────────────────────────────
     hero: {
