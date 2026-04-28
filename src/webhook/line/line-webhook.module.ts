@@ -15,6 +15,7 @@ import { CloudflareModule } from "src/external/cloudflare/cloudflare.module";
 import { GeminiModule } from "src/external/gemini/gemini.module";
 import { NutritionModule } from "src/nutrition/nutrition.module";
 import { LineLiffModule } from "src/external/line-liff/line-liff.module";
+import { FollowEventHandler } from "./handlers/follow-event.handler";
 
 @Module({
     imports: [
@@ -38,6 +39,7 @@ import { LineLiffModule } from "src/external/line-liff/line-liff.module";
         MemberJoinEventHandler,
         MemberLeaveEventHandler,
         PostBackEventHandler,
+        FollowEventHandler,
     ],
     controllers: [LineWebhookController],
 })

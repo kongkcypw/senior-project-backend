@@ -19,4 +19,8 @@ export class LineMessagingApiConfigService extends BaseConfigService<string> {
     get chatbotUserId(): string {
         return this.getAsString('LINE_CHATBOT_USER_ID');
     }
+
+    get chatbotDashboardId(): string {
+        return this.getAsString('LINE_CHATBOT_DASHBOARD_ID');
+    }
 }
