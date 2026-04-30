@@ -5,6 +5,7 @@ import { LineMessagingApiClientService } from "src/external/line-messaging-api/s
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 import { WorkoutProgramHandler } from "../workout-program.handler";
 import { HelpHandler } from "../help.handler";
+import { GreetingHandler } from "../greeting.handler";
 import { LastWorkoutSessionHandler } from "../last-workout-session.handler";
 import { PhysiqueInfoHandler } from "../physique-info.handler";
 import { MyScoreHandler } from "../my-score.handler";
@@ -19,11 +20,16 @@ export class DialogflowWebhookGroupChatHandler {
         private readonly lastWorkoutSessionHandler: LastWorkoutSessionHandler,
         private readonly physiqueInfoHandler: PhysiqueInfoHandler,
         private readonly myScoreHandler: MyScoreHandler,
+        private readonly greetingHandler: GreetingHandler,
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
 
         console.log('Intent detected:', intentName);
+
+        if (intentName === DialogflowIntentName.GREETING) {
+            return this.greetingHandler.handleGroupChat(event);
+        }
 
         if (intentName === DialogflowIntentName.HELP) {
             return this.helpHandler.handleGroupChat(event);

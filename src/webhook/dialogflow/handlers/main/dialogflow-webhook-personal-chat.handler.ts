@@ -5,9 +5,11 @@ import { DialogflowIntentName } from "../../enums/dialogflow-intent-name";
 import { NutritionPlanHandler } from "../nutrition-plan.handler";
 import { TodayNutritionSummaryHandler } from "../today-nutrition-summary.handler";
 import { HelpHandler } from "../help.handler";
+import { GreetingHandler } from "../greeting.handler";
 import { LastWorkoutSessionHandler } from "../last-workout-session.handler";
 import { PhysiqueInfoHandler } from "../physique-info.handler";
 import { MyScoreHandler } from "../my-score.handler";
+import { MealHistoryHandler } from "../meal-history.handler";
 
 @Injectable()
 export class DialogflowWebhookPersonalChatHandler {
@@ -19,10 +21,16 @@ export class DialogflowWebhookPersonalChatHandler {
         private readonly lastWorkoutSessionHandler: LastWorkoutSessionHandler,
         private readonly physiqueInfoHandler: PhysiqueInfoHandler,
         private readonly myScoreHandler: MyScoreHandler,
+        private readonly mealHistoryHandler: MealHistoryHandler,
+        private readonly greetingHandler: GreetingHandler,
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
         console.log('Intent detected:', intentName);
+
+        if (intentName === DialogflowIntentName.GREETING) {
+            return this.greetingHandler.handlePersonalChat(event);
+        }
 
         if (intentName === DialogflowIntentName.HELP) {
             return this.helpHandler.handlePersonalChat(event);
@@ -50,6 +58,10 @@ export class DialogflowWebhookPersonalChatHandler {
 
         if (intentName === DialogflowIntentName.MY_SCORE) {
             return this.myScoreHandler.handlePersonalChat(event, parameters);
+        }
+
+        if (intentName === DialogflowIntentName.MEAL_HISTORY) {
+            return this.mealHistoryHandler.handlePersonalChat(event, parameters);
         }
     }
 }

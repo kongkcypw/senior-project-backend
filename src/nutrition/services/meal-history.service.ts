@@ -58,4 +58,12 @@ export class MealHistoryService {
         const mealsDto = meals.map(meal => MealDetailDto.fromEntityToDto(meal));
         return mealsDto;
     }
+
+    async findMealsByDateRange(lineUserId: string, startDate: Date, endDate: Date): Promise<MealDetailDto[]> {
+        const meals = await this.mealHistoryRepository.find({
+            where: { lineUserId, createdAt: Between(startDate, endDate) },
+            order: { createdAt: 'DESC' },
+        });
+        return meals.map(meal => MealDetailDto.fromEntityToDto(meal));
+    }
 }

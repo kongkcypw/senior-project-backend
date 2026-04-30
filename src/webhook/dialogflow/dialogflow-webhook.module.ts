@@ -22,9 +22,11 @@ import { FeatureDisableHandler } from "./handlers/feature-disable.handler";
 import { NutritionPlanHandler } from "./handlers/nutrition-plan.handler";
 import { TodayNutritionSummaryHandler } from "./handlers/today-nutrition-summary.handler";
 import { HelpHandler } from "./handlers/help.handler";
+import { GreetingHandler } from "./handlers/greeting.handler";
 import { LastWorkoutSessionHandler } from "./handlers/last-workout-session.handler";
 import { PhysiqueInfoHandler } from "./handlers/physique-info.handler";
 import { MyScoreHandler } from "./handlers/my-score.handler";
+import { MealHistoryHandler } from "./handlers/meal-history.handler";
 
 @Module({
     imports: [
@@ -57,7 +59,9 @@ import { MyScoreHandler } from "./handlers/my-score.handler";
         LastWorkoutSessionHandler,
         PhysiqueInfoHandler,
         MyScoreHandler,
+        MealHistoryHandler,
         HelpHandler,
+        GreetingHandler,
     ],
     exports: [
         DialogflowWebhookService,
