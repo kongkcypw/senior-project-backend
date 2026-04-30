@@ -6,23 +6,26 @@ import { LineMessagingApiClientService } from "./services/client.service";
 import { LineMessagingApiGroupChatService } from "./services/group-chat.service";
 import { LineMessagingApiUserService } from "./services/user.service";
 import { LineMessagingApiMessageContentService } from "./services/message-content.service";
+import { LineMessagingApiInfoService } from "./services/info.service";
 
 @Module({
     imports: [HttpModule],
     providers: [
-        LineMessagingApiConfigService, 
-        LineMessagingApiClientService, 
+        LineMessagingApiConfigService,
+        LineMessagingApiClientService,
         LineMessagingApiGroupChatService,
         LineMessagingApiUserService,
         LineMessagingApiMessageContentService,
+        LineMessagingApiInfoService,
     ],
     controllers: [LineMessagingApiController],
     exports: [
-        LineMessagingApiConfigService, 
-        LineMessagingApiClientService, 
+        LineMessagingApiConfigService,
+        LineMessagingApiClientService,
         LineMessagingApiGroupChatService,
         LineMessagingApiUserService,
         LineMessagingApiMessageContentService,
+        LineMessagingApiInfoService,
     ]
 })
 

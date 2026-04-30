@@ -36,7 +36,7 @@ export class LineMessagingApiMessageContentService {
 
             const axiosResponse = await lastValueFrom(response);
 
-            const contentType = axiosResponse.headers['content-type'];
+            const contentType = axiosResponse.headers['content-type'] as string;
 
             if (!contentType) {
                 throw new Error('Content-Type header missing from LINE API response.');

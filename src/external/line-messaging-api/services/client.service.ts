@@ -90,4 +90,17 @@ export class LineMessagingApiClientService {
       error.status < HttpStatus.INTERNAL_SERVER_ERROR
     );
   }
+
+  async getBotInfo(): Promise<void> {
+    try {
+      const botInfo = await this.client.getBotInfo();
+      console.log('Bot Info:', botInfo);
+    } catch (error) {
+      if (this.isHttpClientError(error)) {
+        console.log(`Failed to get bot info due to client error: ${error.message}`)
+        return;
+      }
+      throw error;
+    }
+  }
 }

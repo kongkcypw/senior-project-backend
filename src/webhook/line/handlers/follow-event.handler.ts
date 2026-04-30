@@ -15,7 +15,6 @@ export class FollowEventHandler implements EventHandler<FollowEvent> {
     ) { }
 
     async handle(event: FollowEvent, destination: string): Promise<void> {
-        console.log('Handling Follow Event:', event);
 
         if (!event.source || !event.source.userId) {
             console.warn('Follow event missing userId:', event);
@@ -28,7 +27,7 @@ export class FollowEventHandler implements EventHandler<FollowEvent> {
         // User add for personal chatbot
         if (chatbotId === this.lineMessagingApiConfigService.chatbotUserId) {
 
-            console.log(`User ${lineUserId} followed the chatbot.`);
+            console.log(`User ${lineUserId} followed the personal chatbot.`);
             const profile = await this.lineMessagingApiUserService.getProfile(lineUserId);
 
             if (!profile) {
@@ -44,9 +43,7 @@ export class FollowEventHandler implements EventHandler<FollowEvent> {
 
         // User add for dashboard
         if (chatbotId === this.lineMessagingApiConfigService.chatbotDashboardId) {
-            console.log(`User ${lineUserId} followed the chatbot dashboard.`);
-
-            console.log(`User ${lineUserId} followed the chatbot.`);
+            console.log(`User ${lineUserId} followed the dashboard chatbot.`);
             const profile = await this.lineMessagingApiUserService.getProfile(lineUserId);
 
             if (!profile) {
