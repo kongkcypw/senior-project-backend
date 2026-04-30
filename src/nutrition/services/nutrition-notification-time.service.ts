@@ -41,7 +41,7 @@ export class NutritionNotificationTimeService {
             const meals = await this.mealHistoryService.findMealsByDate(lineUserId, new Date());
             const totalCaloriesIntake = meals.reduce((total, meal) => total + meal.calories, 0);
             const remainingCalories = userPlan.totalCalories - totalCaloriesIntake;
-            const navigatePath = this.lineLiffNavigatePathService.getCaloriesInDayPage(lineUserId);
+            const navigatePath = this.lineLiffNavigatePathService.getNutritionInDayPage(lineUserId);
             const messages = CaloriesIntakeReminderMessages(userPlan.totalCalories, totalCaloriesIntake, remainingCalories, navigatePath);
 
             const groupId = await this.lineGroupMemberService.findGroupIdByMemberLineUserId(lineUserId);

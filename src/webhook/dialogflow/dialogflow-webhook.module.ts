@@ -6,7 +6,6 @@ import { DialogflowWebhookGroupChatHandler } from "./handlers/main/dialogflow-we
 import { LineLiffModule } from "src/external/line-liff/line-liff.module";
 import { UserModule } from "src/users/user.module";
 import { LineGroupModule } from "src/line-group/line-group.module";
-import { CaloriesInDayHandler } from "./handlers/calories-in-day.handler";
 import { NutritionModule } from "src/nutrition/nutrition.module";
 import { WorkoutProgramHandler } from "./handlers/workout-program.handler";
 import { RagApiModule } from "src/external/rag-api/rag-api.module";
@@ -42,7 +41,6 @@ import { HelpHandler } from "./handlers/help.handler";
         DialogflowWebhookService,
         DialogflowWebhookGroupChatHandler,
         DialogflowWebhookPersonalChatHandler,
-        CaloriesInDayHandler,
         WorkoutProgramHandler,
         FallbackIntentService,
         DialogflowFindTuneService,

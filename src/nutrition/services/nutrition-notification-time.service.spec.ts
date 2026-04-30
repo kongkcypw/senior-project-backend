@@ -22,7 +22,7 @@ describe('NutritionNotificationTimeService', () => {
             findMealsByDate: jest.fn(),
         };
         lineLiffNavigatePathService = {
-            getCaloriesInDayPage: jest.fn().mockReturnValue('http://example.com/page'),
+            getNutritionInDayPage: jest.fn().mockReturnValue('http://example.com/page'),
         };
 
         service = new NutritionNotificationTimeService(

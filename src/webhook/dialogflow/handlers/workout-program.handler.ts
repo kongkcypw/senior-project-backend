@@ -35,7 +35,7 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
         }
 
         // Inside your service method
-        navigatePath = this.lineLiffNavigatePathService.getWorkoutProgramPage(trainee.lineUserId);
+        navigatePath = this.lineLiffNavigatePathService.getWorkoutPlanPage(trainee.lineUserId);
 
         // TODO: Implement fetch workout program data
         const mockRoutines = [

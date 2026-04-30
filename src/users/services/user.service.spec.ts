@@ -31,6 +31,7 @@ describe('UserService', () => {
     describe('findByLineUserId', () => {
         it('returns user info when found', async () => {
             usersRepository.findByLineUserId.mockResolvedValue(mockUser);
+            userRelationshipsRepository.findActiveRelationshipsByTrainee.mockResolvedValue(null);
             const result = await service.findByLineUserId('U123');
             expect(result).toEqual({
                 id: mockUser.id,
@@ -38,6 +39,7 @@ describe('UserService', () => {
                 displayName: mockUser.displayName,
                 pictureUrl: mockUser.pictureUrl,
                 role: mockUser.role,
+                isPersonalUse: true,
             });
         });
 

@@ -5,6 +5,7 @@ describe('MealHistoryService', () => {
     let service: MealHistoryService;
     let mealHistoryRepository: any;
     let nutritionPlanRepository: any;
+    let userRelationshipsRepository: any;
 
     beforeEach(() => {
         mealHistoryRepository = {
@@ -14,7 +15,10 @@ describe('MealHistoryService', () => {
             find: jest.fn(),
         };
         nutritionPlanRepository = {};
-        service = new MealHistoryService(mealHistoryRepository, nutritionPlanRepository);
+        userRelationshipsRepository = {
+            findActiveRelationshipsByTrainee: jest.fn().mockResolvedValue(null),
+        };
+        service = new MealHistoryService(mealHistoryRepository, nutritionPlanRepository, userRelationshipsRepository);
     });
 
     describe('findMealDetailByMealId', () => {
@@ -32,13 +36,25 @@ describe('MealHistoryService', () => {
     });
 
     describe('insertMealHistory', () => {
-        it('creates and saves with confirmAt=null', async () => {
+        it('creates and saves with confirmAt=null when user has active trainer', async () => {
+            userRelationshipsRepository.findActiveRelationshipsByTrainee.mockResolvedValue({ id: 1 });
             const data = { lineUserId: 'U1', foodTitle: 'food' };
             const r = await service.insertMealHistory(data);
             expect(mealHistoryRepository.create).toHaveBeenCalledWith(data);
             expect(mealHistoryRepository.save).toHaveBeenCalled();
             const savedArg = mealHistoryRepository.save.mock.calls[0][0];
             expect(savedArg.confirmAt).toBeNull();
+            expect(r).toBeDefined();
+        });
+
+        it('auto-confirms with current date when user is personal-use (no active trainer)', async () => {
+            userRelationshipsRepository.findActiveRelationshipsByTrainee.mockResolvedValue(null);
+            const data = { lineUserId: 'U1', foodTitle: 'food' };
+            const r = await service.insertMealHistory(data);
+            expect(mealHistoryRepository.create).toHaveBeenCalledWith(data);
+            expect(mealHistoryRepository.save).toHaveBeenCalled();
+            const savedArg = mealHistoryRepository.save.mock.calls[0][0];
+            expect(savedArg.confirmAt).toBeInstanceOf(Date);
             expect(r).toBeDefined();
         });
     });

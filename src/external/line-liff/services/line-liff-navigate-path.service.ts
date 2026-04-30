@@ -23,24 +23,39 @@ export class LineLiffNavigatePathService {
         return `${this.basePath}/${this.liffId}/${WebPath.BODY_INFORMATION}/${userId}`;
     }
 
-    getManageNutritionProgramPage(userId: string): string {
-        return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_NUTRITION}/${userId}`;
+    getNutritionPlanPage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.NUTRITION_PLAN}/${userId}`;
     }
 
-    getManageWorkoutProgramPage(userId: string): string {
-        return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_WORKOUT}/${userId}`;
+    getWorkoutPlanPage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.WORKOUT_PLAN}/${userId}`;
     }
 
-    getCaloriesInDayPage(userId: string): string {
-        return `${this.basePath}/${this.liffId}/${WebPath.CALORIES_IN_DAY}/${userId}`;
-    }
-
-    // TODO: Add workout program page
-    getWorkoutProgramPage(userId: string): string {
-        return `${this.basePath}/${this.liffId}/${WebPath.MANAGE_PLAN_WORKOUT}/${userId}`;
+    getNutritionInDayPage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.NUTRITION_IN_DAY}/${userId}`;
     }
 
     getMealDetailPage(userId: string, mealId: string): string {
         return `${this.basePath}/${this.liffId}/${WebPath.MEAL_DETAIL}/${userId}/${mealId}`;
+    }
+
+    getCreateRoutinePage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.CREATE_ROUTINE}/${userId}`;
+    }
+
+    getSelectExercisePage(userId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.SELECT_EXERCISE}/${userId}`;
+    }
+
+    getRoutineDetailPage(userId: string, routineId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.ROUTINE_DETAIL}/${userId}/${routineId}`;
+    }
+
+    getEditRoutinePage(userId: string, routineId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.EDIT_ROUTINE}/${userId}/${routineId}`;
+    }
+
+    getLogSessionPage(userId: string, routineId: string): string {
+        return `${this.basePath}/${this.liffId}/${WebPath.LOG_SESSION}/${userId}/${routineId}`;
     }
 }
