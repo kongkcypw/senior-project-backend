@@ -24,82 +24,41 @@ export interface TodayNutritionMealItem {
     fat: number;
 }
 
-const getPlanStatus = (
-    intake: number,
-    target: number,
-): { text: string; color: string } => {
-    if (intake < target) {
-        return { text: "(ต้องการเพิ่ม)", color: "#4270ED" };
-    }
-
-    if (intake > target) {
-        return { text: "(เกินกำหนด)", color: "#FF3B30" };
-    }
-
-    return { text: "(พอดี)", color: "#2E7D32" };
-};
-
 const buildPlanRow = (
     label: string,
-    statusText: string,
-    statusColor: string,
     valueText: string,
-): messagingApi.FlexBox => {
-    const labelContents: messagingApi.FlexComponent[] = [
+): messagingApi.FlexBox => ({
+    type: "box",
+    layout: "horizontal",
+    margin: "xs",
+    contents: [
         {
             type: "text",
             text: label,
-            size: "md",
+            size: "sm",
             color: "#1F1F1F",
+            wrap: true,
+            flex: 1,
+        },
+        {
+            type: "text",
+            text: valueText,
+            size: "sm",
+            color: "#1F1F1F",
+            align: "end",
             wrap: true,
             flex: 0,
         },
-    ];
-
-    if (statusText.trim().length > 0) {
-        labelContents.push({
-            type: "text",
-            text: statusText,
-            size: "md",
-            color: statusColor,
-            wrap: true,
-            flex: 0,
-            margin: "xs",
-        });
-    }
-
-    return {
-        type: "box",
-        layout: "horizontal",
-        margin: "xs",
-        contents: [
-            {
-                type: "box",
-                layout: "baseline",
-                contents: labelContents,
-                flex: 1,
-            },
-            {
-                type: "text",
-                text: valueText,
-                size: "md",
-                color: "#1F1F1F",
-                align: "end",
-                wrap: true,
-                flex: 0,
-            },
-        ],
-    };
-};
+    ],
+});
 
 const buildSummaryBubble = (
     planNavigateUrl: string,
     intake: TodayNutritionSummaryInput,
     plan: TodayNutritionPlanInput,
+    nutritionScore: number,
 ): messagingApi.FlexBubble => {
-    const carbStatus = getPlanStatus(intake.carbohydrate, plan.carbohydrate);
-    const proteinStatus = getPlanStatus(intake.protein, plan.protein);
-    const fatStatus = getPlanStatus(intake.fat, plan.fat);
+    const scoreText = `${Math.round(nutritionScore)}/50`;
 
     return {
         type: "bubble",
@@ -238,30 +197,72 @@ const buildSummaryBubble = (
                     color: "#111111",
                     wrap: true,
                 },
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    margin: "xs",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "รายละเอียด",
+                            size: "xs",
+                            color: "#888888",
+                            wrap: true,
+                            flex: 1,
+                        },
+                        {
+                            type: "text",
+                            text: "ได้รับ/แผน",
+                            size: "xs",
+                            color: "#888888",
+                            align: "end",
+                            wrap: true,
+                            flex: 0,
+                        },
+                    ],
+                },
                 buildPlanRow(
                     "แคลอรี่",
-                    "",
-                    "#1F1F1F",
-                    `${plan.calories} แคลอรี่`,
+                    `${intake.calories}/${plan.calories} แคลอรี่`,
                 ),
                 buildPlanRow(
                     "คาร์โบไฮเดรต",
-                    carbStatus.text,
-                    carbStatus.color,
-                    `${plan.carbohydrate} กรัม`,
+                    `${intake.carbohydrate}/${plan.carbohydrate} กรัม`,
                 ),
                 buildPlanRow(
                     "โปรตีน",
-                    proteinStatus.text,
-                    proteinStatus.color,
-                    `${plan.protein} กรัม`,
+                    `${intake.protein}/${plan.protein} กรัม`,
                 ),
                 buildPlanRow(
                     "ไขมัน",
-                    fatStatus.text,
-                    fatStatus.color,
-                    `${plan.fat} กรัม`,
+                    `${intake.fat}/${plan.fat} กรัม`,
                 ),
+                {
+                    type: "box",
+                    layout: "horizontal",
+                    margin: "md",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "คะแนนโภชนาการ:",
+                            size: "sm",
+                            weight: "bold",
+                            color: "#111111",
+                            wrap: true,
+                            flex: 1,
+                        },
+                        {
+                            type: "text",
+                            text: scoreText,
+                            size: "sm",
+                            weight: "bold",
+                            color: "#111111",
+                            align: "end",
+                            wrap: true,
+                            flex: 0,
+                        },
+                    ],
+                },
             ],
         },
         footer: {
@@ -286,12 +287,14 @@ const buildSummaryBubble = (
     };
 };
 
+const DEFAULT_MEAL_IMAGE_URL = "https://khunphan.dpdns.org/flex-message/meal_placeholder.png";
+
 const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble => ({
     type: "bubble",
     size: "kilo",
     hero: {
         type: "image",
-        url: meal.imageUrl,
+        url: meal.imageUrl?.trim() ? meal.imageUrl : DEFAULT_MEAL_IMAGE_URL,
         size: "full",
         aspectRatio: "20:13",
         aspectMode: "cover",
@@ -305,7 +308,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
             {
                 type: "text",
                 text: meal.mealName,
-                size: "xxl",
+                size: "xl",
                 weight: "bold",
                 color: "#111111",
                 wrap: true,
@@ -318,7 +321,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
                     {
                         type: "text",
                         text: "คาร์โบไฮเดรต",
-                        size: "lg",
+                        size: "md",
                         color: "#1F1F1F",
                         wrap: true,
                         flex: 1,
@@ -326,7 +329,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
                     {
                         type: "text",
                         text: `${meal.carbohydrate} กรัม`,
-                        size: "lg",
+                        size: "md",
                         color: "#1F1F1F",
                         align: "end",
                         wrap: true,
@@ -342,7 +345,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
                     {
                         type: "text",
                         text: "โปรตีน",
-                        size: "lg",
+                        size: "md",
                         color: "#1F1F1F",
                         wrap: true,
                         flex: 1,
@@ -350,7 +353,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
                     {
                         type: "text",
                         text: `${meal.protein} กรัม`,
-                        size: "lg",
+                        size: "md",
                         color: "#1F1F1F",
                         align: "end",
                         wrap: true,
@@ -366,7 +369,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
                     {
                         type: "text",
                         text: "ไขมัน",
-                        size: "lg",
+                        size: "md",
                         color: "#1F1F1F",
                         wrap: true,
                         flex: 1,
@@ -374,7 +377,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
                     {
                         type: "text",
                         text: `${meal.fat} กรัม`,
-                        size: "lg",
+                        size: "md",
                         color: "#1F1F1F",
                         align: "end",
                         wrap: true,
@@ -395,7 +398,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
                     {
                         type: "text",
                         text: "ปริมาณแคลอรี่",
-                        size: "xl",
+                        size: "lg",
                         color: "#1F1F1F",
                         wrap: true,
                         flex: 1,
@@ -403,7 +406,7 @@ const buildMealBubble = (meal: TodayNutritionMealItem): messagingApi.FlexBubble 
                     {
                         type: "text",
                         text: `${meal.calories} แคลอรี่`,
-                        size: "xl",
+                        size: "lg",
                         color: "#1F1F1F",
                         align: "end",
                         wrap: true,
@@ -448,11 +451,12 @@ export const TodayNutritionSummaryMessage = (
     intake: TodayNutritionSummaryInput,
     plan: TodayNutritionPlanInput,
     meals: TodayNutritionMealItem[],
+    nutritionScore: number,
 ): messagingApi.Message[] => {
     const shownMeals = meals.slice(0, 11);
 
     const bubbles: messagingApi.FlexBubble[] = [
-        buildSummaryBubble(planNavigateUrl, intake, plan),
+        buildSummaryBubble(planNavigateUrl, intake, plan, nutritionScore),
         ...shownMeals.map(buildMealBubble),
     ];
 

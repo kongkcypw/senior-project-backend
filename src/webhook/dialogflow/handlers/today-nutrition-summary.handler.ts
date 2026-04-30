@@ -95,20 +95,33 @@ export class TodayNutritionSummaryHandler implements IntentHandlerInterface {
             fat: planWithMeals.fat,
         };
 
-        // Only show meals with an image in the carousel (hero image is required by the bubble builder)
-        const mealItems = meals
-            .filter(m => m.imageUrl)
-            .map(m => ({
-                mealName: m.foodTitle,
-                imageUrl: m.imageUrl,
-                detailUrl: this.lineLiffNavigatePathService.getMealDetailPage(userId, m.id.toString()),
-                calories: m.calories,
-                carbohydrate: m.carbohydrate,
-                protein: m.protein,
-                fat: m.fat,
-            }));
+        const mealItems = meals.map(m => ({
+            mealName: m.foodTitle,
+            imageUrl: m.imageUrl ?? "",
+            detailUrl: this.lineLiffNavigatePathService.getMealDetailPage(userId, m.id.toString()),
+            calories: m.calories,
+            carbohydrate: m.carbohydrate,
+            protein: m.protein,
+            fat: m.fat,
+        }));
 
-        const payload = TodayNutritionSummaryMessage(planNavigateUrl, intake, plan, mealItems);
+        const clamp = (actual: number, target: number) =>
+            target > 0 ? Math.min(actual / target, 1) : 0;
+
+        const nutritionScore = (
+            clamp(intake.calories, planWithMeals.totalCalories)
+            + clamp(intake.protein, planWithMeals.protein)
+            + clamp(intake.carbohydrate, planWithMeals.carbohydrate)
+            + clamp(intake.fat, planWithMeals.fat)
+        ) / 4 * 50;
+
+        const payload = TodayNutritionSummaryMessage(
+            planNavigateUrl,
+            intake,
+            plan,
+            mealItems,
+            nutritionScore,
+        );
         await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, payload);
     }
 }
