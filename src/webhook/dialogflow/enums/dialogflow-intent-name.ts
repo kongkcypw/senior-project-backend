@@ -11,4 +11,5 @@ export enum DialogflowIntentName {
     // New (After benchmark)
     NUTRITION_PLAN = 'NutritionPlan',
     TODAY_NUTRITION_SUMMARY = 'TodayNutritionSummary',
+    HELP = 'Help',
 }

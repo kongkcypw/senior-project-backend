@@ -8,6 +8,7 @@ import { TestProfileMessages } from "../../messages/test-profile.message";
 import { ManageProgramHandler } from "../manage-program.handler";
 import { CaloriesInDayHandler } from "../calories-in-day.handler";
 import { WorkoutProgramHandler } from "../workout-program.handler";
+import { HelpHandler } from "../help.handler";
 
 @Injectable()
 export class DialogflowWebhookGroupChatHandler {
@@ -17,12 +18,17 @@ export class DialogflowWebhookGroupChatHandler {
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
         private readonly manageProgramHandler: ManageProgramHandler,
         private readonly caloriesInDayHandler: CaloriesInDayHandler,
-        private readonly workoutProgramHandler: WorkoutProgramHandler
+        private readonly workoutProgramHandler: WorkoutProgramHandler,
+        private readonly helpHandler: HelpHandler,
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
 
         console.log('Intent detected:', intentName);
+
+        if (intentName === DialogflowIntentName.HELP) {
+            return this.helpHandler.handleGroupChat(event);
+        }
 
         if (intentName === DialogflowIntentName.TRIGGER) {
             return this.triggerHandler.handleGroupChat(event);

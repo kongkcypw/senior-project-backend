@@ -23,6 +23,7 @@ import { FeatureReachRateLimitHandler } from "./handlers/feature-reach-rate-limi
 import { FeatureDisableHandler } from "./handlers/feature-disable.handler";
 import { NutritionPlanHandler } from "./handlers/nutrition-plan.handler";
 import { TodayNutritionSummaryHandler } from "./handlers/today-nutrition-summary.handler";
+import { HelpHandler } from "./handlers/help.handler";
 
 @Module({
     imports: [
@@ -53,7 +54,8 @@ import { TodayNutritionSummaryHandler } from "./handlers/today-nutrition-summary
         FeatureDisableHandler,
         FeatureReachRateLimitHandler,
         NutritionPlanHandler,
-        TodayNutritionSummaryHandler,   
+        TodayNutritionSummaryHandler,
+        HelpHandler,
     ],
     exports: [
         DialogflowWebhookService,
