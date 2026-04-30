@@ -31,6 +31,25 @@ export class NutritionPlanHandler implements IntentHandlerInterface {
                 altText: "ยังไม่มีแผนโภชนาการ",
                 contents: {
                     type: "bubble",
+                    styles: {
+                        header: { backgroundColor: "#4270ED" },
+                    },
+                    header: {
+                        type: "box",
+                        layout: "vertical",
+                        paddingAll: "16px",
+                        backgroundColor: "#4270ED",
+                        contents: [
+                            {
+                                type: "text",
+                                text: "แผนโภชนาการ",
+                                weight: "bold",
+                                size: "lg",
+                                color: "#FFFFFF",
+                                wrap: true,
+                            },
+                        ],
+                    },
                     body: {
                         type: "box",
                         layout: "vertical",
@@ -46,7 +65,7 @@ export class NutritionPlanHandler implements IntentHandlerInterface {
                             },
                             {
                                 type: "text",
-                                text: "กรุณาติดต่อเทรนเนอร์เพื่อสร้างแผนโภชนาการของคุณ",
+                                text: "คุณยังไม่เคยสร้างแผนออกกำลังกาย คลิกปุ่มข้างล่างเพื่อสร้างแผนเพื่อการติดตามที่สะดวกมากขึ้น",
                                 size: "md",
                                 color: "#555555",
                                 wrap: true,
@@ -60,14 +79,24 @@ export class NutritionPlanHandler implements IntentHandlerInterface {
                         paddingAll: "12px",
                         contents: [
                             {
-                                type: "button",
-                                style: "primary",
-                                color: "#4270ED",
-                                action: {
-                                    type: "uri",
-                                    label: "ดูแผนโภชนาการ",
-                                    uri: navigateUrl,
-                                },
+                                type: "box",
+                                layout: "vertical",
+                                borderColor: "#4270ED",
+                                borderWidth: "normal",
+                                cornerRadius: "md",
+                                contents: [
+                                    {
+                                        type: "button",
+                                        style: "link",
+                                        color: "#4270ED",
+                                        height: "sm",
+                                        action: {
+                                            type: "uri",
+                                            label: "รายละเอียด",
+                                            uri: navigateUrl,
+                                        },
+                                    },
+                                ],
                             },
                         ],
                     },

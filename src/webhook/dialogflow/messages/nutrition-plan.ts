@@ -35,12 +35,13 @@ const buildMacroBubble = (card: MacroCardConfig): messagingApi.FlexBubble => {
     return {
         type: "bubble",
         size: "deca",
+        styles: {
+            body: { backgroundColor: card.color },
+        },
         body: {
             type: "box",
             layout: "vertical",
             paddingAll: "16px",
-            backgroundColor: card.color,
-            cornerRadius: "xl",
             contents: [
                 {
                     type: "text",
@@ -101,12 +102,13 @@ const buildTotalEnergyBubble = (
 ): messagingApi.FlexBubble => ({
     type: "bubble",
     size: "deca",
+    styles: {
+        body: { backgroundColor: "#F3F3F3" },
+    },
     body: {
         type: "box",
         layout: "vertical",
         paddingAll: "16px",
-        backgroundColor: "#F3F3F3",
-        cornerRadius: "xl",
         contents: [
             {
                 type: "text",
