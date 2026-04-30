@@ -5,6 +5,7 @@ import { LineMessagingApiClientService } from "src/external/line-messaging-api/s
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 import { WorkoutProgramHandler } from "../workout-program.handler";
 import { HelpHandler } from "../help.handler";
+import { LastWorkoutSessionHandler } from "../last-workout-session.handler";
 
 @Injectable()
 export class DialogflowWebhookGroupChatHandler {
@@ -13,6 +14,7 @@ export class DialogflowWebhookGroupChatHandler {
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
         private readonly workoutProgramHandler: WorkoutProgramHandler,
         private readonly helpHandler: HelpHandler,
+        private readonly lastWorkoutSessionHandler: LastWorkoutSessionHandler,
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
@@ -25,6 +27,10 @@ export class DialogflowWebhookGroupChatHandler {
 
         if (intentName === DialogflowIntentName.WORKOUT_PROGRAM) {
             return this.workoutProgramHandler.handleGroupChat(event);
+        }
+
+        if (intentName === DialogflowIntentName.LAST_WORKOUT_SESSION) {
+            return this.lastWorkoutSessionHandler.handleGroupChat(event);
         }
 
         return;

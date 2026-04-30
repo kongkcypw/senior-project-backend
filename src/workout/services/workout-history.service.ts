@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { WorkoutHistoryRepository } from "../repositories/workout-history.repository";
+import { LatestCompletedSessionSummary, WorkoutHistoryRepository } from "../repositories/workout-history.repository";
 import { WorkoutHistoryExerciseRepository } from "../repositories/workout-history-exercise.repository";
 import { LogSessionDto } from "../dto/log-session.dto";
 import { weeklyWindow } from "src/common/utils/score.util";
@@ -44,5 +44,9 @@ export class WorkoutHistoryService {
     getRoutinesDoneThisWeek(lineUserId: string): Promise<number[]> {
         const { from, to } = weeklyWindow();
         return this.workoutHistoryRepository.findRoutinesDoneThisWeek(lineUserId, from, to);
+    }
+
+    getLatestCompletedSessionSummary(lineUserId: string): Promise<LatestCompletedSessionSummary | null> {
+        return this.workoutHistoryRepository.findLatestCompletedSessionSummary(lineUserId);
     }
 }

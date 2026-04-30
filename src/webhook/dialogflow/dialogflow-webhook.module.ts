@@ -22,6 +22,7 @@ import { FeatureDisableHandler } from "./handlers/feature-disable.handler";
 import { NutritionPlanHandler } from "./handlers/nutrition-plan.handler";
 import { TodayNutritionSummaryHandler } from "./handlers/today-nutrition-summary.handler";
 import { HelpHandler } from "./handlers/help.handler";
+import { LastWorkoutSessionHandler } from "./handlers/last-workout-session.handler";
 
 @Module({
     imports: [
@@ -51,6 +52,7 @@ import { HelpHandler } from "./handlers/help.handler";
         FeatureReachRateLimitHandler,
         NutritionPlanHandler,
         TodayNutritionSummaryHandler,
+        LastWorkoutSessionHandler,
         HelpHandler,
     ],
     exports: [

@@ -4,6 +4,13 @@ import { WorkoutHistoryEntity } from "../entities/workout-history.entity";
 
 export type TruncUnit = 'day' | 'week' | 'month';
 
+export interface LatestCompletedSessionSummary {
+    routineId: number;
+    routineName: string;
+    programName: string;
+    startedAt: Date;
+}
+
 @Injectable()
 export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
     constructor(private datasource: DataSource) {
@@ -58,6 +65,27 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
                 rep: s.rep,
                 weightKg: s.weightKg ?? 0,
             })),
+        };
+    }
+
+    async findLatestCompletedSessionSummary(
+        lineUserId: string,
+    ): Promise<LatestCompletedSessionSummary | null> {
+        const latest = await this.createQueryBuilder('wh')
+            .innerJoinAndSelect('wh.workoutRoutine', 'wr')
+            .innerJoinAndSelect('wr.workoutProgram', 'wp')
+            .where('wh.line_user_id = :lineUserId', { lineUserId })
+            .andWhere('wh.finished_at IS NOT NULL')
+            .orderBy('wh.started_at', 'DESC')
+            .getOne();
+
+        if (!latest) return null;
+
+        return {
+            routineId: latest.routineId,
+            routineName: latest.workoutRoutine?.name ?? '-',
+            programName: latest.workoutRoutine?.workoutProgram?.name ?? '-',
+            startedAt: latest.startedAt,
         };
     }
 
