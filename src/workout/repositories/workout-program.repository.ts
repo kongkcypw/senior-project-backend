@@ -56,7 +56,7 @@ export class WorkoutProgramPlanRepository extends Repository<WorkoutProgramEntit
             .leftJoinAndSelect('routine.exercises', 'exercise')
             .leftJoinAndSelect('exercise.setDetails', 'setDetail')
             .where('plan.lineUserIdTrainer = :lineUserIdTrainer', { lineUserIdTrainer: lineUserId })
-            .orderBy('plan.orderInProgram', 'ASC')
+            .orderBy('plan.orderInWorkout', 'ASC')
             .addOrderBy('routine.orderInProgram', 'ASC')
             .addOrderBy('exercise.orderInRoutine', 'ASC')
             .addOrderBy('setDetail.set', 'ASC')
