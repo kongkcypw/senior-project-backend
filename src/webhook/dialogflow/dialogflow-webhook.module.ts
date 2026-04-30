@@ -3,9 +3,7 @@ import { DialogflowWebhookService } from "./services/dialogflow-webhook.service"
 import { DialogflowModule } from "src/external/dialogflow-client/dialogflow.module";
 import { LineMessagingApiModule } from "src/external/line-messaging-api/line-messaging-api.module";
 import { DialogflowWebhookGroupChatHandler } from "./handlers/main/dialogflow-webhook-group-chat.handler";
-import { TriggerHandler } from "./handlers/trigger.handler";
 import { LineLiffModule } from "src/external/line-liff/line-liff.module";
-import { ManageProgramHandler } from "./handlers/manage-program.handler";
 import { UserModule } from "src/users/user.module";
 import { LineGroupModule } from "src/line-group/line-group.module";
 import { CaloriesInDayHandler } from "./handlers/calories-in-day.handler";
@@ -44,8 +42,6 @@ import { HelpHandler } from "./handlers/help.handler";
         DialogflowWebhookService,
         DialogflowWebhookGroupChatHandler,
         DialogflowWebhookPersonalChatHandler,
-        TriggerHandler,
-        ManageProgramHandler,
         CaloriesInDayHandler,
         WorkoutProgramHandler,
         FallbackIntentService,

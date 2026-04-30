@@ -1,11 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { DialogflowIntentName } from "../../enums/dialogflow-intent-name";
-import { TriggerHandler } from "../trigger.handler";
 import { MessageEvent } from "@line/bot-sdk";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
-import { TestProfileMessages } from "../../messages/test-profile.message";
-import { ManageProgramHandler } from "../manage-program.handler";
 import { CaloriesInDayHandler } from "../calories-in-day.handler";
 import { WorkoutProgramHandler } from "../workout-program.handler";
 import { HelpHandler } from "../help.handler";
@@ -13,10 +10,9 @@ import { HelpHandler } from "../help.handler";
 @Injectable()
 export class DialogflowWebhookGroupChatHandler {
     constructor(
-        private readonly triggerHandler: TriggerHandler,
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
-        private readonly manageProgramHandler: ManageProgramHandler,
+
         private readonly caloriesInDayHandler: CaloriesInDayHandler,
         private readonly workoutProgramHandler: WorkoutProgramHandler,
         private readonly helpHandler: HelpHandler,
@@ -30,51 +26,12 @@ export class DialogflowWebhookGroupChatHandler {
             return this.helpHandler.handleGroupChat(event);
         }
 
-        if (intentName === DialogflowIntentName.TRIGGER) {
-            return this.triggerHandler.handleGroupChat(event);
-        }
-
-        if (intentName === DialogflowIntentName.MANAGE_PROGRAM) {
-            return this.manageProgramHandler.handleGroupChat(event);
-        }
-
-        if (intentName === DialogflowIntentName.TEST_PROFILE) {
-            const profileUrl = this.lineLiffNavigatePathService.navigateProfilePage;
-            await this.lineMessagingApiClientService.sendReplyMessages(
-                event.replyToken,
-                TestProfileMessages(profileUrl)
-            );
-            return;
-        }
-
         if (intentName === DialogflowIntentName.CALORIES_IN_DAY) {
             return this.caloriesInDayHandler.handleGroupChat(event);
         }
 
         if (intentName === DialogflowIntentName.WORKOUT_PROGRAM) {
             return this.workoutProgramHandler.handleGroupChat(event);
-        }
-
-        if (intentName === DialogflowIntentName.SAVENOTE && fulfillmentMessages && fulfillmentMessages[0].text.text) {
-            await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, [
-                {
-                    type: 'text',
-                    text: fulfillmentMessages[0].text.text[0],
-                }
-            ]);
-        }
-
-        if (fulfillmentMessages && fulfillmentMessages[0].text.text) {
-            await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, [
-                {
-                    type: 'text',
-                    text: fulfillmentMessages[0].text.text[0] || '',
-                }
-            ]);
-        }
-
-        if (parameters) {
-            console.log('Parameters:', parameters);
         }
 
         return;

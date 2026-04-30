@@ -1,15 +1,25 @@
 export enum DialogflowIntentName {
-    TRIGGER = 'Trigger',
-    TEST_PROFILE = 'Test Profile',
-    TRIGGER_CALORIES = 'Trigger - Calories',
-    TRIGGER_MANAGE_PROGRAM = 'Trigger - Manage Program',
-    SAVENOTE = 'Save note',
-    CALORIES_IN_DAY = 'CaloriesInday',
-    WORKOUT_PROGRAM = 'WorkoutProgram',
-    MANAGE_PROGRAM = 'ManageProgram',
+    // ── Greeting ──
+    GREETING = 'greeting',
 
-    // New (After benchmark)
+    // ── Nutrition Intents ──
+    CALORIES_IN_DAY = 'CaloriesInday',
     NUTRITION_PLAN = 'NutritionPlan',
     TODAY_NUTRITION_SUMMARY = 'TodayNutritionSummary',
+    MEAL_HISTORY = 'MealHistory',
+
+    // ── Workout Intents ──
+    WORKOUT_PROGRAM = 'WorkoutProgram',
+    TODAY_WORKOUT_STATUS = 'TodayWorkoutStatus',
+    WORKOUT_STREAK = 'WorkoutStreak',
+    LAST_WORKOUT_SESSION = 'LastWorkoutSession',
+
+    // ── Profile & Score Intents ──
+    PHYSIQUE_INFO = 'PhysiqueInfo',
+    MY_SCORE = 'MyScore',
+    MY_TREND = 'MyTrend',
+
+    // ── Utility Intents ──
     HELP = 'Help',
+    COMPLEX_QUERY = 'ComplexQuery',
 }
