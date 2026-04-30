@@ -7,6 +7,7 @@ import { LineLiffNavigatePathService } from "src/external/line-liff/services/lin
 import { WorkoutProgramMessages, WorkoutRoutineItem } from "../messages/workout-program.message";
 import { WorkoutProgramService } from "src/workout/services/workout-program.service";
 import { WorkoutHistoryService } from "src/workout/services/workout-history.service";
+import { computeWorkoutScore } from "src/common/utils/score.util";
 
 @Injectable()
 export class WorkoutProgramHandler implements IntentHandlerInterface {
@@ -68,11 +69,12 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
         }];
     }
 
-    private async buildRoutineItems(lineUserId: string): Promise<{ items: WorkoutRoutineItem[]; workoutPlanUrl: string }> {
+    private async buildRoutineItems(lineUserId: string): Promise<{ items: WorkoutRoutineItem[]; workoutPlanUrl: string; workoutScore: number }> {
         const workoutPlanUrl = this.lineLiffNavigatePathService.getWorkoutPlanPage(lineUserId);
-        const [programs, completedRoutineIds] = await Promise.all([
+        const [programs, completedRoutineIds, sessionsLogged] = await Promise.all([
             this.workoutProgramService.getProgramPlanByLineUserIdTrainee(lineUserId),
             this.workoutHistoryService.getRoutinesDoneThisWeek(lineUserId),
+            this.workoutHistoryService.getDistinctSessionDaysThisWeek(lineUserId),
         ]);
         const completedSet = new Set(completedRoutineIds);
 
@@ -88,7 +90,8 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
                 });
             }
         }
-        return { items, workoutPlanUrl };
+        const workoutScore = computeWorkoutScore(sessionsLogged, items.length);
+        return { items, workoutPlanUrl, workoutScore };
     }
 
     async handleGroupChat(event: MessageEvent): Promise<void> {
@@ -100,7 +103,7 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
         const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
         if (!trainee) return;
 
-        const { items, workoutPlanUrl } = await this.buildRoutineItems(trainee.lineUserId);
+        const { items, workoutPlanUrl, workoutScore } = await this.buildRoutineItems(trainee.lineUserId);
 
         if (items.length === 0) {
             await this.lineMessagingApiClientService.sendReplyMessages(
@@ -112,7 +115,7 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
 
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            WorkoutProgramMessages(items),
+            WorkoutProgramMessages(items, workoutScore),
         );
     }
 
@@ -120,7 +123,7 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
         const userId = event.source.userId;
         if (!userId) return;
 
-        const { items, workoutPlanUrl } = await this.buildRoutineItems(userId);
+        const { items, workoutPlanUrl, workoutScore } = await this.buildRoutineItems(userId);
 
         if (items.length === 0) {
             await this.lineMessagingApiClientService.sendReplyMessages(
@@ -132,7 +135,7 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
 
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            WorkoutProgramMessages(items),
+            WorkoutProgramMessages(items, workoutScore),
         );
     }
 }

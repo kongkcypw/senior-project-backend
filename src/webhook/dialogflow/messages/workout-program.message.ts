@@ -114,8 +114,109 @@ const buildBubble = (item: WorkoutRoutineItem): messagingApi.FlexBubble => ({
     },
 });
 
+const buildSummaryBubble = (routines: WorkoutRoutineItem[], workoutScore: number): messagingApi.FlexBubble => {
+    const programName = routines[0]?.programName || "โปรแกรมออกกำลังกาย";
+    const score = workoutScore;
+
+    return {
+        type: "bubble",
+        size: "deca",
+        header: {
+            type: "box",
+            layout: "vertical",
+            backgroundColor: "#4E7FFF",
+            paddingAll: "12px",
+            contents: [
+                {
+                    type: "text",
+                    text: "โปรแกรมออกกำลังกาย",
+                    size: "md",
+                    weight: "bold",
+                    color: "#FFFFFF",
+                    wrap: true,
+                },
+            ],
+        },
+        body: {
+            type: "box",
+            layout: "vertical",
+            paddingAll: "14px",
+            contents: [
+                {
+                    type: "text",
+                    text: `ชื่อโปรแกรม:`,
+                    size: "xs",
+                    color: "#666666",
+                    wrap: true,
+                },
+                {
+                    type: "text",
+                    text: programName,
+                    size: "sm",
+                    weight: "bold",
+                    color: "#111111",
+                    wrap: true,
+                    margin: "xs",
+                },
+                {
+                    type: "separator",
+                    margin: "md",
+                    color: "#E0E0E0",
+                },
+                {
+                    type: "text",
+                    text: `บันทึกของการออกกำลังกายของคุณ`,
+                    size: "xs",
+                    color: "#666666",
+                    wrap: true,
+                    margin: "md",
+                },
+                ...routines.map((routine, index) => ({
+                    type: "box" as const,
+                    layout: "horizontal" as const,
+                    margin: "xs" as const,
+                    contents: [
+                        {
+                            type: "text" as const,
+                            text: routine.sessionName,
+                            size: "xs" as const,
+                            color: "#111111",
+                            flex: 2,
+                            wrap: true,
+                        },
+                        {
+                            type: "text" as const,
+                            text: routine.isCompleted ? "สำเร็จ" : "ยังไม่สำเร็จ",
+                            size: "xs" as const,
+                            color: routine.isCompleted ? "#22C55E" : "#EF4444",
+                            weight: "bold" as const,
+                            align: "end" as const,
+                            flex: 1,
+                        },
+                    ],
+                })),
+                {
+                    type: "separator",
+                    margin: "md",
+                    color: "#E0E0E0",
+                },
+                {
+                    type: "text",
+                    text: `คะแนนการออกกำลังกาย: ${score.toFixed(1)}`,
+                    size: "sm",
+                    weight: "bold",
+                    color: "#111111",
+                    wrap: true,
+                    margin: "md",
+                },
+            ],
+        },
+    };
+};
+
 /**
- * Returns a Flex Message carousel of workout routine cards.
+ * Returns a Flex Message carousel of workout routine cards with summary.
+ * First card is a summary showing program name and routine statuses.
  * Pass up to 12 routines; a single routine renders as a plain bubble (no carousel).
  *
  * Example usage in a Dialogflow intent handler:
@@ -134,17 +235,19 @@ const buildBubble = (item: WorkoutRoutineItem): messagingApi.FlexBubble => ({
  */
 export const WorkoutProgramMessages = (
     routines: WorkoutRoutineItem[],
+    workoutScore: number,
 ): messagingApi.Message[] => {
-    const bubbles = routines.slice(0, 12).map(buildBubble);
+    if (routines.length === 0) return [];
 
-    if (bubbles.length === 0) return [];
+    const routineBubbles = routines.slice(0, 12).map(buildBubble);
+    const summaryBubble = buildSummaryBubble(routines.slice(0, 12), workoutScore);
 
-    if (bubbles.length === 1) {
+    if (routines.length === 1) {
         return [
             {
                 type: "flex",
                 altText: `เซสชัน: ${routines[0].sessionName}`,
-                contents: bubbles[0],
+                contents: routineBubbles[0],
             },
         ];
     }
@@ -155,7 +258,7 @@ export const WorkoutProgramMessages = (
             altText: `รายการเซสชัน ${routines[0].programName}`,
             contents: {
                 type: "carousel",
-                contents: bubbles,
+                contents: [summaryBubble, ...routineBubbles],
             },
         },
     ];

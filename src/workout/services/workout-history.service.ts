@@ -46,6 +46,11 @@ export class WorkoutHistoryService {
         return this.workoutHistoryRepository.findRoutinesDoneThisWeek(lineUserId, from, to);
     }
 
+    getDistinctSessionDaysThisWeek(lineUserId: string): Promise<number> {
+        const { from, to } = weeklyWindow();
+        return this.workoutHistoryRepository.countDistinctSessionDays(lineUserId, from, to);
+    }
+
     getLatestCompletedSessionSummary(lineUserId: string): Promise<LatestCompletedSessionSummary | null> {
         return this.workoutHistoryRepository.findLatestCompletedSessionSummary(lineUserId);
     }
