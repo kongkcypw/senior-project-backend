@@ -6,6 +6,7 @@ import { NutritionPlanHandler } from "../nutrition-plan.handler";
 import { TodayNutritionSummaryHandler } from "../today-nutrition-summary.handler";
 import { HelpHandler } from "../help.handler";
 import { LastWorkoutSessionHandler } from "../last-workout-session.handler";
+import { PhysiqueInfoHandler } from "../physique-info.handler";
 
 @Injectable()
 export class DialogflowWebhookPersonalChatHandler {
@@ -15,6 +16,7 @@ export class DialogflowWebhookPersonalChatHandler {
         private readonly todayNutritionSummaryHandler: TodayNutritionSummaryHandler,
         private readonly helpHandler: HelpHandler,
         private readonly lastWorkoutSessionHandler: LastWorkoutSessionHandler,
+        private readonly physiqueInfoHandler: PhysiqueInfoHandler,
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
@@ -38,6 +40,10 @@ export class DialogflowWebhookPersonalChatHandler {
 
         if (intentName === DialogflowIntentName.LAST_WORKOUT_SESSION) {
             return this.lastWorkoutSessionHandler.handlePersonalChat(event);
+        }
+
+        if (intentName === DialogflowIntentName.PHYSIQUE_INFO) {
+            return this.physiqueInfoHandler.handlePersonalChat(event);
         }
     }
 }

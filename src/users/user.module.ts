@@ -39,7 +39,7 @@ import { NutritionPlanRepository } from "src/nutrition/repositories/nutrition-pl
         UserRelationshipsController,
         UserPhysiqueHistoryController,
     ],
-    exports: [UserService, UserRelationshipsService]
+    exports: [UserService, UserRelationshipsService, UserPhysiqueHistoryService]
 })
 
 export class UserModule { }

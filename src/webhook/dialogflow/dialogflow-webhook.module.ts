@@ -23,6 +23,7 @@ import { NutritionPlanHandler } from "./handlers/nutrition-plan.handler";
 import { TodayNutritionSummaryHandler } from "./handlers/today-nutrition-summary.handler";
 import { HelpHandler } from "./handlers/help.handler";
 import { LastWorkoutSessionHandler } from "./handlers/last-workout-session.handler";
+import { PhysiqueInfoHandler } from "./handlers/physique-info.handler";
 
 @Module({
     imports: [
@@ -53,6 +54,7 @@ import { LastWorkoutSessionHandler } from "./handlers/last-workout-session.handl
         NutritionPlanHandler,
         TodayNutritionSummaryHandler,
         LastWorkoutSessionHandler,
+        PhysiqueInfoHandler,
         HelpHandler,
     ],
     exports: [
