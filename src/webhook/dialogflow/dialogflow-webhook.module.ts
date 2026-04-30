@@ -8,6 +8,7 @@ import { UserModule } from "src/users/user.module";
 import { LineGroupModule } from "src/line-group/line-group.module";
 import { NutritionModule } from "src/nutrition/nutrition.module";
 import { WorkoutProgramHandler } from "./handlers/workout-program.handler";
+import { WorkoutModule } from "src/workout/workout.module";
 import { RagApiModule } from "src/external/rag-api/rag-api.module";
 import { FallbackIntentService } from "./services/fallback-intent.service";
 import { DialogflowWebhookPersonalChatHandler } from "./handlers/main/dialogflow-webhook-personal-chat.handler";
@@ -30,6 +31,7 @@ import { HelpHandler } from "./handlers/help.handler";
         UserModule,
         LineGroupModule,
         NutritionModule,
+        WorkoutModule,
         RagApiModule,
         FeatureFlagModule,
         FeatureRateLimitModule,

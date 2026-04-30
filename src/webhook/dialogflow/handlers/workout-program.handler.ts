@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { IntentHandlerInterface } from "../interfaces/intent-handler.interface";
-import { MessageEvent } from "@line/bot-sdk";
+import { MessageEvent, messagingApi } from "@line/bot-sdk";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
-import { WorkoutProgramMessages } from "../messages/workout-program.message";
+import { WorkoutProgramMessages, WorkoutRoutineItem } from "../messages/workout-program.message";
+import { WorkoutProgramService } from "src/workout/services/workout-program.service";
+import { WorkoutHistoryService } from "src/workout/services/workout-history.service";
 
 @Injectable()
 export class WorkoutProgramHandler implements IntentHandlerInterface {
@@ -12,88 +14,125 @@ export class WorkoutProgramHandler implements IntentHandlerInterface {
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly lineGroupMemberService: LineGroupMemberService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly workoutProgramService: WorkoutProgramService,
+        private readonly workoutHistoryService: WorkoutHistoryService,
     ) { }
 
-    async handleGroupChat(event: MessageEvent): Promise<void> {
+    private buildNoProgramMessage(workoutPlanUrl: string): messagingApi.Message[] {
+        return [{
+            type: "flex",
+            altText: "ยังไม่มีโปรแกรมออกกำลังกาย",
+            contents: {
+                type: "bubble",
+                body: {
+                    type: "box",
+                    layout: "vertical",
+                    paddingAll: "16px",
+                    contents: [
+                        {
+                            type: "text",
+                            text: "ยังไม่ได้สร้างโปรแกรมออกกำลังกาย",
+                            weight: "bold",
+                            size: "lg",
+                            wrap: true,
+                            color: "#111111",
+                        },
+                        {
+                            type: "text",
+                            text: "คลิกปุ่มด้านล่างเพื่อสร้างโปรแกรมของคุณได้เลย",
+                            size: "md",
+                            color: "#555555",
+                            wrap: true,
+                            margin: "sm",
+                        },
+                    ],
+                },
+                footer: {
+                    type: "box",
+                    layout: "vertical",
+                    paddingAll: "12px",
+                    contents: [
+                        {
+                            type: "button",
+                            style: "primary",
+                            color: "#4270ED",
+                            action: {
+                                type: "uri",
+                                label: "สร้างโปรแกรม",
+                                uri: workoutPlanUrl,
+                            },
+                        },
+                    ],
+                },
+            },
+        }];
+    }
 
+    private async buildRoutineItems(lineUserId: string): Promise<{ items: WorkoutRoutineItem[]; workoutPlanUrl: string }> {
+        const workoutPlanUrl = this.lineLiffNavigatePathService.getWorkoutPlanPage(lineUserId);
+        const [programs, completedRoutineIds] = await Promise.all([
+            this.workoutProgramService.getProgramPlanByLineUserIdTrainee(lineUserId),
+            this.workoutHistoryService.getRoutinesDoneThisWeek(lineUserId),
+        ]);
+        const completedSet = new Set(completedRoutineIds);
+
+        const items: WorkoutRoutineItem[] = [];
+        for (const program of programs) {
+            for (const routine of program.routines) {
+                items.push({
+                    programName: program.name,
+                    sessionName: routine.name,
+                    exerciseCount: routine.exercises.length,
+                    isCompleted: completedSet.has(routine.id),
+                    navigateUrl: this.lineLiffNavigatePathService.getRoutineDetailPage(lineUserId, routine.id.toString()),
+                });
+            }
+        }
+        return { items, workoutPlanUrl };
+    }
+
+    async handleGroupChat(event: MessageEvent): Promise<void> {
         const groupId = event.source.type === 'group' ? event.source.groupId : null;
         const userId = event.source.userId;
-        let navigatePath: string;
 
-        if (!userId) {
-            return;
-        }
-
-        if (!groupId) {
-            return;
-        }
+        if (!userId || !groupId) return;
 
         const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
+        if (!trainee) return;
 
-        if (!trainee) {
+        const { items, workoutPlanUrl } = await this.buildRoutineItems(trainee.lineUserId);
+
+        if (items.length === 0) {
+            await this.lineMessagingApiClientService.sendReplyMessages(
+                event.replyToken,
+                this.buildNoProgramMessage(workoutPlanUrl),
+            );
             return;
         }
-
-        // Inside your service method
-        navigatePath = this.lineLiffNavigatePathService.getWorkoutPlanPage(trainee.lineUserId);
-
-        // TODO: Implement fetch workout program data
-        const mockRoutines = [
-            {
-                programName: "PPL Program",
-                sessionName: "Push Day",
-                exerciseCount: 6,
-                isCompleted: true,
-                navigateUrl: "mock",
-            },
-            {
-                programName: "PPL Program",
-                sessionName: "Pull Day",
-                exerciseCount: 5,
-                isCompleted: false,
-                navigateUrl: navigatePath,
-            },
-        ];
-        const payload = WorkoutProgramMessages(mockRoutines);
 
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            payload
+            WorkoutProgramMessages(items),
         );
     }
 
     async handlePersonalChat(event: MessageEvent): Promise<void> {
-        // Implementation for personal chat handling
         const userId = event.source.userId;
+        if (!userId) return;
 
-        if (!userId) {
+        const { items, workoutPlanUrl } = await this.buildRoutineItems(userId);
+
+        if (items.length === 0) {
+            await this.lineMessagingApiClientService.sendReplyMessages(
+                event.replyToken,
+                this.buildNoProgramMessage(workoutPlanUrl),
+            );
             return;
         }
 
-        let navigatePath: string = "https://example.com/workout-program"; // Default URL or fetch based on userId
-
-        // TODO: Implement fetch workout program data
-        const mockRoutines = [
-            {
-                programName: "PPL Program",
-                sessionName: "Push Day",
-                exerciseCount: 6,
-                isCompleted: true,
-                navigateUrl: navigatePath,
-            },
-            {
-                programName: "PPL Program",
-                sessionName: "Pull Day",
-                exerciseCount: 5,
-                isCompleted: false,
-                navigateUrl: navigatePath,
-            },
-        ];
-        const payload = WorkoutProgramMessages(mockRoutines);
-
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            payload
+            WorkoutProgramMessages(items),
         );
     }
 }
