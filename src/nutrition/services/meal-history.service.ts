@@ -5,12 +5,14 @@ import { Between } from "typeorm";
 import { NutritionPlanRepository } from "../repositories/nutrition-plan.repository";
 import { MealDetailDto } from "../dto/meal-detail.dto";
 import { NutritionPlanEntity } from "../entities/nutrition-plan.entity";
+import { UserRelationshipsRepository } from "src/users/repositories/user-relationships.repository";
 
 @Injectable()
 export class MealHistoryService {
     constructor(
         private readonly mealHistoryRepository: MealHistoryRepository,
         private readonly nutritionPlanRepository: NutritionPlanRepository,
+        private readonly userRelationshipsRepository: UserRelationshipsRepository,
     ) { }
 
     async findMealDetailByMealId(id: number): Promise<MealDetailDto> {
@@ -26,7 +28,15 @@ export class MealHistoryService {
 
     async insertMealHistory(mealData: Partial<MealHistoryEntity>): Promise<MealDetailDto> {
         const meal = this.mealHistoryRepository.create(mealData);
-        meal.confirmAt = null;
+
+        // Auto-confirm for personal-use trainees (no active trainer relationship)
+        if (mealData.lineUserId) {
+            const activeRelationship = await this.userRelationshipsRepository.findActiveRelationshipsByTrainee(mealData.lineUserId);
+            meal.confirmAt = activeRelationship === null ? new Date() : null;
+        } else {
+            meal.confirmAt = null;
+        }
+
         const insertedMeal = await this.mealHistoryRepository.save(meal);
         const mealDto = MealDetailDto.fromEntityToDto(insertedMeal);
         return mealDto;

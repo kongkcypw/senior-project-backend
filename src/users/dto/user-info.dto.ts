@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsInt, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsString } from 'class-validator';
 
 /**
  * DTO for returning user info (response DTO).
@@ -24,4 +24,8 @@ export class UserInfoDto {
   @IsString()
   @Expose()
   role: string | null;
+
+  @IsBoolean()
+  @Expose()
+  isPersonalUse!: boolean;
 }

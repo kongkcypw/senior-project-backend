@@ -11,6 +11,7 @@ import { NutritionPlanController } from "./controllers/nutrition-plan.controller
 import { NutritionPlanService } from "./services/nutrition-plan.service";
 import { UserModule } from "src/users/user.module";
 import { LineLiffModule } from "src/external/line-liff/line-liff.module";
+import { UserRelationshipsRepository } from "src/users/repositories/user-relationships.repository";
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { LineLiffModule } from "src/external/line-liff/line-liff.module";
     providers: [
         MealHistoryRepository,
         MealHistoryService,
+        UserRelationshipsRepository,
         NutritionPlanRepository,
         NutritionPlanService,
         NutritionNotificationTimeRepository,

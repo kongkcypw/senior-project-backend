@@ -25,12 +25,19 @@ export class UserService {
             throw new NotFoundException('User not found');
         }
 
+        let isPersonalUse = false;
+        if (user.role === UserRole.TRAINEE) {
+            const activeRelationship = await this.userRelationshipsRepository.findActiveRelationshipsByTrainee(id);
+            isPersonalUse = activeRelationship === null;
+        }
+
         return {
             id: user.id,
             lineUserId: user.lineUserId,
             displayName: user.displayName,
             pictureUrl: user.pictureUrl,
             role: user.role,
+            isPersonalUse,
         };
 
     }
