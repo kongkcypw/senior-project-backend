@@ -61,6 +61,21 @@ export class UserRelationshipsController {
         return this.userRelationshipsService.getScoreHistoryForTrainer(trainerLineUserId, resolved);
     }
 
+    @Get('my-current-score/:lineUserId')
+    @Roles(UserRole.TRAINEE, UserRole.TRAINER)
+    async getCurrentScoreForTrainee(
+        @Param('lineUserId') traineeLineUserId: string,
+        @Query('period') period?: string,
+    ) {
+        const resolved = (period ?? 'weekly') as HistoryPeriod;
+        if (!VALID_PERIODS.includes(resolved)) {
+            throw new BadRequestException(
+                `Invalid period "${period}". Must be one of: ${VALID_PERIODS.join(', ')}`,
+            );
+        }
+        return this.userRelationshipsService.getCurrentScoreForTrainee(traineeLineUserId, resolved);
+    }
+
     @Get('my-score-history/:lineUserId')
     @Roles(UserRole.TRAINEE, UserRole.TRAINER)
     async getScoreHistoryForTrainee(

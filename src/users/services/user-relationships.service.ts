@@ -468,6 +468,26 @@ export class UserRelationshipsService {
         return { period, points };
     }
 
+    async getCurrentScoreForTrainee(
+        traineeLineUserId: string,
+        period: HistoryPeriod,
+    ): Promise<{ workout: number; nutrition: number; total: number }> {
+        const windowDays = period === 'daily' ? 1 : period === 'weekly' ? 7 : 30;
+        const window = period === 'daily' ? dailyWindow() : period === 'weekly' ? weeklyWindow() : monthlyWindow();
+
+        const [totalRoutines, nutritionPlan] = await Promise.all([
+            this.workoutProgramRepository.countRoutinesByTrainee(traineeLineUserId),
+            this.nutritionPlanRepository.findByLineUserId(traineeLineUserId),
+        ]);
+
+        const score = await this.buildPeriodScore(traineeLineUserId, window, windowDays, totalRoutines, nutritionPlan);
+        return {
+            workout: score.workout.score,
+            nutrition: score.nutrition.score,
+            total: score.total,
+        };
+    }
+
     async getScoreHistoryForTrainer(
         trainerLineUserId: string,
         period: HistoryPeriod,
