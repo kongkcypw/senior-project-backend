@@ -40,4 +40,17 @@ export class WorkoutHistoryController {
     ) {
         return this.workoutHistoryService.getLatestSession(lineUserId, routineId);
     }
+
+    @Get('sessions')
+    getSessionList(
+        @Query('lineUserId') lineUserId: string,
+        @Query('limit') limit?: string,
+    ) {
+        return this.workoutHistoryService.getSessionList(lineUserId, limit ? parseInt(limit, 10) : 20);
+    }
+
+    @Get('session/:sessionId')
+    getSessionDetail(@Param('sessionId', ParseIntPipe) sessionId: number) {
+        return this.workoutHistoryService.getSessionDetail(sessionId);
+    }
 }

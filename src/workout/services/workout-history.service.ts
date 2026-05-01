@@ -54,4 +54,12 @@ export class WorkoutHistoryService {
     getLatestCompletedSessionSummary(lineUserId: string): Promise<LatestCompletedSessionSummary | null> {
         return this.workoutHistoryRepository.findLatestCompletedSessionSummary(lineUserId);
     }
+
+    getSessionList(lineUserId: string, limit = 20) {
+        return this.workoutHistoryRepository.findSessionList(lineUserId, limit);
+    }
+
+    getSessionDetail(sessionId: number) {
+        return this.workoutHistoryRepository.findSessionDetail(sessionId);
+    }
 }

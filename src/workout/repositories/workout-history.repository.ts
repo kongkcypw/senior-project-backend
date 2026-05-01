@@ -118,6 +118,98 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         return parseInt(result?.count ?? '0', 10);
     }
 
+    async findSessionList(
+        lineUserId: string,
+        limit = 20,
+    ): Promise<Array<{
+        sessionId: number;
+        routineId: number;
+        routineName: string;
+        programName: string;
+        startedAt: Date;
+        finishedAt: Date;
+        exerciseCount: number;
+    }>> {
+        const rows = await this.createQueryBuilder('wh')
+            .innerJoinAndSelect('wh.workoutRoutine', 'wr')
+            .innerJoinAndSelect('wr.workoutProgram', 'wp')
+            .leftJoinAndSelect('wh.exerciseLogs', 'el')
+            .where('wh.line_user_id = :lineUserId', { lineUserId })
+            .andWhere('wh.finished_at IS NOT NULL')
+            .orderBy('wh.started_at', 'DESC')
+            .limit(limit)
+            .getMany();
+
+        return rows.map(s => {
+            const uniqueExercises = new Set((s.exerciseLogs ?? []).map(e => e.exerciseId));
+            return {
+                sessionId: s.id,
+                routineId: s.routineId,
+                routineName: s.workoutRoutine?.name ?? '-',
+                programName: s.workoutRoutine?.workoutProgram?.name ?? '-',
+                startedAt: s.startedAt,
+                finishedAt: s.finishedAt!,
+                exerciseCount: uniqueExercises.size,
+            };
+        });
+    }
+
+    async findSessionDetail(sessionId: number): Promise<{
+        sessionId: number;
+        routineId: number;
+        routineName: string;
+        programName: string;
+        startedAt: Date;
+        finishedAt: Date;
+        exercises: Array<{
+            exerciseId: number;
+            exerciseName: string;
+            sets: Array<{ setNumber: number; rep: number; weightKg: number | null; notes: string | null }>;
+        }>;
+    } | null> {
+        const session = await this.createQueryBuilder('wh')
+            .innerJoinAndSelect('wh.workoutRoutine', 'wr')
+            .innerJoinAndSelect('wr.workoutProgram', 'wp')
+            .leftJoinAndSelect('wh.exerciseLogs', 'el')
+            .leftJoinAndSelect('el.workoutExercise', 'we')
+            .where('wh.id = :sessionId', { sessionId })
+            .andWhere('wh.finished_at IS NOT NULL')
+            .getOne();
+
+        if (!session) return null;
+
+        const exerciseMap = new Map<number, { exerciseId: number; exerciseName: string; sets: Array<{ setNumber: number; rep: number; weightKg: number | null; notes: string | null }> }>();
+        for (const log of session.exerciseLogs ?? []) {
+            if (!exerciseMap.has(log.exerciseId)) {
+                exerciseMap.set(log.exerciseId, {
+                    exerciseId: log.exerciseId,
+                    exerciseName: log.workoutExercise?.name ?? '-',
+                    sets: [],
+                });
+            }
+            exerciseMap.get(log.exerciseId)!.sets.push({
+                setNumber: log.setNumber,
+                rep: log.rep,
+                weightKg: log.weightKg,
+                notes: log.notes,
+            });
+        }
+
+        for (const ex of exerciseMap.values()) {
+            ex.sets.sort((a, b) => a.setNumber - b.setNumber);
+        }
+
+        return {
+            sessionId: session.id,
+            routineId: session.routineId,
+            routineName: session.workoutRoutine?.name ?? '-',
+            programName: session.workoutRoutine?.workoutProgram?.name ?? '-',
+            startedAt: session.startedAt,
+            finishedAt: session.finishedAt!,
+            exercises: Array.from(exerciseMap.values()),
+        };
+    }
+
     async countDaysGroupedByBucket(
         lineUserId: string,
         from: Date,
