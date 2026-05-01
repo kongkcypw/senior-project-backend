@@ -11,11 +11,14 @@ import { GeminiService } from 'src/external/gemini/services/gemini.service';
 import { MealHistoryService } from 'src/nutrition/services/meal-history.service';
 import { LineMessagingApiClientService } from 'src/external/line-messaging-api/services/client.service';
 import { MealDetailMessage } from '../messages/meal-detail.message';
+import { AnalyzeFoodPromptMessage } from '../messages/analyze-food-prompt.message';
 import { GeminiAnalyzeFoodImageResponse } from 'src/external/gemini/types/gemini-analyze-food-image-response.type';
 import { LineMessagingApiConfigService } from 'src/external/line-messaging-api/services/config.service';
 import { NutritionPlanService } from 'src/nutrition/services/nutrition-plan.service';
 import { LineGroupMemberService } from 'src/line-group/services/line-group-member.service';
 import { LineLiffNavigatePathService } from 'src/external/line-liff/services/line-liff-navigate-path.service';
+
+const ANALYZE_FOOD_TRIGGER = 'วิเคราะห์รูปอาหาร';
 
 @Injectable()
 export class MessageEventHandler implements EventHandler<MessageEvent> {
@@ -43,6 +46,11 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     console.log('Is Group Chat:', isGroupChat);
     console.log('Is Personal Chat:', isPersonalChat);
 
+    if (event.message.type === WebhookEventMessageType.IMAGE) {
+      await this.handleImageMessage(event);
+      return;
+    }
+
     if (isGroupChat) {
       await this.handleGroupChatTextMessage(event);
       return;
@@ -50,11 +58,6 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
 
     if (isPersonalChat) {
       await this.handlePersonalChatTextMessage(event);
-      return;
-    }
-
-    if (event.message.type === WebhookEventMessageType.IMAGE) {
-      await this.handleImageMessage(event);
       return;
     }
   }
@@ -89,24 +92,33 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     if (event.message.type !== WebhookEventMessageType.TEXT) {
       return;
     }
+
+    if (event.message.text.trim() === ANALYZE_FOOD_TRIGGER) {
+      await this.lineMessagingApiClientService.sendReplyMessages(
+        event.replyToken,
+        AnalyzeFoodPromptMessage(),
+      );
+      return;
+    }
+
     const isGroupChat = false;
     await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event, isGroupChat);
   }
 
   async handleImageMessage(event: MessageEvent): Promise<void> {
+    const isGroupChat = event.source.type === WebhookEventSourceType.GROUP;
+    const isPersonalChat = event.source.type === WebhookEventSourceType.USER;
 
-    if (event.source.type !== WebhookEventSourceType.GROUP) {
+    if (!isGroupChat && !isPersonalChat) {
       return;
     }
 
-    const groupId = event.source.groupId;
     const userId = event.source.userId;
     const messageId = event.message.id;
-    if (!groupId || !userId) {
+    if (!userId) {
       return;
     }
 
-    // Get the content and MIME type from LINE API
     const messageContentResponse = await this.lineMessagingApiMessageContentService.getMessageContent(messageId);
     if (!messageContentResponse) {
       await this.sendErrorGetMessageContent(event);
@@ -114,16 +126,21 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     }
     const { buffer, contentType } = messageContentResponse;
 
-    // Define the key (filename/path) and upload to Cloudflare R2
     const fileExtension = contentType.split('/')[1] || 'jpeg';
-    const fileKey = `${R2UploadPathEnum.LINE_UPLOADS_FROM_GROUP}/${groupId}/${userId}/${messageId}.${fileExtension}`;
+    let fileKey: string;
+    if (isGroupChat) {
+      const groupId = (event.source as any).groupId as string;
+      fileKey = `${R2UploadPathEnum.LINE_UPLOADS_FROM_GROUP}/${groupId}/${userId}/${messageId}.${fileExtension}`;
+    } else {
+      fileKey = `${R2UploadPathEnum.LINE_UPLOADS_FROM_PERSONAL}/${userId}/${messageId}.${fileExtension}`;
+    }
+
     const publicUrl = await this.cloudFlareR2Service.uploadBuffer(fileKey, buffer, contentType);
     if (!publicUrl) {
       await this.sendErrorUploadToR2(event);
       return;
     }
 
-    // Analyze the image using Gemini
     const analysisResult = await this.geminiService.analyzeFoodImage(buffer, contentType);
     if (!analysisResult) {
       await this.sendErrorAnalyzeImage(event);
@@ -134,8 +151,21 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
       return;
     }
 
+    // Resolve the trainee's lineUserId — direct for personal chat, via group member for group chat
+    let lineUserId: string;
+    if (isGroupChat) {
+      const groupId = (event.source as any).groupId as string;
+      const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
+      if (!trainee) {
+        return;
+      }
+      lineUserId = trainee.lineUserId;
+    } else {
+      lineUserId = userId;
+    }
+
     const meal = await this.mealHistoryService.insertMealHistory({
-      lineUserId: userId,
+      lineUserId,
       imageUrl: publicUrl,
       foodTitle: analysisResult.data.foodTitle,
       ingredients: analysisResult.data.ingredients,
@@ -145,29 +175,13 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
       fat: analysisResult.data.nutritionFacts.fat,
     });
 
-    if (!userId) {
-      return;
-    }
+    const nutritionPlan = await this.nutritionPlanService.getNutritionPlanByLineUserId(lineUserId);
+    const meals = await this.mealHistoryService.findMealsByDate(lineUserId, new Date());
+    const totalCaloriesIntake = meals.reduce((total, m) => total + m.calories, 0);
+    const remainingCalories = nutritionPlan
+      ? nutritionPlan.totalCalories - totalCaloriesIntake
+      : 0;
 
-    if (!groupId) {
-      return;
-    }
-
-    const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
-
-    if (!trainee) {
-      return;
-    }
-
-
-    const nutritionPlan = await this.nutritionPlanService.getNutritionPlanByLineUserId(trainee.lineUserId);
-    if (!nutritionPlan) {
-      return;
-    }
-
-    const meals = await this.mealHistoryService.findMealsByDate(trainee.lineUserId, new Date());
-    const totalCaloriesIntake = meals.reduce((total, meal) => total + meal.calories, 0);
-    const remainingCalories = nutritionPlan.totalCalories - totalCaloriesIntake;
     const formatedDate = new Date().toLocaleString('th-TH', {
       timeZone: 'Asia/Bangkok',
       year: 'numeric',
@@ -178,10 +192,7 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
       hour12: false,
     });
 
-
-    let navigatePath: string;
-    navigatePath = this.lineLiffNavigatePathService.getMealDetailPage(trainee.lineUserId, meal.id.toString());
-
+    const navigatePath = this.lineLiffNavigatePathService.getMealDetailPage(lineUserId, meal.id.toString());
     this.sendMealDetailMessage(event, analysisResult.data, remainingCalories, formatedDate, navigatePath);
   }
 
