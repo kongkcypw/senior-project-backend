@@ -28,6 +28,11 @@ export class NutritionPlanService {
     // TODO: Check this transactional is working or not
     async createOrUpdateNutritionPlan(nutritionPlanDto: NutritionPlanDto): Promise<void> {
         const { notificationTimes } = nutritionPlanDto;
+        // Always derive totalCalories from macros to prevent inconsistency
+        nutritionPlanDto.totalCalories =
+            nutritionPlanDto.protein * 4 +
+            nutritionPlanDto.carbohydrate * 4 +
+            nutritionPlanDto.fat * 9;
         const nutritionPlan = NutritionPlanDto.toEntityWithoutNotificationTimes(nutritionPlanDto);
 
         if (!notificationTimes || notificationTimes.length === 0) {
