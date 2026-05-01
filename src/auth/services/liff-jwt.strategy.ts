@@ -39,7 +39,7 @@ export class LiffJwtStrategy extends PassportStrategy(Strategy, 'liff-jwt') {
   }
 
   async validate(payload: any): Promise<UserInfoDto> {
-    console.log('Validating LIFF JWT with payload:', payload);
+    // console.log('Validating LIFF JWT with payload:', payload);
     const lineUserId = payload.sub;
     const displayName = payload.name;
     const pictureUrl = payload.picture;

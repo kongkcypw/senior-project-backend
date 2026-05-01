@@ -12,6 +12,7 @@ import { FeatureRateLimitService } from 'src/feature-rate-limit/services/feature
 import { FeatureRateLimitKey } from 'src/feature-rate-limit/enums/feature-rate-limit.enum';
 import { FeatureReachRateLimitHandler } from '../handlers/feature-reach-rate-limit.handler';
 import { FeatureDisableHandler } from '../handlers/feature-disable.handler';
+import { DialogflowIntentName } from '../enums/dialogflow-intent-name';
 
 @Injectable()
 export class DialogflowWebhookService {
@@ -63,7 +64,12 @@ export class DialogflowWebhookService {
             // 2. displayName === 'Default Fallback Intent' — Dialogflow is certain no trained intent matches (confidence: 1 but it is a fallback)
             // 3. confidence < threshold           — Dialogflow guessed a real intent but is not confident enough;
             //                                       treat ambiguous matches (e.g. "อยากปรับโปรแกรม..." hitting WorkoutProgram at 0.42) as fallback
-            if (!result || !result.intent || result.intent.displayName === 'Default Fallback Intent' || (result.intentDetectionConfidence ?? 0) < ConfidenceFallbackThreshold) {
+            if (!result 
+                || !result.intent 
+                || result.intent.displayName === 'Default Fallback Intent' 
+                || (result.intentDetectionConfidence ?? 0) < ConfidenceFallbackThreshold 
+                || (result.intent.displayName === DialogflowIntentName.COMPLEX_QUERY && (result.intentDetectionConfidence ?? 0) > ConfidenceFallbackThreshold) // ComplexQuery intent is a special case where we always want to fallback to RAG for fulfillment
+            ) {
                 const isRagEnabled = await this.featureFlagService.isEnabled(FeatureFlagKey.RAG_LLM_SERVICE);
                 if (!isRagEnabled) {
                     await this.featureDisableHandler.handleGeneral(event);
