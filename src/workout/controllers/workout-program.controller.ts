@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { WorkoutProgramService } from "../services/workout-program.service";
 import { getProtectedGuards } from "src/utils/guards.util";
 import { Roles } from "src/auth/decorators/roles.decorator";
@@ -40,5 +40,13 @@ export class WorkoutProgramController {
         @Body() body: { name: string; lineUserIdTrainee: string; lineUserIdTrainer: string }
     ) {
         return this.workoutProgramService.createProgramPlan(body.name, body.lineUserIdTrainee, body.lineUserIdTrainer);
+    }
+
+    @Delete(':programId')
+    @Roles(UserRole.TRAINER)
+    async deleteProgramPlan(
+        @Param('programId') programId: string,
+    ): Promise<void> {
+        return this.workoutProgramService.deleteProgramPlan(Number(programId));
     }
 }

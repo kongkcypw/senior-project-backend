@@ -42,4 +42,8 @@ export class WorkoutProgramService {
         const savedPlan = await this.workoutProgramPlanRepository.save(newPlan);
         return WorkoutProgramDto.fromEntityToDto(savedPlan);
     }
+
+    async deleteProgramPlan(programPlanId: number): Promise<void> {
+        await this.workoutProgramPlanRepository.delete(programPlanId);
+    }
 }
