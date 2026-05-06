@@ -31,7 +31,7 @@ export class AssignedTrainerGuard implements CanActivate {
     }
 
     // The target user ID from route param, body, or query string
-    const targetLineUserId = request.params.lineUserId || request.body.lineUserId || request.query.lineUserId;
+    const targetLineUserId = request.params?.lineUserId || request.body?.lineUserId || request.query?.lineUserId;
 
     console.log(`[AssignedTrainerGuard] ${request.method} ${request.url} | viewer: ${viewer.lineUserId} (${viewer.role}) | target: ${targetLineUserId} | params: ${JSON.stringify(request.params)} | query: ${JSON.stringify(request.query)}`);
 
