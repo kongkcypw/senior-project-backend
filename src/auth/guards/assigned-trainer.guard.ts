@@ -26,7 +26,7 @@ export class AssignedTrainerGuard implements CanActivate {
     const viewer: UserInfoDto = request.user;
 
     // The target user ID from the route parameter (the Trainee/Client)
-    const targetLineUserId = request.params.lineUserId || request.body.lineUserId;
+    const targetLineUserId = request.params.lineUserId || request.body.lineUserId || request.query.lineUserId;
 
     // Authorization Check: Self-Access (Trainee viewing their own data)
     // The Trainee can always view their own history.
