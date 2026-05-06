@@ -28,6 +28,7 @@ export class WorkoutProgramController {
     }
 
     @Get(':lineUserId')
+    @Roles(UserRole.TRAINER, UserRole.TRAINEE)
     getByLineUserIdTrainee(
         @Param('lineUserId') lineUserId: string,
     ) {
