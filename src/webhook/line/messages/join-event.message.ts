@@ -4,7 +4,7 @@ import { PostbackData } from "../enums/postback-data.enum";
 export const JoinEventMessages: messagingApi.Message[] = [
     {
         type: 'text',
-        text: 'สวัสดีครับ! ขอบคุณที่เพิ่มบอทของเราเข้ากลุ่มนี้ครับ 😊',
+        text: 'สวัสดีครับ! ขุนพันธ์พร้อมที่จะช่วยให้การดูแลผู้ฝึกหรือลูกเทรนของคุณเป็นเรื่องง่ายและมีประสิทธิภาพมากขึ้นแล้วครับ! 🎉',
     },
     {
         type: "flex",
