@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { WorkoutRoutineRepository } from "../repositories/workout-routine.repository";
 import { WorkoutRoutineEntity } from "../entities/workout-routine.entity";
 import { WorkoutExerciseDto } from "../dto/workout-exercise.dto";
@@ -6,6 +6,7 @@ import { WorkoutExerciseRepository } from "../repositories/workout-exercise.repo
 import { WorkoutExerciseSetRepository } from "../repositories/workout-exercise-set.repository";
 import { Transactional } from "typeorm-transactional";
 import { WorkoutExerciseResponseDto, WorkoutExerciseSetResponseDto, WorkoutRoutineResponseDto } from "../dto/workout-program.dto";
+import { In } from "typeorm";
 
 @Injectable()
 export class WorkoutRoutineService {
@@ -42,6 +43,129 @@ export class WorkoutRoutineService {
             return e;
         });
         return dto;
+    }
+
+    async deleteExercise(exerciseId: number): Promise<void> {
+        await this.exerciseRepository.delete(exerciseId);
+    }
+
+    async addExercisesToRoutine(
+        routineId: number,
+        exercises: { name: string; imageUrl: string | null }[],
+    ): Promise<void> {
+        const existing = await this.exerciseRepository.find({
+            where: { routineId },
+            order: { orderInRoutine: 'DESC' },
+            take: 1,
+        });
+        const nextOrder = (existing[0]?.orderInRoutine ?? 0) + 1;
+
+        const entities = exercises.map((e, i) =>
+            this.exerciseRepository.create({
+                routineId,
+                name: e.name,
+                imageUrl: e.imageUrl,
+                description: null,
+                orderInRoutine: nextOrder + i,
+            }),
+        );
+        await this.exerciseRepository.save(entities);
+    }
+
+    async addSetsToExercise(
+        exerciseId: number,
+        sets: { set: number; rep: number; weightKg: number | null }[],
+    ): Promise<void> {
+        const entities = sets.map((s) =>
+            this.setRepository.create({ exerciseId, set: s.set, rep: s.rep, weightKg: s.weightKg }),
+        );
+        await this.setRepository.save(entities);
+    }
+
+    @Transactional()
+    async updateRoutine(
+        routineId: number,
+        exercises: {
+            id?: number;
+            name: string;
+            imageUrl: string | null;
+            description: string | null;
+            orderInRoutine: number;
+            sets: { set: number; rep: number; weightKg: number | null }[];
+        }[],
+    ): Promise<void> {
+        const existing = await this.exerciseRepository.find({ where: { routineId } });
+        const existingIds = new Set(existing.map((e) => e.id));
+
+        const incomingIds = new Set(exercises.filter((e) => e.id != null).map((e) => e.id as number));
+        for (const id of incomingIds) {
+            if (!existingIds.has(id)) {
+                throw new BadRequestException(`Exercise id ${id} does not belong to routine ${routineId}`);
+            }
+        }
+
+        // Validate set numbers / reps before touching DB
+        for (const ex of exercises) {
+            const seen = new Set<number>();
+            for (const s of ex.sets ?? []) {
+                if (s.set == null || !Number.isInteger(s.set) || s.set <= 0) {
+                    throw new BadRequestException(`Invalid set number: ${s.set}`);
+                }
+                if (seen.has(s.set)) {
+                    throw new BadRequestException(`Duplicate set number ${s.set} for exercise ${ex.id ?? '(new)'}`);
+                }
+                seen.add(s.set);
+
+                if (s.rep == null || !Number.isInteger(s.rep) || s.rep < 0) {
+                    throw new BadRequestException(`Invalid rep: ${s.rep}`);
+                }
+                if (s.weightKg != null && typeof s.weightKg !== 'number') {
+                    throw new BadRequestException(`Invalid weightKg: ${s.weightKg}`);
+                }
+            }
+        }
+
+        // Delete exercises removed from payload
+        const toDelete = existing.filter((e) => !incomingIds.has(e.id)).map((e) => e.id);
+        if (toDelete.length > 0) {
+            await this.exerciseRepository.delete(toDelete);
+        }
+
+        // Upsert exercises (existing + new)
+        const entitiesToSave = exercises.map((ex) =>
+            this.exerciseRepository.create({
+                ...(ex.id ? { id: ex.id } : {}),
+                routineId,
+                name: ex.name,
+                imageUrl: ex.imageUrl,
+                description: ex.description ?? null,
+                orderInRoutine: ex.orderInRoutine,
+            }),
+        );
+        const savedExercises = await this.exerciseRepository.save(entitiesToSave);
+
+        // Replace sets for all saved exercises
+        const savedIds = savedExercises.map((e) => e.id);
+        if (savedIds.length > 0) {
+            await this.setRepository.delete({ exerciseId: In(savedIds) });
+
+            const allSetEntities = savedExercises.flatMap((savedEx, idx) => {
+                const reqEx = exercises[idx];
+                const sets = reqEx?.sets ?? [];
+                return sets.map((s) =>
+                    this.setRepository.create({
+                        exerciseId: savedEx.id,
+                        set: s.set,
+                        rep: s.rep,
+                        weightKg: s.weightKg,
+                    }),
+                );
+            });
+
+            if (allSetEntities.length > 0) {
+                await this.setRepository.save(allSetEntities);
+            }
+        }
     }
 
     async deleteById(id: number): Promise<void> {

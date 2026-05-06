@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { getProtectedGuards } from "src/utils/guards.util";
 import { WorkoutRoutineService } from "../services/workout-routine.service";
 import { WorkoutRoutineEntity } from "../entities/workout-routine.entity";
@@ -22,6 +22,52 @@ export class WorkoutRoutineController {
         @Param('id') id: number,
     ): Promise<void> {
         return this.workoutRoutineService.deleteById(id);
+    }
+
+    @Delete('exercise/:exerciseId')
+    async deleteExercise(@Param('exerciseId') exerciseId: number): Promise<void> {
+        return this.workoutRoutineService.deleteExercise(Number(exerciseId));
+    }
+
+    @Post(':routineId/exercises')
+    async addExercisesToRoutine(
+        @Param('routineId') routineId: number,
+        @Body() body: { exercises: { name: string; imageUrl: string | null }[] },
+    ): Promise<void> {
+        return this.workoutRoutineService.addExercisesToRoutine(Number(routineId), body.exercises);
+    }
+
+    @Post('exercise/:exerciseId/sets')
+    async addSetsToExercise(
+        @Param('exerciseId') exerciseId: number,
+        @Body() body: { sets: { set: number; rep: number; weightKg: number | null }[] },
+    ): Promise<void> {
+        return this.workoutRoutineService.addSetsToExercise(Number(exerciseId), body.sets);
+    }
+
+    /**
+     * PUT /workout-routine/:routineId
+     * Fully sync exercises + sets for a routine.
+     * - Creates new exercises when id is omitted
+     * - Deletes exercises not present in payload
+     * - Replaces all sets for each exercise
+     */
+    @Put(':routineId')
+    async updateRoutine(
+        @Param('routineId') routineId: number,
+        @Body()
+        body: {
+            exercises: {
+                id?: number;
+                name: string;
+                imageUrl: string | null;
+                description: string | null;
+                orderInRoutine: number;
+                sets: { set: number; rep: number; weightKg: number | null }[];
+            }[];
+        },
+    ): Promise<void> {
+        return this.workoutRoutineService.updateRoutine(Number(routineId), body.exercises);
     }
 
     @Post('')
