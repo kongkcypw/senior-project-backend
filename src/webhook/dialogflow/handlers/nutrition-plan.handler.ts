@@ -19,7 +19,7 @@ export class NutritionPlanHandler implements IntentHandlerInterface {
     ) { }
 
     private async buildPayload(lineUserId: string): Promise<messagingApi.Message[]> {
-        const navigateUrl = this.lineLiffNavigatePathService.getNutritionPlanPage(lineUserId);
+        const navigateUrl = this.lineLiffNavigatePathService.getNutritionInDayPage(lineUserId);
         const plan = await this.nutritionPlanService.getNutritionPlanByLineUserId(lineUserId);
 
         if (!plan || plan.totalCalories === 0) {
@@ -62,7 +62,7 @@ export class NutritionPlanHandler implements IntentHandlerInterface {
                             },
                             {
                                 type: "text",
-                                text: "คุณยังไม่เคยสร้างแผนออกกำลังกาย คลิกปุ่มข้างล่างเพื่อสร้างแผนเพื่อการติดตามที่สะดวกมากขึ้น",
+                                text: "คุณยังไม่เคยสร้างแผนโภชนาการ คลิกปุ่มข้างล่างเพื่อสร้างแผนเพื่อการติดตามที่สะดวกมากขึ้น",
                                 size: "md",
                                 color: "#555555",
                                 wrap: true,
