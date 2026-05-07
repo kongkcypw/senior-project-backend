@@ -8,7 +8,7 @@ export interface PhysiqueInfoData {
     updatedAtText: string;
 }
 
-const DEFAULT_PROFILE_IMAGE_URL = "https://khunphan.dpdns.org/flex-message/user_placeholder.png";
+const DEFAULT_PROFILE_IMAGE_URL = "https://khunphan.dpdns.org/assets/profile/profile-place-holder.png";
 
 const resolveProfileImageUrl = (profileImageUrl?: string | null): string =>
     profileImageUrl?.trim() ? profileImageUrl : DEFAULT_PROFILE_IMAGE_URL;

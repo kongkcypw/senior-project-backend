@@ -65,6 +65,7 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
         }
 
         let membersName: string[] = [];
+        let firstMemberPictureUrl: string | null = null;
 
         // Create users for each member
         for(const member of members) {
@@ -82,14 +83,17 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
             const pictureUrl = profile.pictureUrl ? profile.pictureUrl : null;
 
             membersName.push(displayName ? displayName : '');
+            if (firstMemberPictureUrl === null) {
+                firstMemberPictureUrl = pictureUrl;
+            }
 
             // Save trainee user and group member to database
             await this.insertUserAndGroupMember(event, lineUserId, displayName, pictureUrl, groupId);
-            
+
         }
 
         const navigateUrl = this.lineLiffNavigationPathService.getBodyInformationPage(members[0].userId);
-        await this.sendWelcomeMessageToGroup(event, membersName, navigateUrl);
+        await this.sendWelcomeMessageToGroup(event, membersName, navigateUrl, firstMemberPictureUrl);
     }
 
     // Save user and group member in a single transaction
@@ -120,10 +124,10 @@ export class MemberJoinEventHandler implements EventHandler<MemberJoinEvent> {
         );
     }
 
-    async sendWelcomeMessageToGroup(event: MemberJoinEvent, membersName: string[], navigateUrl: string): Promise<void> {
+    async sendWelcomeMessageToGroup(event: MemberJoinEvent, membersName: string[], navigateUrl: string, profileImageUrl?: string | null): Promise<void> {
         await this.lineMessagingApiClientService.sendReplyMessages(
             event.replyToken,
-            MemberJoinEventMessages(membersName, navigateUrl),
+            MemberJoinEventMessages(membersName, navigateUrl, profileImageUrl),
         );
     }
 
