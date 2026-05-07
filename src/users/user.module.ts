@@ -10,6 +10,8 @@ import { UserPhysiqueHistoryRepository } from "./repositories/user-physique-hist
 import { UserPhysiqueHistoryService } from "./services/user-physique-history.service";
 import { LineGroupModule } from "src/line-group/line-group.module";
 import { LineMessagingApiModule } from "src/external/line-messaging-api/line-messaging-api.module";
+import { LineLiffModule } from "src/external/line-liff/line-liff.module";
+import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
 import { WorkoutHistoryRepository } from "src/workout/repositories/workout-history.repository";
 import { WorkoutProgramPlanRepository } from "src/workout/repositories/workout-program.repository";
 import { MealHistoryRepository } from "src/nutrition/repositories/meal-history.repository";
@@ -19,6 +21,8 @@ import { NutritionPlanRepository } from "src/nutrition/repositories/nutrition-pl
     imports: [
         LineGroupModule,
         LineMessagingApiModule,
+        LineLiffModule,
+        FeatureFlagModule,
     ],
     providers: [
         UserRepository,

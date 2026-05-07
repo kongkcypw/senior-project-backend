@@ -15,9 +15,19 @@ import { WorkoutExerciseTemplateController } from "./controllers/workout-exercis
 import { WorkoutExerciseTemplateService } from "./services/workout-exercise-template.service";
 import { WorkoutExerciseTemplateRepository } from "./repositories/workout-exercise-template.repository";
 import { WorkoutExerciseSetRepository } from "./repositories/workout-exercise-set.repository";
+import { LineMessagingApiModule } from "src/external/line-messaging-api/line-messaging-api.module";
+import { LineGroupModule } from "src/line-group/line-group.module";
+import { LineLiffModule } from "src/external/line-liff/line-liff.module";
+import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
 
 @Module({
-    imports: [UserModule],
+    imports: [
+        UserModule,
+        LineMessagingApiModule,
+        LineGroupModule,
+        LineLiffModule,
+        FeatureFlagModule,
+    ],
     controllers: [
         WorkoutHistoryController,
         WorkoutProgramController,

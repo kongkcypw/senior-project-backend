@@ -2,17 +2,21 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { MealHistoryRepository } from "../repositories/meal-history.repository";
 import { MealHistoryEntity } from "../entities/meal-history.entity";
 import { Between } from "typeorm";
-import { NutritionPlanRepository } from "../repositories/nutrition-plan.repository";
 import { MealDetailDto } from "../dto/meal-detail.dto";
-import { NutritionPlanEntity } from "../entities/nutrition-plan.entity";
 import { UserRelationshipsRepository } from "src/users/repositories/user-relationships.repository";
+import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
+import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
+import { FeatureFlagService } from "src/feature-flag/services/feature-flag.service";
+import { FeatureFlagKey } from "src/feature-flag/enums/feature-flag.constant";
 
 @Injectable()
 export class MealHistoryService {
     constructor(
         private readonly mealHistoryRepository: MealHistoryRepository,
-        private readonly nutritionPlanRepository: NutritionPlanRepository,
         private readonly userRelationshipsRepository: UserRelationshipsRepository,
+        private readonly lineMessagingApiService: LineMessagingApiClientService,
+        private readonly lineGroupMemberService: LineGroupMemberService,
+        private readonly featureFlagService: FeatureFlagService,
     ) { }
 
     async findMealDetailByMealId(id: number): Promise<MealDetailDto> {
@@ -43,10 +47,24 @@ export class MealHistoryService {
     }
 
     async confirmMeal(id: number, mealData: Partial<MealHistoryEntity>): Promise<MealDetailDto> {
+        const existingMeal = await this.mealHistoryRepository.findOne({ where: { id } });
+        const lineUserId = existingMeal?.lineUserId ?? (mealData as any).lineUserId;
+
         const meal = this.mealHistoryRepository.create(mealData);
         meal.confirmAt = new Date();
         const updatedMeal = await this.mealHistoryRepository.save(meal);
         const mealDto = MealDetailDto.fromEntityToDto(updatedMeal);
+
+        const isPushEnabled = await this.featureFlagService.isEnabled(FeatureFlagKey.PUSH_MESSAGE_FOR_LIFF_ACTION);
+        if (isPushEnabled && lineUserId) {
+            const groupId = await this.lineGroupMemberService.findGroupIdByMemberLineUserId(lineUserId);
+            if (groupId) {
+                await this.lineMessagingApiService.sendPushMessages(groupId, [
+                    { type: 'text', text: 'เทรนเนอร์ได้ตรวจสอบและยืนยันโภชนาการอาหารมื้อนี้ของคุณแล้ว' },
+                ]);
+            }
+        }
+
         return mealDto;
     }
 

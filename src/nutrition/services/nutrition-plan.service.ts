@@ -3,10 +3,13 @@ import { NutritionPlanRepository } from "../repositories/nutrition-plan.reposito
 import { NutritionPlanDto } from "../dto/nutrition-plan.dto";
 import { Transactional } from "typeorm-transactional";
 import { NutritionNotificationTimeRepository } from "../repositories/nutrition-notification-time.repository";
-import { NutritionPlanEntity } from "../entities/nutrition-plan.entity";
-import { MealDetailDto } from "../dto/meal-detail.dto";
-import { MealHistoryRepository } from "../repositories/meal-history.repository";
 import { MealHistoryService } from "./meal-history.service";
+import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
+import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
+import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
+import { NutritionPlanInput, NutritionPlanMessage } from "src/webhook/dialogflow/messages/nutrition-plan";
+import { FeatureFlagService } from "src/feature-flag/services/feature-flag.service";
+import { FeatureFlagKey } from "src/feature-flag/enums/feature-flag.constant";
 
 @Injectable()
 export class NutritionPlanService {
@@ -14,6 +17,10 @@ export class NutritionPlanService {
         private readonly nutritionPlanRepository: NutritionPlanRepository,
         private readonly nutritionNotificationTimeRepository: NutritionNotificationTimeRepository,
         private readonly mealHistoryService: MealHistoryService,
+        private readonly lineMessagingApiService: LineMessagingApiClientService,
+        private readonly lineGroupMemberService: LineGroupMemberService,
+        private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly featureFlagService: FeatureFlagService,
     ) { }
 
     async getNutritionPlanByLineUserId(lineUserId: string): Promise<NutritionPlanDto | null> {
@@ -82,6 +89,8 @@ export class NutritionPlanService {
             savedPlanId,
             currentNotificationIds
         );
+
+        await this.pushNutritionPlanMessage(nutritionPlanDto);
     }
 
     async findNutritionPlanWithMealsInDay(lineUserId: string, date: string): Promise<NutritionPlanDto | null> {
@@ -92,5 +101,35 @@ export class NutritionPlanService {
         const nutritionPlanDto = NutritionPlanDto.fromEntityToDto(nutritionPlan);
         nutritionPlanDto.meals = await this.mealHistoryService.findMealsByDate(lineUserId, new Date(date));
         return nutritionPlanDto;
+    }
+
+    private async pushNutritionPlanMessage(nutritionPlanDto: NutritionPlanDto): Promise<void> {
+        const isPushEnabled = await this.featureFlagService.isEnabled(FeatureFlagKey.PUSH_MESSAGE_FOR_LIFF_ACTION);
+        if (!isPushEnabled) return;
+
+        const lineUserId = nutritionPlanDto.line_user_id;
+        const groupId = await this.lineGroupMemberService.findGroupIdByMemberLineUserId(lineUserId);
+        if (!groupId) return;
+
+        const totalCalories = nutritionPlanDto.totalCalories;
+        const carbohydrateCalories = nutritionPlanDto.carbohydrate * 4;
+        const proteinCalories = nutritionPlanDto.protein * 4;
+        const fatCalories = nutritionPlanDto.fat * 9;
+
+        const input: NutritionPlanInput = {
+            totalCalories,
+            carbohydrateGrams: nutritionPlanDto.carbohydrate,
+            carbohydrateCalories,
+            carbohydratePercent: totalCalories > 0 ? (carbohydrateCalories / totalCalories) * 100 : 0,
+            proteinGrams: nutritionPlanDto.protein,
+            proteinCalories,
+            proteinPercent: totalCalories > 0 ? (proteinCalories / totalCalories) * 100 : 0,
+            fatGrams: nutritionPlanDto.fat,
+            fatCalories,
+            fatPercent: totalCalories > 0 ? (fatCalories / totalCalories) * 100 : 0,
+        };
+        const navigateUrl = this.lineLiffNavigatePathService.getNutritionPlanPage(lineUserId);
+        const messages = NutritionPlanMessage(navigateUrl, input);
+        await this.lineMessagingApiService.sendPushMessages(groupId, messages);
     }
 }

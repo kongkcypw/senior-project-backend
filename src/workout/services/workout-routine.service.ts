@@ -7,6 +7,13 @@ import { WorkoutExerciseSetRepository } from "../repositories/workout-exercise-s
 import { Transactional } from "typeorm-transactional";
 import { WorkoutExerciseResponseDto, WorkoutExerciseSetResponseDto, WorkoutRoutineResponseDto } from "../dto/workout-program.dto";
 import { In } from "typeorm";
+import { WorkoutProgramPlanRepository } from "../repositories/workout-program.repository";
+import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
+import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
+import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
+import { WorkoutRoutineItem, WorkoutProgramMessages } from "src/webhook/dialogflow/messages/workout-program.message";
+import { FeatureFlagService } from "src/feature-flag/services/feature-flag.service";
+import { FeatureFlagKey } from "src/feature-flag/enums/feature-flag.constant";
 
 @Injectable()
 export class WorkoutRoutineService {
@@ -14,6 +21,11 @@ export class WorkoutRoutineService {
         private readonly workoutRoutineRepository: WorkoutRoutineRepository,
         private readonly exerciseRepository: WorkoutExerciseRepository,
         private readonly setRepository: WorkoutExerciseSetRepository,
+        private readonly workoutProgramPlanRepository: WorkoutProgramPlanRepository,
+        private readonly lineMessagingApiService: LineMessagingApiClientService,
+        private readonly lineGroupMemberService: LineGroupMemberService,
+        private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly featureFlagService: FeatureFlagService,
     ) { }
 
     async getById(id: number): Promise<WorkoutRoutineResponseDto | null> {
@@ -173,7 +185,7 @@ export class WorkoutRoutineService {
     }
 
     async createRoutineWithoutExercises(programId: number, name: string): Promise<WorkoutRoutineEntity> {
-        const routine = await this.workoutRoutineRepository.create({
+        const routine = this.workoutRoutineRepository.create({
             programId,
             name,
         });
@@ -224,7 +236,6 @@ export class WorkoutRoutineService {
                 description: exerciseDto.description,
                 orderInRoutine: exerciseDto.orderInRoutine,
             });
-            // We use save() here, relying on the @Transactional() wrapper to manage the underlying connection
             const savedExercise = await this.exerciseRepository.save(exercise);
 
             // Handle Sets
@@ -235,15 +246,10 @@ export class WorkoutRoutineService {
                     rep: setDto.rep,
                     weightKg: setDto.weightKg,
                 }));
-                // Bulk save the sets
                 await this.setRepository.save(setEntities);
             }
         }
 
-        // 3. Fetch the final entity with relations for the return value
-        // Note: The transaction might still be open here. The decorator commits/rolls back
-        // AFTER this method returns successfully or throws an error.
-        // and reflects the changes made inside the transaction.
         const finalRoutine = await this.workoutRoutineRepository.findOne({
             where: { id: savedRoutine.id },
             relations: ['exercises', 'exercises.setDetails']
@@ -253,6 +259,32 @@ export class WorkoutRoutineService {
             throw new Error('Cannot find created routine');
         }
 
-        return finalRoutine; // Transaction commits upon successful return
+        await this.pushWorkoutProgramMessage(lineUserId, programId);
+
+        return finalRoutine;
+    }
+
+    private async pushWorkoutProgramMessage(lineUserId: string, programId: number): Promise<void> {
+        const isPushEnabled = await this.featureFlagService.isEnabled(FeatureFlagKey.PUSH_MESSAGE_FOR_LIFF_ACTION);
+        if (!isPushEnabled) return;
+
+        const groupId = await this.lineGroupMemberService.findGroupIdByMemberLineUserId(lineUserId);
+        if (!groupId) return;
+
+        const program = await this.workoutProgramPlanRepository.findFullProgramByProgramPlanId(programId);
+        if (!program || !program.routines || program.routines.length === 0) return;
+
+        const routineItems: WorkoutRoutineItem[] = program.routines.map(r => ({
+            programName: program.name,
+            sessionName: r.name,
+            exerciseCount: r.exercises?.length ?? 0,
+            isCompleted: false,
+            navigateUrl: this.lineLiffNavigatePathService.getRoutineDetailPage(lineUserId, r.id.toString()),
+        }));
+
+        const messages = WorkoutProgramMessages(routineItems, 0);
+        if (messages.length === 0) return;
+
+        await this.lineMessagingApiService.sendPushMessages(groupId, messages);
     }
 }

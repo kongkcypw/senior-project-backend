@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { UserPhysiqueHistoryEntity } from "../entities/user-physique-history.entity";
 import { UserPhysiqueHistoryRepository } from "../repositories/user-physique-history.repository";
 import { UserPhysiqueDto } from "../dto/user-physique.dto";
 import { UserRepository } from "../repositories/user.repository";
-import { LineMessagingApiGroupChatService } from "src/external/line-messaging-api/services/group-chat.service";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
-import { TraineeInfoMessage } from "../messages/trainee-info.message";
+import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
+import { PhysiqueInfoData, PhysiqueInfoMessage } from "src/webhook/dialogflow/messages/physique-info.message";
+import { FeatureFlagService } from "src/feature-flag/services/feature-flag.service";
+import { FeatureFlagKey } from "src/feature-flag/enums/feature-flag.constant";
 
 @Injectable()
 export class UserPhysiqueHistoryService {
@@ -14,7 +15,9 @@ export class UserPhysiqueHistoryService {
         private readonly userPhysiqueHistoryRepository: UserPhysiqueHistoryRepository,
         private readonly userRepository: UserRepository,
         private readonly lineMessagingApiService: LineMessagingApiClientService,
-        private readonly lineGroupMemberService: LineGroupMemberService
+        private readonly lineGroupMemberService: LineGroupMemberService,
+        private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly featureFlagService: FeatureFlagService,
     ) { }
 
     async getPhysiqueHistoryByLineUserId(lineUserId: string): Promise<UserPhysiqueDto[]> {
@@ -42,24 +45,26 @@ export class UserPhysiqueHistoryService {
         });
         await this.userPhysiqueHistoryRepository.save(newRecord);
 
-        const userPhysiqueHistory = await this.userPhysiqueHistoryRepository.findByLineUserId(params.lineUserId);
+        const isPushEnabled = await this.featureFlagService.isEnabled(FeatureFlagKey.PUSH_MESSAGE_FOR_LIFF_ACTION);
+        if (!isPushEnabled) return;
 
-        if (userPhysiqueHistory.length > 1) {
-            return;
-        }
+        const groupId = await this.lineGroupMemberService.findGroupIdByMemberLineUserId(params.lineUserId);
+        if (!groupId) return;
 
         const user = await this.userRepository.findOneBy({ lineUserId: params.lineUserId });
-        if (!user) {
-            throw new Error("User not found");
-        }
 
-        const groupId = await this.lineGroupMemberService.findGroupIdByMemberLineUserId(user.lineUserId);
+        const d = new Date();
+        const updatedAtText = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 
-        if (!groupId) {
-            return;
-        }
-
-        const message = TraineeInfoMessage(user.displayName, params.age, params.weight, params.height, params.bodyFatPercentage);
-        await this.lineMessagingApiService.sendPushMessages(groupId, message);
+        const data: PhysiqueInfoData = {
+            heightCm: params.height,
+            weightKg: params.weight,
+            bodyFatPercentage: params.bodyFatPercentage,
+            goal: params.goal,
+            updatedAtText,
+        };
+        const navigateUrl = this.lineLiffNavigatePathService.getBodyInformationPage(params.lineUserId);
+        const messages = PhysiqueInfoMessage(data, user?.pictureUrl ?? null, navigateUrl);
+        await this.lineMessagingApiService.sendPushMessages(groupId, messages);
     }
 }
