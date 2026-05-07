@@ -165,7 +165,7 @@ const buildSummaryBubble = (routines: WorkoutRoutineItem[], workoutScore: number
                 },
                 {
                     type: "text",
-                    text: `บันทึกของการออกกำลังกายของคุณ`,
+                    text: `บันทึกของการออกกำลังกาย`,
                     size: "xs",
                     color: "#666666",
                     wrap: true,
@@ -179,6 +179,7 @@ const buildSummaryBubble = (routines: WorkoutRoutineItem[], workoutScore: number
                         {
                             type: "text" as const,
                             text: routine.sessionName,
+                            weight: "bold" as const,
                             size: "xs" as const,
                             color: "#111111",
                             flex: 2,
@@ -202,12 +203,20 @@ const buildSummaryBubble = (routines: WorkoutRoutineItem[], workoutScore: number
                 },
                 {
                     type: "text",
-                    text: `คะแนนการออกกำลังกาย: ${score.toFixed(1)}`,
+                    text: `คะแนนการออกกำลังกาย:`,
+                    size: "xs",
+                    color: "#666666",
+                    wrap: true,
+                    margin: "md",
+                },
+                {
+                    type: "text",
+                    text: `${Math.round(score)}/50`,
                     size: "sm",
                     weight: "bold",
                     color: "#111111",
                     wrap: true,
-                    margin: "md",
+                    margin: "xs",
                 },
             ],
         },
@@ -241,16 +250,6 @@ export const WorkoutProgramMessages = (
 
     const routineBubbles = routines.slice(0, 12).map(buildBubble);
     const summaryBubble = buildSummaryBubble(routines.slice(0, 12), workoutScore);
-
-    if (routines.length === 1) {
-        return [
-            {
-                type: "flex",
-                altText: `เซสชัน: ${routines[0].sessionName}`,
-                contents: routineBubbles[0],
-            },
-        ];
-    }
 
     return [
         {
