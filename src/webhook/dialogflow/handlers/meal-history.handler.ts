@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
+import { MessageEvent } from "@line/bot-sdk";
 import { messagingApi } from "@line/bot-sdk";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { MealHistoryService } from "src/nutrition/services/meal-history.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
 import { MealHistoryMessage, MealHistoryMealItem, MealHistoryIntake } from "../messages/meal-history.message";
+import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 
 const THAI_MONTHS = [
     'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -79,20 +81,17 @@ export class MealHistoryHandler {
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly mealHistoryService: MealHistoryService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly lineGroupMemberService: LineGroupMemberService,
     ) { }
 
-    async handlePersonalChat(event: any, parameters?: any): Promise<void> {
-        const userId = event.source.userId;
-        if (!userId) return;
-
+    private async buildPayload(lineUserId: string, parameters?: any): Promise<messagingApi.Message[]> {
         const { startDate, endDate, label } = parseDatePeriod(parameters);
-        console.log(`Parsed date period for MealHistory: start=${startDate.toISOString()}, end=${endDate.toISOString()}, label=${label}`);
-        const seeMoreUrl = this.lineLiffNavigatePathService.getNutritionInDayPage(userId);
+        const seeMoreUrl = this.lineLiffNavigatePathService.getNutritionInDayPage(lineUserId);
 
-        const meals = await this.mealHistoryService.findMealsByDateRange(userId, startDate, endDate);
+        const meals = await this.mealHistoryService.findMealsByDateRange(lineUserId, startDate, endDate);
 
         if (meals.length === 0) {
-            const noMealsMessage: messagingApi.Message[] = [{
+            return [{
                 type: "flex",
                 altText: `ไม่พบรายการอาหาร วันที่ ${label}`,
                 contents: {
@@ -139,8 +138,6 @@ export class MealHistoryHandler {
                     },
                 },
             }];
-            await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, noMealsMessage);
-            return;
         }
 
         const intake: MealHistoryIntake = {
@@ -153,14 +150,34 @@ export class MealHistoryHandler {
         const mealItems: MealHistoryMealItem[] = meals.map(m => ({
             mealName: m.foodTitle,
             imageUrl: m.imageUrl ?? '',
-            detailUrl: this.lineLiffNavigatePathService.getMealDetailPage(userId, m.id.toString()),
+            detailUrl: this.lineLiffNavigatePathService.getMealDetailPage(lineUserId, m.id.toString()),
             calories: m.calories,
             carbohydrate: m.carbohydrate,
             protein: m.protein,
             fat: m.fat,
         }));
 
-        const payload = MealHistoryMessage(label, seeMoreUrl, intake, mealItems);
+        return MealHistoryMessage(label, seeMoreUrl, intake, mealItems);
+    }
+
+    async handlePersonalChat(event: MessageEvent, parameters?: any): Promise<void> {
+        const userId = event.source.userId;
+        if (!userId) return;
+
+        const payload = await this.buildPayload(userId, parameters);
+        await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, payload);
+    }
+
+    async handleGroupChat(event: MessageEvent, parameters?: any): Promise<void> {
+        const groupId = event.source.type === "group" ? event.source.groupId : null;
+        const userId = event.source.userId;
+
+        if (!userId || !groupId) return;
+
+        const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
+        if (!trainee) return;
+
+        const payload = await this.buildPayload(trainee.lineUserId, parameters);
         await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, payload);
     }
 }

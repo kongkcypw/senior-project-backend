@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
+import { MessageEvent } from "@line/bot-sdk";
 import { IntentHandlerInterface } from "../interfaces/intent-handler.interface";
 import { messagingApi } from "@line/bot-sdk";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { NutritionPlanMessage } from "../messages/nutrition-plan";
 import { NutritionPlanService } from "src/nutrition/services/nutrition-plan.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
+import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 
 @Injectable()
 export class NutritionPlanHandler implements IntentHandlerInterface {
@@ -13,20 +15,15 @@ export class NutritionPlanHandler implements IntentHandlerInterface {
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly nutritionPlanService: NutritionPlanService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly lineGroupMemberService: LineGroupMemberService,
     ) { }
 
-    async handleGroupChat(event: any): Promise<void> {
-    }
-
-    async handlePersonalChat(event: any): Promise<void> {
-        const userId = event.source.userId;
-        if (!userId) return;
-
-        const navigateUrl = this.lineLiffNavigatePathService.getNutritionPlanPage(userId);
-        const plan = await this.nutritionPlanService.getNutritionPlanByLineUserId(userId);
+    private async buildPayload(lineUserId: string): Promise<messagingApi.Message[]> {
+        const navigateUrl = this.lineLiffNavigatePathService.getNutritionPlanPage(lineUserId);
+        const plan = await this.nutritionPlanService.getNutritionPlanByLineUserId(lineUserId);
 
         if (!plan || plan.totalCalories === 0) {
-            const noPlanMessage: messagingApi.Message[] = [{
+            return [{
                 type: "flex",
                 altText: "ยังไม่มีแผนโภชนาการ",
                 contents: {
@@ -102,15 +99,13 @@ export class NutritionPlanHandler implements IntentHandlerInterface {
                     },
                 },
             }];
-            await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, noPlanMessage);
-            return;
         }
 
         const carbCalories = plan.carbohydrate * 4;
         const proteinCalories = plan.protein * 4;
         const fatCalories = plan.fat * 9;
 
-        const payload = NutritionPlanMessage(navigateUrl, {
+        return NutritionPlanMessage(navigateUrl, {
             totalCalories: plan.totalCalories,
             carbohydrateGrams: plan.carbohydrate,
             carbohydrateCalories: carbCalories,
@@ -122,7 +117,26 @@ export class NutritionPlanHandler implements IntentHandlerInterface {
             fatCalories: fatCalories,
             fatPercent: Math.round((fatCalories / plan.totalCalories) * 100),
         });
+    }
 
+    async handleGroupChat(event: MessageEvent): Promise<void> {
+        const groupId = event.source.type === "group" ? event.source.groupId : null;
+        const userId = event.source.userId;
+
+        if (!userId || !groupId) return;
+
+        const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
+        if (!trainee) return;
+
+        const payload = await this.buildPayload(trainee.lineUserId);
+        await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, payload);
+    }
+
+    async handlePersonalChat(event: MessageEvent): Promise<void> {
+        const userId = event.source.userId;
+        if (!userId) return;
+
+        const payload = await this.buildPayload(userId);
         await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, payload);
     }
 }

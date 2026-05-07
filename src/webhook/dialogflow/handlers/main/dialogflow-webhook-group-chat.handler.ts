@@ -9,6 +9,9 @@ import { GreetingHandler } from "../greeting.handler";
 import { LastWorkoutSessionHandler } from "../last-workout-session.handler";
 import { PhysiqueInfoHandler } from "../physique-info.handler";
 import { MyScoreHandler } from "../my-score.handler";
+import { NutritionPlanHandler } from "../nutrition-plan.handler";
+import { TodayNutritionSummaryHandler } from "../today-nutrition-summary.handler";
+import { MealHistoryHandler } from "../meal-history.handler";
 
 @Injectable()
 export class DialogflowWebhookGroupChatHandler {
@@ -21,6 +24,9 @@ export class DialogflowWebhookGroupChatHandler {
         private readonly physiqueInfoHandler: PhysiqueInfoHandler,
         private readonly myScoreHandler: MyScoreHandler,
         private readonly greetingHandler: GreetingHandler,
+        private readonly nutritionPlanHandler: NutritionPlanHandler,
+        private readonly todayNutritionSummaryHandler: TodayNutritionSummaryHandler,
+        private readonly mealHistoryHandler: MealHistoryHandler,
     ) { }
 
     async handleIntent(intentName: string, event: MessageEvent, fulfillmentMessages?: any[], parameters?: any): Promise<void> {
@@ -33,6 +39,14 @@ export class DialogflowWebhookGroupChatHandler {
 
         if (intentName === DialogflowIntentName.HELP) {
             return this.helpHandler.handleGroupChat(event);
+        }
+
+        if (intentName === DialogflowIntentName.NUTRITION_PLAN) {
+            return this.nutritionPlanHandler.handleGroupChat(event);
+        }
+
+        if (intentName === DialogflowIntentName.TODAY_NUTRITION_SUMMARY) {
+            return this.todayNutritionSummaryHandler.handleGroupChat(event);
         }
 
         if (intentName === DialogflowIntentName.WORKOUT_PROGRAM) {
@@ -49,6 +63,10 @@ export class DialogflowWebhookGroupChatHandler {
 
         if (intentName === DialogflowIntentName.MY_SCORE) {
             return this.myScoreHandler.handleGroupChat(event, parameters);
+        }
+
+        if (intentName === DialogflowIntentName.MEAL_HISTORY) {
+            return this.mealHistoryHandler.handleGroupChat(event, parameters);
         }
 
         return;

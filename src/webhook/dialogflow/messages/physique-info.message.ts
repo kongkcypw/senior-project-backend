@@ -115,13 +115,8 @@ const buildPhysiqueBubble = (
         paddingAll: "12px",
         contents: [
             {
-                type: "separator",
-                color: "#D0D0D0",
-            },
-            {
                 type: "box",
                 layout: "vertical",
-                margin: "md",
                 borderColor: "#4E7FFF",
                 borderWidth: "normal",
                 cornerRadius: "md",

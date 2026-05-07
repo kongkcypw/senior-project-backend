@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
+import { MessageEvent } from "@line/bot-sdk";
 import { IntentHandlerInterface } from "../interfaces/intent-handler.interface";
 import { messagingApi } from "@line/bot-sdk";
 import { LineMessagingApiClientService } from "src/external/line-messaging-api/services/client.service";
 import { TodayNutritionSummaryMessage } from "../messages/today-nutrition-summary.message";
 import { NutritionPlanService } from "src/nutrition/services/nutrition-plan.service";
 import { LineLiffNavigatePathService } from "src/external/line-liff/services/line-liff-navigate-path.service";
+import { LineGroupMemberService } from "src/line-group/services/line-group-member.service";
 
 @Injectable()
 export class TodayNutritionSummaryHandler implements IntentHandlerInterface {
@@ -13,23 +15,18 @@ export class TodayNutritionSummaryHandler implements IntentHandlerInterface {
         private readonly lineMessagingApiClientService: LineMessagingApiClientService,
         private readonly nutritionPlanService: NutritionPlanService,
         private readonly lineLiffNavigatePathService: LineLiffNavigatePathService,
+        private readonly lineGroupMemberService: LineGroupMemberService,
     ) { }
 
-    async handleGroupChat(event: any): Promise<void> {
-    }
-
-    async handlePersonalChat(event: any): Promise<void> {
-        const userId = event.source.userId;
-        if (!userId) return;
-
-        const planNavigateUrl = this.lineLiffNavigatePathService.getNutritionInDayPage(userId);
+    private async buildPayload(lineUserId: string): Promise<messagingApi.Message[]> {
+        const planNavigateUrl = this.lineLiffNavigatePathService.getNutritionInDayPage(lineUserId);
 
         const now = new Date();
         const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-        const planWithMeals = await this.nutritionPlanService.findNutritionPlanWithMealsInDay(userId, dateStr);
+        const planWithMeals = await this.nutritionPlanService.findNutritionPlanWithMealsInDay(lineUserId, dateStr);
 
         if (!planWithMeals || planWithMeals.totalCalories === 0) {
-            const noPlanMessage: messagingApi.Message[] = [{
+            return [{
                 type: "flex",
                 altText: "ยังไม่มีแผนโภชนาการ",
                 contents: {
@@ -76,8 +73,6 @@ export class TodayNutritionSummaryHandler implements IntentHandlerInterface {
                     },
                 },
             }];
-            await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, noPlanMessage);
-            return;
         }
 
         const meals = planWithMeals.meals ?? [];
@@ -98,7 +93,7 @@ export class TodayNutritionSummaryHandler implements IntentHandlerInterface {
         const mealItems = meals.map(m => ({
             mealName: m.foodTitle,
             imageUrl: m.imageUrl ?? "",
-            detailUrl: this.lineLiffNavigatePathService.getMealDetailPage(userId, m.id.toString()),
+            detailUrl: this.lineLiffNavigatePathService.getMealDetailPage(lineUserId, m.id.toString()),
             calories: m.calories,
             carbohydrate: m.carbohydrate,
             protein: m.protein,
@@ -115,13 +110,27 @@ export class TodayNutritionSummaryHandler implements IntentHandlerInterface {
             + clamp(intake.fat, planWithMeals.fat)
         ) / 4 * 50;
 
-        const payload = TodayNutritionSummaryMessage(
-            planNavigateUrl,
-            intake,
-            plan,
-            mealItems,
-            nutritionScore,
-        );
+        return TodayNutritionSummaryMessage(planNavigateUrl, intake, plan, mealItems, nutritionScore);
+    }
+
+    async handleGroupChat(event: MessageEvent): Promise<void> {
+        const groupId = event.source.type === "group" ? event.source.groupId : null;
+        const userId = event.source.userId;
+
+        if (!userId || !groupId) return;
+
+        const trainee = await this.lineGroupMemberService.findTraineeInGroup(groupId);
+        if (!trainee) return;
+
+        const payload = await this.buildPayload(trainee.lineUserId);
+        await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, payload);
+    }
+
+    async handlePersonalChat(event: MessageEvent): Promise<void> {
+        const userId = event.source.userId;
+        if (!userId) return;
+
+        const payload = await this.buildPayload(userId);
         await this.lineMessagingApiClientService.sendReplyMessages(event.replyToken, payload);
     }
 }
