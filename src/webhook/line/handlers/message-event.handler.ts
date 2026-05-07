@@ -91,6 +91,7 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
       return;
     }
 
+    // Remove mentions from the original text to get the clean user message for better intent detection in Dialogflow
     const cleanText = stripMentions(
       event.message.text,
       event.message.mention?.mentionees ?? [],
@@ -116,6 +117,8 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
       return;
     }
 
+    await this.lineMessagingApiClientService.showLoadingAnimation(event.source.userId!);
+
     const isGroupChat = false;
     await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event, isGroupChat);
   }
@@ -132,6 +135,10 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     const messageId = event.message.id;
     if (!userId) {
       return;
+    }
+
+    if (isPersonalChat) {
+      await this.lineMessagingApiClientService.showLoadingAnimation(userId);
     }
 
     const messageContentResponse = await this.lineMessagingApiMessageContentService.getMessageContent(messageId);

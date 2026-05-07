@@ -91,6 +91,15 @@ export class LineMessagingApiClientService {
     );
   }
 
+  // This function only works for one-on-one chat, as group chat and room chat do not support sending typing indicators or loading animations.
+  async showLoadingAnimation(chatId: string, loadingSeconds = 60): Promise<void> {
+    try {
+      await this.client.showLoadingAnimation({ chatId, loadingSeconds });
+    } catch (error) {
+      console.warn(`Failed to show loading animation: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
   async getBotInfo(): Promise<void> {
     try {
       const botInfo = await this.client.getBotInfo();
