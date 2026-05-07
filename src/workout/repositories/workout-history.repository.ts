@@ -164,6 +164,9 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         exercises: Array<{
             exerciseId: number;
             exerciseName: string;
+            imageUrl: string | null;
+            plannedSets: Array<{ setNumber: number; rep: number; weightKg: number | null }>;
+            previousSets: Array<{ setNumber: number; rep: number; weightKg: number | null }>;
             sets: Array<{ setNumber: number; rep: number; weightKg: number | null; notes: string | null }>;
         }>;
     } | null> {
@@ -172,18 +175,50 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
             .innerJoinAndSelect('wr.workoutProgram', 'wp')
             .leftJoinAndSelect('wh.exerciseLogs', 'el')
             .leftJoinAndSelect('el.workoutExercise', 'we')
+            .leftJoinAndSelect('we.setDetails', 'wes')
             .where('wh.id = :sessionId', { sessionId })
             .andWhere('wh.finished_at IS NOT NULL')
             .getOne();
 
         if (!session) return null;
 
-        const exerciseMap = new Map<number, { exerciseId: number; exerciseName: string; sets: Array<{ setNumber: number; rep: number; weightKg: number | null; notes: string | null }> }>();
+        // Fetch the previous completed session for the same routine + trainee
+        const prevSession = await this.createQueryBuilder('wh2')
+            .leftJoinAndSelect('wh2.exerciseLogs', 'el2')
+            .where('wh2.line_user_id = :lineUserId', { lineUserId: session.lineUserId })
+            .andWhere('wh2.routine_id = :routineId', { routineId: session.routineId })
+            .andWhere('wh2.finished_at IS NOT NULL')
+            .andWhere('wh2.started_at < :startedAt', { startedAt: session.startedAt })
+            .orderBy('wh2.started_at', 'DESC')
+            .getOne();
+
+        const prevSetsMap = new Map<number, Array<{ setNumber: number; rep: number; weightKg: number | null }>>();
+        for (const log of prevSession?.exerciseLogs ?? []) {
+            if (!prevSetsMap.has(log.exerciseId)) prevSetsMap.set(log.exerciseId, []);
+            prevSetsMap.get(log.exerciseId)!.push({ setNumber: log.setNumber, rep: log.rep, weightKg: log.weightKg });
+        }
+        for (const sets of prevSetsMap.values()) sets.sort((a, b) => a.setNumber - b.setNumber);
+
+        const exerciseMap = new Map<number, {
+            exerciseId: number;
+            exerciseName: string;
+            imageUrl: string | null;
+            plannedSets: Array<{ setNumber: number; rep: number; weightKg: number | null }>;
+            previousSets: Array<{ setNumber: number; rep: number; weightKg: number | null }>;
+            sets: Array<{ setNumber: number; rep: number; weightKg: number | null; notes: string | null }>;
+        }>();
+
         for (const log of session.exerciseLogs ?? []) {
             if (!exerciseMap.has(log.exerciseId)) {
+                const plannedSets = (log.workoutExercise?.setDetails ?? [])
+                    .sort((a, b) => a.set - b.set)
+                    .map(s => ({ setNumber: s.set, rep: s.rep, weightKg: s.weightKg }));
                 exerciseMap.set(log.exerciseId, {
                     exerciseId: log.exerciseId,
                     exerciseName: log.workoutExercise?.name ?? '-',
+                    imageUrl: log.workoutExercise?.imageUrl ?? null,
+                    plannedSets,
+                    previousSets: prevSetsMap.get(log.exerciseId) ?? [],
                     sets: [],
                 });
             }
