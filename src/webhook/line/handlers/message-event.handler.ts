@@ -20,6 +20,15 @@ import { LineLiffNavigatePathService } from 'src/external/line-liff/services/lin
 
 const ANALYZE_FOOD_TRIGGER = 'วิเคราะห์รูปอาหาร';
 
+export function stripMentions(text: string, mentionees: Array<{ index: number; length: number }>): string {
+  const sorted = [...mentionees].sort((a, b) => b.index - a.index);
+  let result = text;
+  for (const m of sorted) {
+    result = result.slice(0, m.index) + result.slice(m.index + m.length);
+  }
+  return result;
+}
+
 @Injectable()
 export class MessageEventHandler implements EventHandler<MessageEvent> {
 
@@ -67,10 +76,8 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
       return;
     }
 
-    const isGroupChat = true;
     let isBotMentioned = false;
-
-    if (event.message.type === WebhookEventMessageType.TEXT && event.message.mention) {
+    if (event.message.mention) {
       for (const mentionee of event.message.mention.mentionees) {
         console.log('Mentionee userId:', mentionee.userId);
         if (mentionee.userId === this.lineMessagingApiConfigService.chatbotUserId) {
@@ -78,14 +85,22 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
           break;
         }
       }
-
-      // Skip if bot is not mentioned
-      if (!isBotMentioned) {
-        return;
-      }
-
-      await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event, isGroupChat);
     }
+
+    if (!isBotMentioned) {
+      return;
+    }
+
+    const cleanText = stripMentions(
+      event.message.text,
+      event.message.mention?.mentionees ?? [],
+    ).trim();
+
+    if (!cleanText) {
+      return;
+    }
+
+    await this.dialogflowWebhookService.getFullfilmentTextAndReplyMessage(event, true, cleanText);
   }
 
   async handlePersonalChatTextMessage(event: MessageEvent): Promise<void> {

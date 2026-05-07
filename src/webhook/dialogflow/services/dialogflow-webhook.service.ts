@@ -29,7 +29,7 @@ export class DialogflowWebhookService {
         private readonly featureReachRateLimitHandler: FeatureReachRateLimitHandler,
     ) { }
 
-    async getFullfilmentTextAndReplyMessage(event: MessageEvent, isGroupChat: boolean): Promise<void> {
+    async getFullfilmentTextAndReplyMessage(event: MessageEvent, isGroupChat: boolean, textOverride?: string): Promise<void> {
 
         if (event.message.type !== 'text') {
             return;
@@ -46,7 +46,7 @@ export class DialogflowWebhookService {
                 session: sessionPath,
                 queryInput: {
                     text: {
-                        text: event.message.text,
+                        text: textOverride ?? event.message.text,
                         languageCode: 'th',
                     },
                 },
