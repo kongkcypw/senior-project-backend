@@ -178,9 +178,9 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     const nutritionPlan = await this.nutritionPlanService.getNutritionPlanByLineUserId(lineUserId);
     const meals = await this.mealHistoryService.findMealsByDate(lineUserId, new Date());
     const totalCaloriesIntake = meals.reduce((total, m) => total + m.calories, 0);
-    const remainingCalories = nutritionPlan
+    const remainingCalories = nutritionPlan && nutritionPlan.totalCalories > 0
       ? nutritionPlan.totalCalories - totalCaloriesIntake
-      : 0;
+      : null;
 
     const formatedDate = new Date().toLocaleString('th-TH', {
       timeZone: 'Asia/Bangkok',
@@ -244,7 +244,7 @@ export class MessageEventHandler implements EventHandler<MessageEvent> {
     );
   }
 
-  async sendMealDetailMessage(event: MessageEvent, detail: GeminiAnalyzeFoodImageResponse, remainingCalories: number, formatedDate: string, navigatePath: string): Promise<void> {
+  async sendMealDetailMessage(event: MessageEvent, detail: GeminiAnalyzeFoodImageResponse, remainingCalories: number | null, formatedDate: string, navigatePath: string): Promise<void> {
     await this.lineMessagingApiClientService.sendReplyMessages(
       event.replyToken,
       MealDetailMessage(detail, formatedDate, remainingCalories, navigatePath)

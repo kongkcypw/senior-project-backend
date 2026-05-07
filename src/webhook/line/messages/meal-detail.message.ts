@@ -4,7 +4,7 @@ import { GeminiAnalyzeFoodImageResponse } from "src/external/gemini/types/gemini
 export const MealDetailMessage = (
     detail: GeminiAnalyzeFoodImageResponse,
     date: string,
-    remainingCalories: number,
+    remainingCalories: number | null,
     navigateUrl: string,
 ): messagingApi.Message[] => {
 
@@ -82,7 +82,7 @@ export const MealDetailMessage = (
                             contents: [
                                 {
                                     type: "text",
-                                    text: "ยังขาดอีก",
+                                    text: remainingCalories !== null ? "ยังขาดอีก" : "แผนโภชนาการ",
                                     size: "md",
                                     color: "#000000",
                                     weight: "bold",
@@ -90,8 +90,8 @@ export const MealDetailMessage = (
                                 },
                                 {
                                     type: "text",
-                                    text: `${remainingCalories} แคลอรี่`,
-                                    size: "lg",
+                                    text: remainingCalories !== null ? `${remainingCalories} แคลอรี่` : "ยังไม่ได้สร้างแผนโภชนาการ",
+                                    size: remainingCalories !== null ? "lg" : "sm",
                                     color: "#000000",
                                     weight: "bold",
                                     align: "end",
