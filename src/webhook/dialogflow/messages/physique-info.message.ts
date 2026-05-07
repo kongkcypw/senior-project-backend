@@ -76,6 +76,29 @@ const buildValueRow = (label: string, value: string): messagingApi.FlexBox => ({
     ],
 });
 
+const buildLongValueRow = (label: string, value: string): messagingApi.FlexBox => ({
+    type: "box",
+    layout: "vertical",
+    margin: "xs",
+    contents: [
+        {
+            type: "text",
+            text: label,
+            size: "sm",
+            weight: "bold",
+            color: "#111111",
+        },
+        {
+            type: "text",
+            text: value,
+            size: "sm",
+            color: "#111111",
+            wrap: true,
+            margin: "xs",
+        },
+    ],
+});
+
 const buildPhysiqueBubble = (
     data: PhysiqueInfoData,
     profileImageUrl: string | null,
@@ -97,7 +120,7 @@ const buildPhysiqueBubble = (
                     ? "-"
                     : `${data.bodyFatPercentage} %`,
             ),
-            buildValueRow("เป้าหมาย:", data.goal?.trim() ? data.goal : "-"),
+            buildLongValueRow("เป้าหมาย:", data.goal?.trim() ? data.goal : "-"),
             {
                 type: "text",
                 text: `อัพเดทวันที่: ${data.updatedAtText}`,
