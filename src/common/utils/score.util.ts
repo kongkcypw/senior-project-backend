@@ -103,42 +103,43 @@ export interface DateWindow {
     to: Date;
 }
 
-/** Returns [start-of-day, start-of-next-day) for today in server local time. */
+const BANGKOK_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+function bkParts(utc: Date) {
+    const bk = new Date(utc.getTime() + BANGKOK_OFFSET_MS);
+    return { year: bk.getUTCFullYear(), month: bk.getUTCMonth(), date: bk.getUTCDate(), day: bk.getUTCDay() };
+}
+
+function bkMidnight(year: number, month: number, date: number): Date {
+    return new Date(Date.UTC(year, month, date) - BANGKOK_OFFSET_MS);
+}
+
+/** Returns [start-of-day, start-of-next-day) for today in Asia/Bangkok time. */
 export function dailyWindow(): DateWindow {
-    const from = new Date();
-    from.setHours(0, 0, 0, 0);
-    const to = new Date(from);
-    to.setDate(to.getDate() + 1);
-    return { from, to };
+    const { year, month, date } = bkParts(new Date());
+    return { from: bkMidnight(year, month, date), to: bkMidnight(year, month, date + 1) };
 }
 
-/** Returns [start-of-current-ISO-week Monday, next Monday). */
+/** Returns [start-of-current-ISO-week Monday, next Monday) in Asia/Bangkok time. */
 export function weeklyWindow(): DateWindow {
-    const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 = Sunday
-    const daysToMonday = (dayOfWeek + 6) % 7;
-    const from = new Date(now);
-    from.setDate(now.getDate() - daysToMonday);
-    from.setHours(0, 0, 0, 0);
-    const to = new Date(from);
-    to.setDate(from.getDate() + 7);
-    return { from, to };
+    const { year, month, date, day } = bkParts(new Date());
+    const daysToMonday = (day + 6) % 7;
+    const mondayDate = date - daysToMonday;
+    return { from: bkMidnight(year, month, mondayDate), to: bkMidnight(year, month, mondayDate + 7) };
 }
 
-/** Returns [start-of-last-Monday-week, this-week-Monday). */
+/** Returns [start-of-last-Monday-week, this-week-Monday) in Asia/Bangkok time. */
 export function lastWeeklyWindow(): DateWindow {
     const { from } = weeklyWindow();
     const to = new Date(from);
-    from.setDate(from.getDate() - 7);
-    return { from, to };
+    const prevMonday = new Date(from.getTime() - 7 * 86400000);
+    return { from: prevMonday, to };
 }
 
-/** Returns [1st of current month, 1st of next month). */
+/** Returns [1st of current month, 1st of next month) in Asia/Bangkok time. */
 export function monthlyWindow(): DateWindow {
-    const now = new Date();
-    const from = new Date(now.getFullYear(), now.getMonth(), 1);
-    const to   = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    return { from, to };
+    const { year, month } = bkParts(new Date());
+    return { from: bkMidnight(year, month, 1), to: bkMidnight(year, month + 1, 1) };
 }
 
 // ---------------------------------------------------------------------------
@@ -192,14 +193,12 @@ export function buildHistoryBuckets(period: HistoryPeriod): HistoryBuckets {
     const now = new Date();
 
     if (period === 'daily') {
-        // Mon–Sun of this week, 7 buckets
+        // Mon–Sun of this week, 7 buckets (Bangkok midnight boundaries)
         const { from: weekStart } = weeklyWindow();
         const buckets: ScoreBucket[] = [];
         for (let i = 0; i < 7; i++) {
-            const bucketFrom = new Date(weekStart);
-            bucketFrom.setDate(weekStart.getDate() + i);
-            const bucketTo = new Date(bucketFrom);
-            bucketTo.setDate(bucketFrom.getDate() + 1);
+            const bucketFrom = new Date(weekStart.getTime() + i * 86400000);
+            const bucketTo   = new Date(weekStart.getTime() + (i + 1) * 86400000);
             buckets.push({
                 label: THAI_DAY_LABELS[i],
                 from: bucketFrom,
@@ -208,31 +207,25 @@ export function buildHistoryBuckets(period: HistoryPeriod): HistoryBuckets {
                 isFuture: bucketFrom > now,
             });
         }
-        const rangeTo = new Date(weekStart);
-        rangeTo.setDate(weekStart.getDate() + 7);
+        const rangeTo = new Date(weekStart.getTime() + 7 * 86400000);
         return { truncUnit: 'day', rangeFrom: weekStart, rangeTo, buckets };
     }
 
     if (period === 'weekly') {
-        // Every ISO week (Mon start) that overlaps the current calendar month.
-        // Range is the union of those weeks (so a week that straddles a month
-        // boundary is still counted fully).
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const monthEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        // Every ISO week (Mon start) that overlaps the current Bangkok calendar month.
+        const bkNow = bkParts(now);
+        const monthStart = bkMidnight(bkNow.year, bkNow.month, 1);
+        const monthEnd   = bkMidnight(bkNow.year, bkNow.month + 1, 1);
 
-        // First bucket: Monday of the week that contains monthStart
-        const firstBucketFrom = new Date(monthStart);
-        const dow = firstBucketFrom.getDay(); // 0 = Sun
-        const daysToMonday = (dow + 6) % 7;
-        firstBucketFrom.setDate(firstBucketFrom.getDate() - daysToMonday);
-        firstBucketFrom.setHours(0, 0, 0, 0);
+        // First bucket: Monday of the week that contains monthStart (Bangkok)
+        const bkMonthStart = bkParts(monthStart);
+        const daysToMonday = (bkMonthStart.day + 6) % 7;
+        let cursor = bkMidnight(bkNow.year, bkNow.month, bkMonthStart.date - daysToMonday);
 
         const buckets: ScoreBucket[] = [];
-        let cursor = firstBucketFrom;
         let weekIndex = 1;
         while (cursor < monthEnd) {
-            const bucketTo = new Date(cursor);
-            bucketTo.setDate(cursor.getDate() + 7);
+            const bucketTo = new Date(cursor.getTime() + 7 * 86400000);
             buckets.push({
                 label: `W${weekIndex}`,
                 from: cursor,
@@ -248,13 +241,13 @@ export function buildHistoryBuckets(period: HistoryPeriod): HistoryBuckets {
         return { truncUnit: 'week', rangeFrom, rangeTo, buckets };
     }
 
-    // monthly — 12 buckets, Jan–Dec of current year
-    const year = now.getFullYear();
+    // monthly — 12 buckets, Jan–Dec of current Bangkok year
+    const year = bkParts(now).year;
     const buckets: ScoreBucket[] = [];
     for (let m = 0; m < 12; m++) {
-        const bucketFrom = new Date(year, m, 1);
-        const bucketTo   = new Date(year, m + 1, 1);
-        const daysInMonth = Math.round((bucketTo.getTime() - bucketFrom.getTime()) / (1000 * 60 * 60 * 24));
+        const bucketFrom = bkMidnight(year, m, 1);
+        const bucketTo   = bkMidnight(year, m + 1, 1);
+        const daysInMonth = Math.round((bucketTo.getTime() - bucketFrom.getTime()) / 86400000);
         buckets.push({
             label: THAI_MONTH_LABELS[m],
             from: bucketFrom,
@@ -265,8 +258,8 @@ export function buildHistoryBuckets(period: HistoryPeriod): HistoryBuckets {
     }
     return {
         truncUnit: 'month',
-        rangeFrom: new Date(year, 0, 1),
-        rangeTo:   new Date(year + 1, 0, 1),
+        rangeFrom: bkMidnight(year, 0, 1),
+        rangeTo:   bkMidnight(year + 1, 0, 1),
         buckets,
     };
 }

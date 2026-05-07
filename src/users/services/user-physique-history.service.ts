@@ -53,8 +53,8 @@ export class UserPhysiqueHistoryService {
 
         const user = await this.userRepository.findOneBy({ lineUserId: params.lineUserId });
 
-        const d = new Date();
-        const updatedAtText = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+        const bkd = new Date(Date.now() + 7 * 60 * 60 * 1000);
+        const updatedAtText = `${bkd.getUTCDate().toString().padStart(2, '0')}/${(bkd.getUTCMonth() + 1).toString().padStart(2, '0')}/${bkd.getUTCFullYear()}`;
 
         const data: PhysiqueInfoData = {
             heightCm: params.height,

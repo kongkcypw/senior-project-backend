@@ -69,8 +69,13 @@ export class MealHistoryService {
     }
 
     async findMealsByDate(lineUserId: string, date: Date): Promise<MealDetailDto[]> {
-        const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+        const BANGKOK_OFFSET_MS = 7 * 60 * 60 * 1000;
+        const bangkokTime = new Date(date.getTime() + BANGKOK_OFFSET_MS);
+        const year = bangkokTime.getUTCFullYear();
+        const month = bangkokTime.getUTCMonth();
+        const day = bangkokTime.getUTCDate();
+        const startOfDay = new Date(Date.UTC(year, month, day) - BANGKOK_OFFSET_MS);
+        const endOfDay = new Date(Date.UTC(year, month, day + 1) - BANGKOK_OFFSET_MS);
         const meals = await this.mealHistoryRepository.find({ where: { lineUserId, createdAt: Between(startOfDay, endOfDay) } });
 
         const mealsDto = meals.map(meal => MealDetailDto.fromEntityToDto(meal));

@@ -23,9 +23,9 @@ export class NutritionNotificationTimeService {
         timeZone: 'Asia/Bangkok'
     })
     async caloriesIntakeReminder(): Promise<void> {
-        const now = new Date();
-        const hour = now.getHours().toString().padStart(2, "0");
-        const minute = now.getMinutes().toString().padStart(2, "0");
+        const bkNow = new Date(Date.now() + 7 * 60 * 60 * 1000);
+        const hour = bkNow.getUTCHours().toString().padStart(2, "0");
+        const minute = bkNow.getUTCMinutes().toString().padStart(2, "0");
         const time = `${hour}:${minute}:00`;
 
         const notificationTimes = await this.nutritionNotificationTimeRepository.findByTimeWithPlan(time);

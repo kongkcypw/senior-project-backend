@@ -109,7 +109,7 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
      */
     async countDistinctSessionDays(lineUserId: string, from: Date, to: Date): Promise<number> {
         const result = await this.createQueryBuilder('wh')
-            .select('COUNT(DISTINCT DATE(wh.startedAt))', 'count')
+            .select("COUNT(DISTINCT DATE(wh.started_at AT TIME ZONE 'Asia/Bangkok'))", 'count')
             .where('wh.lineUserId = :lineUserId', { lineUserId })
             .andWhere('wh.finishedAt IS NOT NULL')
             .andWhere('wh.startedAt >= :from', { from })
@@ -252,8 +252,8 @@ export class WorkoutHistoryRepository extends Repository<WorkoutHistoryEntity> {
         truncUnit: TruncUnit,
     ): Promise<Map<string, number>> {
         const rows = await this.createQueryBuilder('wh')
-            .select(`DATE_TRUNC('${truncUnit}', wh.started_at)`, 'bucket')
-            .addSelect('COUNT(DISTINCT DATE(wh.started_at))', 'count')
+            .select(`DATE_TRUNC('${truncUnit}', wh.started_at AT TIME ZONE 'Asia/Bangkok') AT TIME ZONE 'Asia/Bangkok'`, 'bucket')
+            .addSelect("COUNT(DISTINCT DATE(wh.started_at AT TIME ZONE 'Asia/Bangkok'))", 'count')
             .where('wh.line_user_id = :lineUserId', { lineUserId })
             .andWhere('wh.finished_at IS NOT NULL')
             .andWhere('wh.started_at >= :from', { from })

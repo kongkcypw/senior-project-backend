@@ -96,8 +96,8 @@ export class WorkoutHistoryService {
         const totalRoutines = await this.workoutProgramPlanRepository.countRoutinesByTrainee(lineUserId);
 
         const exerciseCount = new Set(dto.sets.map(s => s.exerciseId)).size;
-        const d = new Date(dto.finishedAt);
-        const sessionDateText = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+        const bkd = new Date(new Date(dto.finishedAt).getTime() + 7 * 60 * 60 * 1000);
+        const sessionDateText = `${bkd.getUTCDate().toString().padStart(2, '0')}/${(bkd.getUTCMonth() + 1).toString().padStart(2, '0')}/${bkd.getUTCFullYear()}`;
 
         const lastSessionData: LastWorkoutSessionCardData = {
             programName: session.workoutRoutine?.workoutProgram?.name ?? '-',
