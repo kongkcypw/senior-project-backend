@@ -42,22 +42,6 @@ export const HelpMessagePersonalChat = (): messagingApi.Message[] => [
                     type: "action",
                     action: {
                         type: "message",
-                        label: "✅ ซ้อมวันนี้ไหม",
-                        text: "วันนี้ออกกำลังกายแล้วไหม",
-                    },
-                },
-                {
-                    type: "action",
-                    action: {
-                        type: "message",
-                        label: "🔥 Streak ฉัน",
-                        text: "ฉันออกกำลังกายต่อเนื่องมาแล้วกี่วัน",
-                    },
-                },
-                {
-                    type: "action",
-                    action: {
-                        type: "message",
                         label: "⭐ คะแนนสัปดาห์นี้",
                         text: "คะแนนของฉันสัปดาห์นี้",
                     },
