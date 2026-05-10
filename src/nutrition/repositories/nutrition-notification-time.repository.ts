@@ -15,6 +15,22 @@ export class NutritionNotificationTimeRepository extends Repository<NutritionNot
             .getMany();
     }
 
+    // Matches notifications whose send_at falls within [startTime, endTime].
+    // When the window wraps past midnight (e.g. 23:57–00:03), wrapsAround=true
+    // and the condition flips to >= startTime OR <= endTime.
+    async findByTimeRangeWithPlan(startTime: string, endTime: string, wrapsAround: boolean): Promise<NutritionNotificationTimeEntity[]> {
+        const qb = this.createQueryBuilder("notificationTime")
+            .leftJoinAndSelect("notificationTime.nutritionPlan", "nutritionPlan");
+
+        if (wrapsAround) {
+            qb.where("notificationTime.sendAt >= :startTime OR notificationTime.sendAt <= :endTime", { startTime, endTime });
+        } else {
+            qb.where("notificationTime.sendAt BETWEEN :startTime AND :endTime", { startTime, endTime });
+        }
+
+        return qb.getMany();
+    }
+
     // Inside NutritionNotificationTimeRepository.ts
 
     async deleteNotificationsNotIn(planId: number, notificationIds: number[]): Promise<void> {

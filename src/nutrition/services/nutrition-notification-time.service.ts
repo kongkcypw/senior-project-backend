@@ -23,12 +23,24 @@ export class NutritionNotificationTimeService {
         timeZone: 'Asia/Bangkok'
     })
     async caloriesIntakeReminder(): Promise<void> {
+        const WINDOW_MINUTES = 5;
         const bkNow = new Date(Date.now() + 7 * 60 * 60 * 1000);
-        const hour = bkNow.getUTCHours().toString().padStart(2, "0");
-        const minute = bkNow.getUTCMinutes().toString().padStart(2, "0");
-        const time = `${hour}:${minute}:00`;
+        const currentTotalMinutes = bkNow.getUTCHours() * 60 + bkNow.getUTCMinutes();
 
-        const notificationTimes = await this.nutritionNotificationTimeRepository.findByTimeWithPlan(time);
+        const toTimeStr = (totalMinutes: number): string => {
+            const normalized = ((totalMinutes % 1440) + 1440) % 1440;
+            const h = Math.floor(normalized / 60).toString().padStart(2, "0");
+            const m = (normalized % 60).toString().padStart(2, "0");
+            return `${h}:${m}:00`;
+        };
+
+        const startMinutes = currentTotalMinutes - WINDOW_MINUTES;
+        const endMinutes = currentTotalMinutes + WINDOW_MINUTES;
+        const wrapsAround = startMinutes < 0 || endMinutes >= 1440;
+        const startTime = toTimeStr(startMinutes);
+        const endTime = toTimeStr(endMinutes);
+
+        const notificationTimes = await this.nutritionNotificationTimeRepository.findByTimeRangeWithPlan(startTime, endTime, wrapsAround);
 
         for (const notification of notificationTimes) {
             // Now you directly access the related plan
