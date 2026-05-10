@@ -35,6 +35,14 @@ export class AssignedTrainerGuard implements CanActivate {
 
     console.log(`[AssignedTrainerGuard] ${request.method} ${request.url} | viewer: ${viewer.lineUserId} (${viewer.role}) | target: ${targetLineUserId} | params: ${JSON.stringify(request.params)} | query: ${JSON.stringify(request.query)}`);
 
+    // No target lineUserId in the request — route uses a non-user identifier
+    // (e.g. :sessionId, :routineId). The resource ownership can't be checked
+    // here, so pass through and trust the service layer.
+    if (!targetLineUserId) {
+      console.log('[AssignedTrainerGuard] PASS — no lineUserId target to check');
+      return true;
+    }
+
     // Authorization Check: Self-Access (Trainee viewing their own data)
     // The Trainee can always view their own history.
     if (viewer.lineUserId === targetLineUserId) {
