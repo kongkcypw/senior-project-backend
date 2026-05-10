@@ -57,13 +57,9 @@ export class NutritionNotificationTimeService {
             const messages = CaloriesIntakeReminderMessages(userPlan.totalCalories, totalCaloriesIntake, remainingCalories, navigatePath);
 
             const groupId = await this.lineGroupMemberService.findGroupIdByMemberLineUserId(lineUserId);
-
-            if (!groupId) {
-                console.log(`No group found for user ${lineUserId}. Skipping notification for plan ID ${userPlan.id}`);
-            } else {
-                await this.lineMessagingApiClientService.sendPushMessages(groupId, messages);
-                console.log(`Sent calories intake reminder to user ${lineUserId} for plan ID ${userPlan.id} at time ${notification.sendAt}`);
-            }
+            const destination = groupId ?? lineUserId;
+            await this.lineMessagingApiClientService.sendPushMessages(destination, messages);
+            console.log(`Sent calories intake reminder to ${groupId ? `group ${groupId}` : `personal chat ${lineUserId}`} for plan ID ${userPlan.id} at time ${notification.sendAt}`);
         }
     }
 }
