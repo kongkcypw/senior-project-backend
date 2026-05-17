@@ -13,7 +13,6 @@ import { UserModule } from "src/users/user.module";
 import { LineLiffModule } from "src/external/line-liff/line-liff.module";
 import { UserRelationshipsRepository } from "src/users/repositories/user-relationships.repository";
 import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
-
 @Module({
     imports: [
         LineMessagingApiModule,

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { MealHistoryService } from "../services/meal-history.service";
 import { MealDetailDto } from "../dto/meal-detail.dto";
 import { ApiResponse } from "@nestjs/swagger";
@@ -12,6 +12,22 @@ export class MealHistoryController {
     constructor(
         private readonly mealHistoryService: MealHistoryService,
     ) { }
+
+    @Roles(UserRole.TRAINER, UserRole.TRAINEE)
+    @Post()
+    @ApiResponse({ status: 201, description: 'Meal created successfully.', type: MealDetailDto })
+    async createMeal(@Body() body: MealDetailDto): Promise<MealDetailDto> {
+        return this.mealHistoryService.insertMealHistory({
+            lineUserId: body.lineUserId,
+            foodTitle: body.foodTitle,
+            imageUrl: body.imageUrl ?? '',
+            calories: body.calories,
+            protein: body.protein,
+            carbohydrate: body.carbohydrate,
+            fat: body.fat,
+            ingredients: body.ingredients ?? [],
+        });
+    }
 
     @Roles(UserRole.TRAINER, UserRole.TRAINEE)
     @Get('range/:lineUserId')

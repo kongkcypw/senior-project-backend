@@ -89,4 +89,5 @@ export class MealHistoryService {
         });
         return meals.map(meal => MealDetailDto.fromEntityToDto(meal));
     }
+
 }
