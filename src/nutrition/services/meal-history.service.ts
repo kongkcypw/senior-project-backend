@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { MealHistoryRepository } from "../repositories/meal-history.repository";
+import { MealHistoryRepository, PendingMealRow } from "../repositories/meal-history.repository";
 import { MealHistoryEntity } from "../entities/meal-history.entity";
 import { Between } from "typeorm";
 import { MealDetailDto } from "../dto/meal-detail.dto";
@@ -88,6 +88,10 @@ export class MealHistoryService {
             order: { createdAt: 'DESC' },
         });
         return meals.map(meal => MealDetailDto.fromEntityToDto(meal));
+    }
+
+    async findUnconfirmedMealsByTrainer(trainerLineUserId: string): Promise<PendingMealRow[]> {
+        return this.mealHistoryRepository.findUnconfirmedMealsByTrainer(trainerLineUserId);
     }
 
 }

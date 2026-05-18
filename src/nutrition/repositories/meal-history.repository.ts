@@ -1,6 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import { MealHistoryEntity } from "../entities/meal-history.entity";
+import { UserEntity } from "src/users/entities/user.entity";
+
+export interface PendingMealRow {
+    id: number;
+    lineUserId: string;
+    displayName: string | null;
+    pictureUrl: string | null;
+    foodTitle: string;
+    imageUrl: string;
+    calories: number;
+    createdAt: Date;
+}
 
 export interface MacroTotals {
     calories: number;
@@ -104,5 +116,27 @@ export class MealHistoryRepository extends Repository<MealHistoryEntity> {
             });
         }
         return map;
+    }
+
+    async findUnconfirmedMealsByTrainer(trainerLineUserId: string): Promise<PendingMealRow[]> {
+        return this.createQueryBuilder('mh')
+            .innerJoin(UserEntity, 'u', 'u.lineUserId = mh.lineUserId')
+            .innerJoin(
+                'user_relationships',
+                'ur',
+                'ur.trainee_line_user_id = mh.line_user_id AND ur.trainer_line_user_id = :trainerLineUserId AND ur.is_active = true',
+                { trainerLineUserId },
+            )
+            .select('mh.id', 'id')
+            .addSelect('mh.line_user_id', 'lineUserId')
+            .addSelect('u.display_name', 'displayName')
+            .addSelect('u.picture_url', 'pictureUrl')
+            .addSelect('mh.food_title', 'foodTitle')
+            .addSelect('mh.image_url', 'imageUrl')
+            .addSelect('mh.calories', 'calories')
+            .addSelect('mh.created_at', 'createdAt')
+            .where('mh.confirm_at IS NULL')
+            .orderBy('mh.created_at', 'DESC')
+            .getRawMany<PendingMealRow>();
     }
 }

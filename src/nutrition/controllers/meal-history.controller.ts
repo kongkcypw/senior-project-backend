@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { MealHistoryService } from "../services/meal-history.service";
 import { MealDetailDto } from "../dto/meal-detail.dto";
+import { PendingMealRow } from "../repositories/meal-history.repository";
 import { ApiResponse } from "@nestjs/swagger";
 import { UserRole } from "src/users/enums/user-role.enum";
 import { Roles } from "src/auth/decorators/roles.decorator";
@@ -27,6 +28,15 @@ export class MealHistoryController {
             fat: body.fat,
             ingredients: body.ingredients ?? [],
         });
+    }
+
+    @Roles(UserRole.TRAINER)
+    @Get('pending-by-trainer/:trainerLineUserId')
+    @ApiResponse({ status: 200, description: 'Unconfirmed meals for all trainees of this trainer.', type: [Object] })
+    async findPendingMealsByTrainer(
+        @Param('trainerLineUserId') trainerLineUserId: string,
+    ): Promise<PendingMealRow[]> {
+        return this.mealHistoryService.findUnconfirmedMealsByTrainer(trainerLineUserId);
     }
 
     @Roles(UserRole.TRAINER, UserRole.TRAINEE)
