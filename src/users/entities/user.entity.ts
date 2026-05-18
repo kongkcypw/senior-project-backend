@@ -25,6 +25,9 @@ export class UserEntity {
   @Column({ name: 'picture_url', type: 'varchar', nullable: true })
   pictureUrl: string | null;
 
+  @Column({ name: 'has_seen_onboarding', type: 'boolean', default: false })
+  hasSeenOnboarding: boolean;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 

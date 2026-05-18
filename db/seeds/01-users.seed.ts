@@ -13,6 +13,7 @@ export class MockUsers {
         displayName: 'Kong Chayapol',
         role: UserRole.TRAINER,
         pictureUrl: 'https://sprofile.line-scdn.net/0h54lOtxNTahtBNnt3xLAUZDFmaXFiRzMJaAByLycwMCx1ASQabwQsKnwzNC19USsdPVIte30wMS9NJR19X2CWL0YGNyp9Dy1FblMi9A',
+        hasSeenOnboarding: true,
         createdAt: new Date(),
         updatedAt: new Date(),
     };
@@ -23,6 +24,7 @@ export class MockUsers {
         displayName: 'Witcha',
         role: UserRole.TRAINEE,
         pictureUrl: 'https://sprofile.line-scdn.net/0hUUVEVAPOCnp7PBv_K-10RAtsCRBYTVNoV1kXHUhpV0lHDxklBF1GGU5rAU1DXx1-A1oRT0s7XE5ZZQVbFCMYYzVvIUsfcxJXD18ifRY8UkkZdUotFhIWdxB0Iw0_Dx1yI0YkYTZVE0kgRS0kDVokbDNbIjEjSxpwKWtmLH4OZPkUPn0vVltMHEY_V03P',
+        hasSeenOnboarding: true,
         createdAt: new Date(),
         updatedAt: new Date(),
     };
@@ -33,6 +35,7 @@ export class MockUsers {
         displayName: 'Latif Danai',
         role: UserRole.TRAINEE,
         pictureUrl: 'https://sprofile.line-scdn.net/0hxxN63ENiJ1djTze5Gd1ZKBMfJD1APn5FRis9NlcfcTJXKDUIT3puYgJLfWdXLzIGGi1hNVZOeTNvXFAxfRnbY2R_emZfdmAJTCpvuA',
+        hasSeenOnboarding: true,
         createdAt: new Date(),
         updatedAt: new Date(),
     };
@@ -44,6 +47,7 @@ export class MockUsers {
         displayName: 'Arisa Natcha',
         role: UserRole.TRAINEE,
         pictureUrl: null,
+        hasSeenOnboarding: true,
         createdAt: new Date(),
         updatedAt: new Date(),
     };
@@ -55,6 +59,7 @@ export class MockUsers {
         displayName: 'Tawan Kraiwit',
         role: UserRole.TRAINEE,
         pictureUrl: null,
+        hasSeenOnboarding: true,
         createdAt: new Date(),
         updatedAt: new Date(),
     };
@@ -66,6 +71,7 @@ export class MockUsers {
         displayName: 'Nuch Piyanat',
         role: UserRole.TRAINEE,
         pictureUrl: null,
+        hasSeenOnboarding: true,
         createdAt: new Date(),
         updatedAt: new Date(),
     };
@@ -77,6 +83,7 @@ export class MockUsers {
         displayName: 'Prem',
         role: UserRole.TRAINEE,
         pictureUrl: 'https://profile.line-scdn.net/0hY8D-sFuABhd5VBnIPmN5QAQRCHoOegBfAWBNeFhcXXRXYRNHQTZOIVpQCCRRbBUSRWJOcVhRWCFVe0MDOGwvBT0gG0QCDxwRBTANMhQsMSEyABE8AE4LDhwVA3UWMycmQjEKCiYNCCUMeB4pHEoBJCAnXnoTDBU3Pm0',
+        hasSeenOnboarding: true,
         createdAt: new Date(),
         updatedAt: new Date(),
     };

@@ -28,4 +28,8 @@ export class UserInfoDto {
   @IsBoolean()
   @Expose()
   isPersonalUse!: boolean;
+
+  @IsBoolean()
+  @Expose()
+  hasSeenOnboarding!: boolean;
 }

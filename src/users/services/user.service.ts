@@ -38,6 +38,7 @@ export class UserService {
             pictureUrl: user.pictureUrl,
             role: user.role,
             isPersonalUse,
+            hasSeenOnboarding: user.hasSeenOnboarding,
         };
 
     }
@@ -75,6 +76,15 @@ export class UserService {
             throw new NotFoundException('User not found');
         }
         user.displayName = displayName;
+        await this.usersRepository.save(user);
+    }
+
+    async completeOnboarding(lineUserId: string): Promise<void> {
+        const user = await this.usersRepository.findByLineUserId(lineUserId);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        user.hasSeenOnboarding = true;
         await this.usersRepository.save(user);
     }
 

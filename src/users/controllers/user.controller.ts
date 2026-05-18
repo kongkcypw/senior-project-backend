@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { UserService } from "../services/user.service";
 import { UserInfoDto } from "../dto/user-info.dto";
 import { CreateUserDto } from "../dto/create-user.dto";
@@ -37,5 +37,13 @@ export class UserController {
     ): Promise<void> {
         await this.usersService.insertUserIfNotExist(body.lineUserId, body.displayName ?? null, body.role, body.pictureUrl ?? null);;
         return;
+    }
+
+    @Patch('onboarding-complete/:lineUserId')
+    @Roles(UserRole.TRAINER, UserRole.TRAINEE)
+    async completeOnboarding(
+        @Param('lineUserId') id: string
+    ): Promise<void> {
+        await this.usersService.completeOnboarding(id);
     }
 }
