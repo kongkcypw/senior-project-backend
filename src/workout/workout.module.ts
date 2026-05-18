@@ -19,6 +19,8 @@ import { LineMessagingApiModule } from "src/external/line-messaging-api/line-mes
 import { LineGroupModule } from "src/line-group/line-group.module";
 import { LineLiffModule } from "src/external/line-liff/line-liff.module";
 import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
+import { RagApiModule } from "src/external/rag-api/rag-api.module";
+import { UserPhysiqueHistoryRepository } from "src/users/repositories/user-physique-history.repository";
 
 @Module({
     imports: [
@@ -27,6 +29,7 @@ import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
         LineGroupModule,
         LineLiffModule,
         FeatureFlagModule,
+        RagApiModule,
     ],
     controllers: [
         WorkoutHistoryController,
@@ -46,6 +49,7 @@ import { FeatureFlagModule } from "src/feature-flag/feature-flag.module";
         WorkoutExerciseTemplateRepository,
         WorkoutExerciseTemplateService,
         WorkoutExerciseSetRepository,
+        UserPhysiqueHistoryRepository,
     ],
     exports: [WorkoutHistoryRepository, WorkoutProgramPlanRepository, WorkoutProgramService, WorkoutHistoryService],
 })

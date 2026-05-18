@@ -55,6 +55,11 @@ export class UserRelationshipsService {
         return true;
     }
 
+    async hasActiveTrainer(traineeLineUserId: string): Promise<boolean> {
+        const relationship = await this.userRelationshipsRepository.findActiveRelationshipsByTrainee(traineeLineUserId);
+        return relationship !== null;
+    }
+
     async insertTrainerRelationshipIfNotExist(groupId: string, traineeLineUserId: string): Promise<void> {
 
         const trainer = await this.lineGroupMemberService.findTrainerInGroup(groupId);

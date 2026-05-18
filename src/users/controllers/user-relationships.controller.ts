@@ -90,4 +90,11 @@ export class UserRelationshipsController {
         }
         return this.userRelationshipsService.getScoreHistoryForTrainee(traineeLineUserId, resolved);
     }
+
+    @Get('has-trainer/:lineUserId')
+    @Roles(UserRole.TRAINEE, UserRole.TRAINER)
+    async hasActiveTrainer(@Param('lineUserId') traineeLineUserId: string) {
+        const hasTrainer = await this.userRelationshipsService.hasActiveTrainer(traineeLineUserId);
+        return { hasTrainer };
+    }
 }

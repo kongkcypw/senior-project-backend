@@ -70,6 +70,17 @@ export class MockUsers {
         updatedAt: new Date(),
     };
 
+    // Personal user
+    static readonly PERSONAL_USER_007: UserEntity = {
+        id: 7,
+        lineUserId: 'Upersonaluser00000000000000000000000',
+        displayName: 'Prem',
+        role: UserRole.TRAINEE,
+        pictureUrl: 'https://profile.line-scdn.net/0hY8D-sFuABhd5VBnIPmN5QAQRCHoOegBfAWBNeFhcXXRXYRNHQTZOIVpQCCRRbBUSRWJOcVhRWCFVe0MDOGwvBT0gG0QCDxwRBTANMhQsMSEyABE8AE4LDhwVA3UWMycmQjEKCiYNCCUMeB4pHEoBJCAnXnoTDBU3Pm0',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
     static readonly Users = [
         this.TRAINER_USER_001,
         this.TRAINEE_USER_002,
@@ -77,6 +88,7 @@ export class MockUsers {
         this.TRAINEE_USER_004,
         this.TRAINEE_USER_005,
         this.TRAINEE_USER_006,
+        this.PERSONAL_USER_007,
     ]
 }
 

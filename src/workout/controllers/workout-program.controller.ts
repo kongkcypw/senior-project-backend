@@ -4,6 +4,7 @@ import { getProtectedGuards } from "src/utils/guards.util";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { UserRole } from "src/users/enums/user-role.enum";
 import { SkipAssignedTrainerGuard } from "src/auth/decorators/skip-trainer-guard.decorator";
+import { GenerateWorkoutDto } from "../dto/generate-workout.dto";
 
 @Controller('workout-program')
 @UseGuards(...getProtectedGuards('liff-jwt'))
@@ -43,8 +44,14 @@ export class WorkoutProgramController {
         return this.workoutProgramService.createProgramPlan(body.name, body.lineUserIdTrainee, body.lineUserIdTrainer);
     }
 
+    @Post('generate')
+    @Roles(UserRole.TRAINEE, UserRole.TRAINER)
+    generateProgramWithAI(@Body() body: GenerateWorkoutDto) {
+        return this.workoutProgramService.generateAndSaveProgram(body.lineUserIdTrainee);
+    }
+
     @Delete(':programId')
-    @Roles(UserRole.TRAINER)
+    @Roles(UserRole.TRAINER, UserRole.TRAINEE)
     async deleteProgramPlan(
         @Param('programId') programId: string,
     ): Promise<void> {
